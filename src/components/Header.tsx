@@ -30,8 +30,6 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const {
     currentUser,
-    switchRole,
-    switchUserAccount,
     availableUsers,
     coaches,
     athletes,
@@ -273,64 +271,6 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 </div>
 
-                {/* Alternar Perfil Rápido */}
-                <div className="p-2 border-b border-slate-100">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 py-1">
-                    Alternar Role / Perfil
-                  </p>
-                  <div className="space-y-1">
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        switchRole('treinador');
-                      }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                        currentUser.role === 'treinador'
-                          ? 'bg-blue-50 text-blue-800'
-                          : 'text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span>👔 Treinador</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400">Treinadores</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        switchRole('atleta');
-                      }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                        currentUser.role === 'atleta'
-                          ? 'bg-indigo-50 text-indigo-800'
-                          : 'text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span>🏊 Atleta</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400">Atletas</span>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        switchRole('encarregado');
-                      }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between transition-colors cursor-pointer ${
-                        currentUser.role === 'encarregado'
-                          ? 'bg-purple-50 text-purple-800'
-                          : 'text-slate-600 hover:bg-slate-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span>👨‍👩‍👦 Encarregado</span>
-                      </div>
-                      <span className="text-[10px] text-slate-400">Enc. Educação</span>
-                    </button>
-                  </div>
-                </div>
 
                 <div className="p-2">
                   <button
