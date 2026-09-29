@@ -1,0 +1,6 @@
+{
+  "name": "+ Desporto",
+  "description": "App móvel de gestão desportiva com perfis de Treinador, Atleta e Encarregados de Educação, Clube, Planos de Treino, Calendário, Resultados e Área dos Pais.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
