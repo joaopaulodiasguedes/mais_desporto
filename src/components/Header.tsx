@@ -8,15 +8,13 @@ import {
   Smartphone,
   Monitor,
   Sparkles,
-  RefreshCw,
   Menu,
   ShieldCheck,
   ShieldAlert,
   CheckCircle2,
   LogOut,
   Clock,
-  Users,
-  Database
+  Users
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -39,11 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
     setIsApprovalsModalOpen,
     setActiveTab,
     clubInfo,
-    isCurrentUserAdmin,
-    supabaseStatus,
-    setIsSupabaseModalOpen,
-    syncWithSupabase,
-    showToast
+    isCurrentUserAdmin
   } = useApp();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -134,40 +128,6 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Right Action Area */}
       <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3 shrink-0">
-        {/* Supabase Status / Sync Button */}
-        <button
-          onClick={() => {
-            if (supabaseStatus === 'connected') {
-              syncWithSupabase();
-              showToast('A atualizar dados do Supabase...', 'info');
-            } else {
-              setIsSupabaseModalOpen(true);
-            }
-          }}
-          className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 ${
-            supabaseStatus === 'connected'
-              ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
-              : supabaseStatus === 'connecting'
-              ? 'bg-blue-50 text-blue-700 border-blue-200'
-              : 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-300'
-          }`}
-          title={
-            supabaseStatus === 'connected'
-              ? 'Supabase Conectado — Clique para atualizar dados'
-              : 'Configurar ou Ligar Supabase'
-          }
-        >
-          <Database className="w-3.5 h-3.5 shrink-0" />
-          <span className="hidden md:inline">
-            {supabaseStatus === 'connected' ? 'Supabase' : supabaseStatus === 'connecting' ? 'A ligar...' : 'Ligar Supabase'}
-          </span>
-          {supabaseStatus === 'connected' && (
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          )}
-          {supabaseStatus === 'connecting' && (
-            <RefreshCw className="w-3 h-3 animate-spin text-blue-600" />
-          )}
-        </button>
 
         {/* Coach Pending Registrations Button */}
         {currentUser.role === 'treinador' && (
