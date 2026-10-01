@@ -458,20 +458,29 @@ export const getTabForRole = (role?: UserRole): string => {
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Ensure initial access to the application starts on the login page
+  if (typeof window !== 'undefined') {
+    const loginEnforced = localStorage.getItem('plus_desporto_require_login_v1');
+    if (!loginEnforced) {
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_is_auth`);
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_auth`, JSON.stringify(false));
+      localStorage.setItem('plus_desporto_require_login_v1', 'true');
+    }
+  }
+
   // Initialize state with localStorage if present
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_user`);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed.email === 'carlos.silva@maisdesporto.pt' || !parsed.email) {
-          return INITIAL_PROFILES[0];
+        if (parsed && parsed.email) {
+          return {
+            ...parsed,
+            isAdmin: parsed.email.toLowerCase() === 'joaopaulodiasguedes@gmail.com' ? true : (parsed.isAdmin ?? false),
+            status: parsed.status || 'aprovado'
+          };
         }
-        return {
-          ...parsed,
-          isAdmin: parsed.email === 'joaopaulodiasguedes@gmail.com' ? true : (parsed.isAdmin ?? false),
-          status: parsed.status || 'aprovado'
-        };
       } catch {
         return INITIAL_PROFILES[0];
       }
@@ -482,13 +491,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_is_auth`);
     const savedUserStr = localStorage.getItem(`${LOCAL_STORAGE_KEY}_user`);
-    // If user was on login screen or had old placeholder coach, auto-authenticate with Prof. João Paulo Dias Guedes
-    if (saved === 'false' && (!savedUserStr || savedUserStr.includes('carlos.silva'))) {
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_auth`, JSON.stringify(true));
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(INITIAL_PROFILES[0]));
-      return true;
+    // First access must always be the login page (only true if explicitly logged in)
+    if (saved === 'true' && savedUserStr) {
+      try {
+        const parsed = JSON.parse(savedUserStr);
+        return Boolean(parsed && parsed.email);
+      } catch {
+        return false;
+      }
     }
-    return saved !== null ? JSON.parse(saved) : true;
+    return false;
   });
 
   const [availableUsers, setAvailableUsers] = useState<UserProfile[]>(() => {
@@ -1346,6 +1358,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const logout = () => {
     setIsAuthenticated(false);
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_auth`, JSON.stringify(false));
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_user`);
     showToast('Sessão terminada.', 'info');
   };
 
