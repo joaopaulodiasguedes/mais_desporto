@@ -443,6 +443,8 @@ export const isTrainingPlanVisibleForUser = (plan: TrainingPlan, user: UserProfi
 };
 
 const LOCAL_STORAGE_KEY = 'plus_desporto_app_state_v1';
+const SESSION_AUTH_KEY = 'plus_desporto_session_auth';
+const SESSION_USER_KEY = 'plus_desporto_session_user';
 
 export const getTabForRole = (role?: UserRole): string => {
   switch (role) {
@@ -458,46 +460,47 @@ export const getTabForRole = (role?: UserRole): string => {
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Ensure initial access to the application starts on the login page
+  // Proactively clear any legacy persistent login keys in localStorage so accessing the link ALWAYS requires login
   if (typeof window !== 'undefined') {
-    const loginEnforced = localStorage.getItem('plus_desporto_require_login_v1');
-    if (!loginEnforced) {
-      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_is_auth`);
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_auth`, JSON.stringify(false));
-      localStorage.setItem('plus_desporto_require_login_v1', 'true');
-    }
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_is_auth`);
+    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_user`);
+    localStorage.removeItem('plus_desporto_require_login_v1');
   }
 
-  // Initialize state with localStorage if present
+  // Active session user: only set from sessionStorage if explicitly authenticated
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_user`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed && parsed.email) {
-          return {
-            ...parsed,
-            isAdmin: parsed.email.toLowerCase() === 'joaopaulodiasguedes@gmail.com' ? true : (parsed.isAdmin ?? false),
-            status: parsed.status || 'aprovado'
-          };
+    if (typeof window !== 'undefined') {
+      const sessionUser = sessionStorage.getItem(SESSION_USER_KEY);
+      if (sessionUser) {
+        try {
+          const parsed = JSON.parse(sessionUser);
+          if (parsed && parsed.email) {
+            return {
+              ...parsed,
+              isAdmin: parsed.email.toLowerCase() === 'joaopaulodiasguedes@gmail.com' ? true : (parsed.isAdmin ?? false),
+              status: parsed.status || 'aprovado'
+            };
+          }
+        } catch {
+          // ignore
         }
-      } catch {
-        return INITIAL_PROFILES[0];
       }
     }
     return INITIAL_PROFILES[0];
   });
 
+  // Authentication state: MUST BE FALSE on initial link access, only true if active in sessionStorage
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_is_auth`);
-    const savedUserStr = localStorage.getItem(`${LOCAL_STORAGE_KEY}_user`);
-    // First access must always be the login page (only true if explicitly logged in)
-    if (saved === 'true' && savedUserStr) {
-      try {
-        const parsed = JSON.parse(savedUserStr);
-        return Boolean(parsed && parsed.email);
-      } catch {
-        return false;
+    if (typeof window !== 'undefined') {
+      const sessionAuth = sessionStorage.getItem(SESSION_AUTH_KEY);
+      const sessionUser = sessionStorage.getItem(SESSION_USER_KEY);
+      if (sessionAuth === 'true' && sessionUser) {
+        try {
+          const parsed = JSON.parse(sessionUser);
+          return Boolean(parsed && parsed.email);
+        } catch {
+          return false;
+        }
       }
     }
     return false;
@@ -1007,8 +1010,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setCurrentUser(targetUser);
     setIsAuthenticated(true);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(targetUser));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_auth`, JSON.stringify(true));
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(targetUser));
+    }
     setActiveTab(getTabForRole(role));
     showToast(`Perfil alterado para: ${role.toUpperCase()} (${targetUser.name})`, 'info');
   };
@@ -1016,8 +1021,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const switchUserAccount = (user: UserProfile) => {
     setCurrentUser(user);
     setIsAuthenticated(true);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(user));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_auth`, JSON.stringify(true));
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
+    }
     setActiveTab(getTabForRole(user.role));
     showToast(`Sessão ativa: ${user.name} (${user.role.toUpperCase()})`, 'info');
   };
@@ -1054,8 +1061,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setCurrentUser(found);
     setIsAuthenticated(true);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(found));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_auth`, JSON.stringify(true));
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(found));
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_is_auth`);
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_user`);
+    }
     setActiveTab(getTabForRole(found.role));
 
     if (found.status === 'pendente_aprovacao') {
@@ -1333,8 +1344,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setCurrentUser(newProfile);
     setIsAuthenticated(true);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(newProfile));
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_auth`, JSON.stringify(true));
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(newProfile));
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_is_auth`);
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_user`);
+    }
     setActiveTab(getTabForRole(newProfile.role));
 
     // Send broadcast notification for coaches
@@ -1357,8 +1372,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Authentication: Logout
   const logout = () => {
     setIsAuthenticated(false);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_is_auth`, JSON.stringify(false));
-    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_user`);
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem(SESSION_AUTH_KEY);
+      sessionStorage.removeItem(SESSION_USER_KEY);
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_is_auth`);
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_user`);
+    }
     showToast('Sessão terminada.', 'info');
   };
 
