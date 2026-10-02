@@ -197,64 +197,31 @@ export const INITIAL_CLUB_DOCUMENTS: ClubDocument[] = [
     fileSize: '285 KB',
     uploadedAt: '2026-09-05',
     uploadedByCoachName: 'Equipa Técnica'
-  },
-  {
-    id: 'doc-apoio-3',
-    title: 'Protocolo de Apoio Médico e Seguro Desportivo',
-    category: 'Apoio Médico & Seguro',
-    description: 'Procedimentos em caso de lesão ou sinistro, apólice federativa e horários do gabinete médico.',
-    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-    fileName: 'Guia_Apoio_Medico_Seguro.pdf',
-    fileType: 'pdf',
-    fileSize: '310 KB',
-    uploadedAt: '2026-09-08',
-    uploadedByCoachName: 'Gabinete Clínico'
   }
 ];
 
 export const INITIAL_CLUB_INFO: ClubInfo = {
   name: '+ Desporto Clube',
-  modality: 'Natação & Atletismo',
+  modality: 'Atletismo',
   logoUrl: 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?w=300&auto=format&fit=crop&q=80',
   bannerUrl: 'https://images.unsplash.com/photo-1519766304817-4f37bda74a29?w=1200&auto=format&fit=crop&q=80',
   address: 'Av. do Desporto, Complexo Municipal nº 140, 4050-123 Porto, Portugal',
   nif: '509 876 543',
   phone: '+351 220 123 456',
-  email: 'geral@maisdesporto.pt',
+  email: 'geral@desporto.pt',
   foundationYear: 1998,
   presidentName: 'Dr. Henrique Valente',
   description: 'O + Desporto é um clube dedicado à formação atlética e humana de jovens atletas nas modalidades aquáticas e pista, promovendo o rigor, espírito de equipa e alto rendimento.',
   facilities: 'Piscina Olímpica de 50m, Pista Sintética de 8 pistas, Ginásio de Condição Física e Gabinete Médico.',
-  instagram: '@maisdesportoclube',
-  facebook: 'facebook.com/maisdesportoficial',
-  website: 'www.maisdesporto.pt',
+  instagram: '@desportoclube',
+  facebook: 'facebook.com/desportoficial',
+  website: 'www.desporto.pt',
   primaryColor: '#2563eb',
   regulationsPdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   documents: INITIAL_CLUB_DOCUMENTS
 };
 
 export const INITIAL_ATHLETES: Athlete[] = [
-  {
-    id: 'ath-1',
-    name: 'Marta Santos',
-    birthDate: '2009-06-18',
-    address: 'Rua das Flores 124, 2º Dto, Porto',
-    phone: '+351 925 111 222',
-    email: 'marta.santos@maisdesporto.pt',
-    photoUrl: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80',
-    federationNumber: 'FPN-84920',
-    category: 'Juvenis (Sub-16)',
-    guardianName: 'António Santos',
-    guardianPhone: '+351 963 888 999',
-    guardianEmail: 'antonio.santos@gmail.com',
-    guardianId: 'user-parent-1',
-    medicalExamExpiry: '2026-11-30',
-    medicalStatus: 'valido',
-    emergencyContact: '+351 963 888 999 (Pai)',
-    allergiesOrConditions: 'Nenhuma alergia conhecida. Asma ligeira induzida por esforço frio.',
-    attendanceRate: 96,
-    notes: 'Recordista regional nos 100m Livres e 200m Estilos.'
-  },
   {
     id: 'ath-2',
     name: 'Lucas Ferreira',
@@ -340,7 +307,7 @@ export const INITIAL_ATHLETES: Athlete[] = [
 export const INITIAL_COACHES: Coach[] = [
   {
     id: 'coach-1',
-    name: 'Prof. João Paulo Dias Guedes',
+    name: 'João Paulo Dias Guedes',
     birthDate: '1978-06-20',
     address: 'Cortiçadas de Lavre, Montemor-o-Novo',
     phone: '+351 912 345 678',
@@ -372,24 +339,6 @@ export const INITIAL_COACHES: Coach[] = [
     assignedCategories: ['Juvenis (Sub-16)', 'Juniores (Sub-18)', 'Seniores'],
     experienceYears: 16,
     bio: 'Mestrado em Treino Desportivo pela FADEUP. Antigo atleta e treinador-adjunto.',
-    isAdmin: false
-  },
-  {
-    id: 'coach-2',
-    name: 'Profª. Ana Beatriz Sousa',
-    birthDate: '1991-08-25',
-    address: 'Praceta das Amendoeiras 44, Matosinhos',
-    phone: '+351 931 999 888',
-    email: 'ana.sousa@maisdesporto.pt',
-    photoUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80',
-    licenseNumber: 'TPTD-89210',
-    licenseGrade: 'Grau II - Treinador de Desporto',
-    diplomaUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-    diplomaName: 'Diploma_Treinador_Grau_II.pdf',
-    diplomaType: 'pdf',
-    assignedCategories: ['Benjamins (Sub-12)', 'Infantis (Sub-14)', 'Iniciados (Sub-15)'],
-    experienceYears: 9,
-    bio: 'Especialista em desenvolvimento motor infantil e biomecânica desportiva na natação pura.',
     isAdmin: false
   },
   {
