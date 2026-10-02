@@ -379,31 +379,28 @@ export const CategoriesManagement: React.FC<CategoriesManagementProps> = ({ onSe
           <span className="text-xs font-semibold text-slate-500 mr-1">Vigência:</span>
           <button
             onClick={() => setFilterSeasonStatus('todos')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              filterSeasonStatus === 'todos'
-                ? 'bg-slate-900 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${filterSeasonStatus === 'todos'
+              ? 'bg-slate-900 text-white'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
           >
             Todos ({ageCategories.length})
           </button>
           <button
             onClick={() => setFilterSeasonStatus('em_vigor')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              filterSeasonStatus === 'em_vigor'
-                ? 'bg-emerald-600 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${filterSeasonStatus === 'em_vigor'
+              ? 'bg-emerald-600 text-white'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
           >
             Em Vigor
           </button>
           <button
             onClick={() => setFilterSeasonStatus('outros')}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              filterSeasonStatus === 'outros'
-                ? 'bg-slate-700 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${filterSeasonStatus === 'outros'
+              ? 'bg-slate-700 text-white'
+              : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
           >
             Outros Períodos
           </button>
@@ -416,7 +413,7 @@ export const CategoriesManagement: React.FC<CategoriesManagementProps> = ({ onSe
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                <th className="py-3 px-4">Escalão & Código</th>
+                <th className="py-3 px-4">Escalão e Abreviatura</th>
                 <th className="py-3 px-4">Intervalo Nascimento dos Atletas</th>
                 <th className="py-3 px-4">Idades Referência</th>
                 <th className="py-3 px-4">Período de Gestão (Início / Fim)</th>
@@ -606,7 +603,7 @@ export const CategoriesManagement: React.FC<CategoriesManagementProps> = ({ onSe
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Código</label>
+                  <label className="font-bold text-slate-700">Abreviatura</label>
                   <input
                     type="text"
                     placeholder="Ex: SUB-14"
@@ -660,7 +657,7 @@ export const CategoriesManagement: React.FC<CategoriesManagementProps> = ({ onSe
               <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
                 <div className="flex items-center gap-1.5 text-slate-900 font-bold text-xs">
                   <CalendarRange className="w-4 h-4 text-emerald-600" />
-                  <span>Período de Gestão / Época Desportiva (Início e Fim)</span>
+                  <span>Época Desportiva (Início e Fim)</span>
                 </div>
                 <p className="text-[11px] text-slate-500">
                   Define o período temporal em que esta gestão do escalão está ativa (ex: Época 2025/2026).
@@ -734,7 +731,7 @@ export const CategoriesManagement: React.FC<CategoriesManagementProps> = ({ onSe
                 <label className="font-bold text-slate-700">Notas / Regulamentação Técnica</label>
                 <textarea
                   rows={2}
-                  placeholder="Ex: Normas da Federação Portuguesa de Natação / Atletismo, provas específicas..."
+                  placeholder="Ex: Normas da Federação / provas específicas..."
                   value={formData.notes || ''}
                   onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-500 focus:bg-white outline-hidden font-medium text-slate-800"
