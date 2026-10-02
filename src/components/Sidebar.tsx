@@ -94,7 +94,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: Trophy,
           badge: null
         },
-
         {
           id: 'pais',
           label: 'Área dos Enc.',
