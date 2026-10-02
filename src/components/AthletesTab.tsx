@@ -110,12 +110,12 @@ export const AthletesTab: React.FC = () => {
         notifActionTab === 'calendario'
           ? 'Ver no Calendário'
           : notifActionTab === 'resultados'
-          ? 'Ver Resultados'
-          : notifActionTab === 'encarregados'
-          ? 'Encarregados de Educação'
-          : notifActionTab === 'pais'
-          ? 'Área dos Pais'
-          : undefined
+            ? 'Ver Resultados'
+            : notifActionTab === 'encarregados'
+              ? 'Encarregados de Educação'
+              : notifActionTab === 'pais'
+                ? 'Área dos Pais'
+                : undefined
     });
 
     setAthleteForDirectNotif(null);
@@ -173,14 +173,14 @@ export const AthletesTab: React.FC = () => {
   const configuredCategoryNames = ageCategories && ageCategories.length > 0
     ? ageCategories.map(c => c.name)
     : [
-        'Benjamins (Sub-12)',
-        'Infantis (Sub-14)',
-        'Iniciados (Sub-15)',
-        'Juvenis (Sub-16)',
-        'Juniores (Sub-18)',
-        'Seniores',
-        'Masters'
-      ];
+      'Benjamins (Sub-12)',
+      'Infantis (Sub-14)',
+      'Iniciados (Sub-15)',
+      'Juvenis (Sub-16)',
+      'Juniores (Sub-18)',
+      'Seniores',
+      'Masters'
+    ];
 
   const categoryNames = Array.from(new Set([...configuredCategoryNames, 'Em Análise']));
   const categories = ['todos', ...categoryNames];
@@ -511,11 +511,10 @@ export const AthletesTab: React.FC = () => {
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
-            className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-              selectedCategory === cat
-                ? 'bg-blue-600 text-white shadow-2xs'
-                : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-            }`}
+            className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${selectedCategory === cat
+              ? 'bg-blue-600 text-white shadow-2xs'
+              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+              }`}
           >
             {cat === 'todos' ? 'Todos os Escalões' : cat}
           </button>
@@ -532,11 +531,10 @@ export const AthletesTab: React.FC = () => {
             <div
               key={ath.id}
               onClick={() => setSelectedAthlete(ath)}
-              className={`bg-white rounded-2xl p-4 border shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group ${
-                isMine
-                  ? 'border-blue-400/80 ring-2 ring-blue-500/20 bg-gradient-to-b from-blue-50/30 to-white'
-                  : 'border-slate-200 hover:border-blue-300'
-              }`}
+              className={`bg-white rounded-2xl p-4 border shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group ${isMine
+                ? 'border-blue-400/80 ring-2 ring-blue-500/20 bg-gradient-to-b from-blue-50/30 to-white'
+                : 'border-slate-200 hover:border-blue-300'
+                }`}
             >
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
@@ -544,11 +542,10 @@ export const AthletesTab: React.FC = () => {
                     <img
                       src={ath.photoUrl}
                       alt={ath.name}
-                      className={`w-14 h-14 rounded-2xl object-cover ring-2 transition-all shadow-xs ${
-                        isMine
-                          ? 'ring-blue-500'
-                          : 'ring-slate-100 group-hover:ring-blue-400'
-                      }`}
+                      className={`w-14 h-14 rounded-2xl object-cover ring-2 transition-all shadow-xs ${isMine
+                        ? 'ring-blue-500'
+                        : 'ring-slate-100 group-hover:ring-blue-400'
+                        }`}
                       referrerPolicy="no-referrer"
                     />
                     <span className="absolute -bottom-1 -right-1 text-[10px] font-extrabold bg-blue-600 text-white px-1.5 py-0.2 rounded-md shadow-2xs">
@@ -785,7 +782,7 @@ export const AthletesTab: React.FC = () => {
                     const ath = selectedAthlete;
                     try {
                       sessionStorage.setItem('plus_selected_athlete_plan_id', ath.id);
-                    } catch {}
+                    } catch { }
                     setSelectedAthlete(null);
                     setActiveTab('planos_treino');
                   }}
@@ -887,35 +884,33 @@ export const AthletesTab: React.FC = () => {
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-slate-700">Escalão / Categoria *</label>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      formData.category === 'Em Análise'
-                        ? 'bg-amber-50 text-amber-800 border-amber-300'
-                        : 'bg-blue-50 text-blue-700 border-blue-200'
-                    }`}>
+                    <label className="text-xs font-bold text-slate-700">Escalão *</label>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${formData.category === 'Em Análise'
+                      ? 'bg-amber-50 text-amber-800 border-amber-300'
+                      : 'bg-blue-50 text-blue-700 border-blue-200'
+                      }`}>
                       {formData.category === 'Em Análise' ? '⚠️ Em Análise' : '⚡ Automático por Nascimento'}
                     </span>
                   </div>
                   <select
                     value={formData.category}
                     onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className={`w-full px-3 py-2 rounded-xl border focus:ring-2 font-medium ${
-                      formData.category === 'Em Análise'
-                        ? 'border-amber-300 bg-amber-50/50 text-amber-900 focus:ring-amber-500'
-                        : 'border-slate-300 bg-white text-slate-900 focus:ring-blue-500'
-                    }`}
+                    className={`w-full px-3 py-2 rounded-xl border focus:ring-2 font-medium ${formData.category === 'Em Análise'
+                      ? 'border-amber-300 bg-amber-50/50 text-amber-900 focus:ring-amber-500'
+                      : 'border-slate-300 bg-white text-slate-900 focus:ring-blue-500'
+                      }`}
                   >
                     {categories.filter(c => c !== 'todos').map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
                   <p className="text-[11px] text-slate-500 mt-1">
-                    Atribuído automaticamente pela data de nascimento. Caso não corresponda a nenhum escalão configurado no clube, assume <strong className="text-amber-700 font-bold">Em Análise</strong>.
+                    Caso não corresponda a nenhum escalão configurado, assume <strong className="text-amber-700 font-bold">Em Análise</strong>.
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">Número de Federado</label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Nº Filiado</label>
                   <input
                     type="text"
                     value={formData.federationNumber}
@@ -1042,8 +1037,8 @@ export const AthletesTab: React.FC = () => {
                       {formData.medicalStatus === 'valido'
                         ? 'Apto para competir'
                         : formData.medicalStatus === 'a_expirar'
-                        ? 'Notificação ativa (15 dias)'
-                        : 'Aptidão suspensa'}
+                          ? 'Notificação ativa (15 dias)'
+                          : 'Aptidão suspensa'}
                     </span>
                   </div>
                   <p className="text-[11px] text-slate-500 mt-1">

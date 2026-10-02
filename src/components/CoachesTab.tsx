@@ -295,11 +295,10 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
             <button
               id="subtab-coaches"
               onClick={() => setActiveSubTab('coaches')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
-                activeSubTab === 'coaches'
+              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${activeSubTab === 'coaches'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-              }`}
+                }`}
             >
               <UserCheck className="w-4 h-4 text-teal-600" />
               <span>Equipa Técnica ({coaches.length})</span>
@@ -308,11 +307,10 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
             <button
               id="subtab-categories"
               onClick={() => setActiveSubTab('categories')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
-                activeSubTab === 'categories'
+              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${activeSubTab === 'categories'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-              }`}
+                }`}
             >
               <Layers className="w-4 h-4 text-blue-600" />
               <span>Gestão de Escalões ({ageCategories.length})</span>
@@ -321,11 +319,10 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
             <button
               id="subtab-approvals"
               onClick={() => setActiveSubTab('approvals')}
-              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
-                activeSubTab === 'approvals'
+              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${activeSubTab === 'approvals'
                   ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
-              }`}
+                }`}
             >
               <ShieldCheck className={`w-4 h-4 ${pendingApprovalsCount > 0 ? 'text-amber-500' : 'text-slate-500'}`} />
               <span>Validar Inscrições</span>
@@ -347,113 +344,113 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
       ) : (
         /* Coaches Grid */
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {coaches.map((coach) => {
-          const age = getAge(coach.birthDate);
-          return (
-            <div
-              key={coach.id}
-              onClick={() => setSelectedCoach(coach)}
-              className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs hover:border-teal-300 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
-            >
-              <div className="space-y-3">
-                <div className="flex items-start gap-3.5">
-                  <img
-                    src={coach.photoUrl}
-                    alt={coach.name}
-                    className="w-16 h-16 rounded-2xl object-cover ring-2 ring-teal-100 group-hover:ring-teal-400 transition-all shadow-xs shrink-0"
-                    referrerPolicy="no-referrer"
-                  />
+          {coaches.map((coach) => {
+            const age = getAge(coach.birthDate);
+            return (
+              <div
+                key={coach.id}
+                onClick={() => setSelectedCoach(coach)}
+                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs hover:border-teal-300 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3.5">
+                    <img
+                      src={coach.photoUrl}
+                      alt={coach.name}
+                      className="w-16 h-16 rounded-2xl object-cover ring-2 ring-teal-100 group-hover:ring-teal-400 transition-all shadow-xs shrink-0"
+                      referrerPolicy="no-referrer"
+                    />
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 justify-between">
-                      <h3 className="font-bold text-slate-900 text-sm group-hover:text-teal-700 transition-colors truncate">
-                        {coach.name}
-                      </h3>
-                      {coach.isAdmin && (
-                        <span className="px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[9px] font-black border border-amber-200 shrink-0 flex items-center gap-1">
-                          <ShieldAlert className="w-2.5 h-2.5 text-amber-600" /> Administrador
-                        </span>
-                      )}
-                    </div>
-                    <span className="inline-block mt-0.5 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 text-[11px] font-bold border border-teal-200 max-w-full truncate">
-                      {coach.licenseGrade}
-                    </span>
-                    <p className="text-[11px] font-mono text-slate-400 mt-1">
-                      {coach.licenseNumber}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Details */}
-                <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{coach.birthDate} {age ? `(${age} anos)` : ''}</span>
-                  </div>
-                  {coach.address && (
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span className="truncate">{coach.address}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate font-medium text-slate-700">{coach.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{coach.experienceYears} anos de experiência</span>
-                  </div>
-                </div>
-
-                {/* Categories badges */}
-                <div className="pt-2">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                    Escalões atribuídos:
-                  </span>
-                  <div className="flex flex-wrap gap-1">
-                    {coach.assignedCategories.map((cat, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-semibold"
-                      >
-                        {cat}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 justify-between">
+                        <h3 className="font-bold text-slate-900 text-sm group-hover:text-teal-700 transition-colors truncate">
+                          {coach.name}
+                        </h3>
+                        {coach.isAdmin && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[9px] font-black border border-amber-200 shrink-0 flex items-center gap-1">
+                            <ShieldAlert className="w-2.5 h-2.5 text-amber-600" /> Administrador
+                          </span>
+                        )}
+                      </div>
+                      <span className="inline-block mt-0.5 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 text-[11px] font-bold border border-teal-200 max-w-full truncate">
+                        {coach.licenseGrade}
                       </span>
-                    ))}
+                      <p className="text-[11px] font-mono text-slate-400 mt-1">
+                        {coach.licenseNumber}
+                      </p>
+                    </div>
                   </div>
+
+                  {/* Details */}
+                  <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>{coach.birthDate} {age ? `(${age} anos)` : ''}</span>
+                    </div>
+                    {coach.address && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{coach.address}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="truncate font-medium text-slate-700">{coach.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>{coach.experienceYears} anos de experiência</span>
+                    </div>
+                  </div>
+
+                  {/* Categories badges */}
+                  <div className="pt-2">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                      Escalões atribuídos:
+                    </span>
+                    <div className="flex flex-wrap gap-1">
+                      {coach.assignedCategories.map((cat, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-md text-[10px] font-semibold"
+                        >
+                          {cat}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Diploma Badge in Card */}
+                  {coach.diplomaUrl && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewDiploma(coach);
+                      }}
+                      className="w-full mt-2 py-1.5 px-2.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                      <span className="truncate">Ver Diploma / Certificado</span>
+                    </button>
+                  )}
                 </div>
 
-                {/* Diploma Badge in Card */}
-                {coach.diplomaUrl && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleViewDiploma(coach);
-                    }}
-                    className="w-full mt-2 py-1.5 px-2.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                {/* Bottom bar */}
+                <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-100">
+                  <a
+                    href={`tel:${coach.phone}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-xs font-bold text-teal-700 hover:text-teal-800 flex items-center gap-1"
                   >
-                    <FileText className="w-3.5 h-3.5 text-teal-600 shrink-0" />
-                    <span className="truncate">Ver Diploma / Certificado</span>
-                  </button>
-                )}
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>{coach.phone}</span>
+                  </a>
+                  <span className="text-[11px] text-slate-400 font-medium">Ver Ficha &rarr;</span>
+                </div>
               </div>
-
-              {/* Bottom bar */}
-              <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-100">
-                <a
-                  href={`tel:${coach.phone}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="text-xs font-bold text-teal-700 hover:text-teal-800 flex items-center gap-1"
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  <span>{coach.phone}</span>
-                </a>
-                <span className="text-[11px] text-slate-400 font-medium">Ver Ficha &rarr;</span>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
         </div>
       )}
 
@@ -566,8 +563,8 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                       {selectedCoach.diplomaType === 'pdf'
                         ? 'PDF'
                         : selectedCoach.diplomaType === 'image'
-                        ? 'Imagem'
-                        : 'Documento'}
+                          ? 'Imagem'
+                          : 'Documento'}
                     </span>
                   )}
                 </div>
@@ -771,7 +768,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">Cédula TPTD *</label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Nº Diploma / Cédula / Certificado *</label>
                   <input
                     type="text"
                     required
@@ -978,15 +975,13 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, isAdmin: true })}
-                    className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
-                      formData.isAdmin
+                    className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${formData.isAdmin
                         ? 'bg-white border-amber-500 ring-2 ring-amber-400/40 shadow-xs'
                         : 'bg-amber-100/40 border-amber-200 text-slate-600 hover:bg-white'
-                    }`}
+                      }`}
                   >
-                    <div className={`w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0 ${
-                      formData.isAdmin ? 'border-amber-600 bg-amber-600' : 'border-slate-400 bg-white'
-                    }`}>
+                    <div className={`w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0 ${formData.isAdmin ? 'border-amber-600 bg-amber-600' : 'border-slate-400 bg-white'
+                      }`}>
                       {formData.isAdmin && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                     </div>
                     <div>
@@ -1002,15 +997,13 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                   <button
                     type="button"
                     onClick={() => setFormData({ ...formData, isAdmin: false })}
-                    className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${
-                      !formData.isAdmin
+                    className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${!formData.isAdmin
                         ? 'bg-white border-teal-600 ring-2 ring-teal-400/40 shadow-xs'
                         : 'bg-amber-100/40 border-amber-200 text-slate-600 hover:bg-white'
-                    }`}
+                      }`}
                   >
-                    <div className={`w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0 ${
-                      !formData.isAdmin ? 'border-teal-600 bg-teal-600' : 'border-slate-400 bg-white'
-                    }`}>
+                    <div className={`w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0 ${!formData.isAdmin ? 'border-teal-600 bg-teal-600' : 'border-slate-400 bg-white'
+                      }`}>
                       {!formData.isAdmin && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                     </div>
                     <div>
