@@ -94,13 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: Trophy,
           badge: null
         },
-        {
-          id: 'notificacoes',
-          label: 'Notificações',
-          icon: Bell,
-          badge: unreadCount > 0 ? `${unreadCount}` : null,
-          badgeColor: 'bg-red-500 text-white'
-        },
+
         {
           id: 'pais',
           label: 'Área dos Enc.',

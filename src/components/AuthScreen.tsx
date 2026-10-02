@@ -247,11 +247,10 @@ export const AuthScreen: React.FC = () => {
                 setMode('login');
                 setLoginError('');
               }}
-              className={`py-4 text-center font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                mode === 'login'
-                  ? 'bg-slate-800 text-amber-400 border-b-2 border-amber-400'
-                  : 'bg-slate-900/60 text-slate-400 hover:text-slate-200'
-              }`}
+              className={`py-4 text-center font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 cursor-pointer ${mode === 'login'
+                ? 'bg-slate-800 text-amber-400 border-b-2 border-amber-400'
+                : 'bg-slate-900/60 text-slate-400 hover:text-slate-200'
+                }`}
             >
               <Lock className="w-4 h-4" />
               <span>Iniciar Sessão</span>
@@ -261,11 +260,10 @@ export const AuthScreen: React.FC = () => {
                 setMode('register');
                 setRegError('');
               }}
-              className={`py-4 text-center font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                mode === 'register'
-                  ? 'bg-slate-800 text-amber-400 border-b-2 border-amber-400'
-                  : 'bg-slate-900/60 text-slate-400 hover:text-slate-200'
-              }`}
+              className={`py-4 text-center font-bold text-sm sm:text-base transition-all flex items-center justify-center gap-2 cursor-pointer ${mode === 'register'
+                ? 'bg-slate-800 text-amber-400 border-b-2 border-amber-400'
+                : 'bg-slate-900/60 text-slate-400 hover:text-slate-200'
+                }`}
             >
               <User className="w-4 h-4" />
               <span>Criar Nova Conta</span>
@@ -389,33 +387,30 @@ export const AuthScreen: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setRegRole('atleta')}
-                        className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${
-                          regRole === 'atleta'
-                            ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20'
-                            : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
-                        }`}
+                        className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${regRole === 'atleta'
+                          ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20'
+                          : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
+                          }`}
                       >
                         🏊 Atleta
                       </button>
                       <button
                         type="button"
                         onClick={() => setRegRole('encarregado')}
-                        className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${
-                          regRole === 'encarregado'
-                            ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20'
-                            : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
-                        }`}
+                        className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${regRole === 'encarregado'
+                          ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20'
+                          : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
+                          }`}
                       >
                         👨‍👩‍👦 Encarregado
                       </button>
                       <button
                         type="button"
                         onClick={() => setRegRole('treinador')}
-                        className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${
-                          regRole === 'treinador'
-                            ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20'
-                            : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
-                        }`}
+                        className={`py-2.5 px-3 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer ${regRole === 'treinador'
+                          ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20'
+                          : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'
+                          }`}
                       >
                         👔 Treinador
                       </button>
@@ -522,7 +517,7 @@ export const AuthScreen: React.FC = () => {
                   {regRole === 'atleta' && (
                     <div>
                       <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Nº de Federação
+                        Nº de Filiação
                       </label>
                       <input
                         type="text"
@@ -555,7 +550,7 @@ export const AuthScreen: React.FC = () => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                       <div>
                         <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                          Grau de Treinador 
+                          Grau de Treinador
                         </label>
                         <input
                           type="text"
@@ -591,7 +586,7 @@ export const AuthScreen: React.FC = () => {
                         rows={2}
                         value={regNotes}
                         onChange={e => setRegNotes(e.target.value)}
-                        placeholder="Ex: Pratiquei natação durante 3 anos noutro clube..."
+                        placeholder="Ex: Pratico Natação nos mesmos dia dos treinos de Atletismo..."
                         className="w-full px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium"
                       />
                     </div>
@@ -648,8 +643,8 @@ export const AuthScreen: React.FC = () => {
                   {forgotStep === 'success'
                     ? 'Palavra-passe Redefinida'
                     : forgotStep === 'verify'
-                    ? 'Verificar Código de Segurança'
-                    : 'Recuperar Palavra-passe por Email'}
+                      ? 'Verificar Código de Segurança'
+                      : 'Recuperar Palavra-passe por Email'}
                 </h3>
                 <p className="text-xs text-slate-400">
                   {clubInfo.name} &bull; Processo de Segurança Auditado
@@ -659,25 +654,21 @@ export const AuthScreen: React.FC = () => {
 
             {/* Stepper Indicator */}
             <div className="grid grid-cols-3 gap-2 py-1">
-              <div className={`h-1.5 rounded-full transition-all ${
-                forgotStep === 'request' ? 'bg-amber-400' : 'bg-emerald-500'
-              }`} />
-              <div className={`h-1.5 rounded-full transition-all ${
-                forgotStep === 'verify' ? 'bg-amber-400' : forgotStep === 'success' ? 'bg-emerald-500' : 'bg-slate-800'
-              }`} />
-              <div className={`h-1.5 rounded-full transition-all ${
-                forgotStep === 'success' ? 'bg-emerald-500' : 'bg-slate-800'
-              }`} />
+              <div className={`h-1.5 rounded-full transition-all ${forgotStep === 'request' ? 'bg-amber-400' : 'bg-emerald-500'
+                }`} />
+              <div className={`h-1.5 rounded-full transition-all ${forgotStep === 'verify' ? 'bg-amber-400' : forgotStep === 'success' ? 'bg-emerald-500' : 'bg-slate-800'
+                }`} />
+              <div className={`h-1.5 rounded-full transition-all ${forgotStep === 'success' ? 'bg-emerald-500' : 'bg-slate-800'
+                }`} />
             </div>
 
             {/* Feedback Alert */}
             {forgotFeedback && (
               <div
-                className={`p-3.5 rounded-2xl border flex items-start gap-2.5 text-xs leading-relaxed ${
-                  forgotFeedback.type === 'success'
-                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                    : 'bg-red-500/10 border-red-500/30 text-red-400'
-                }`}
+                className={`p-3.5 rounded-2xl border flex items-start gap-2.5 text-xs leading-relaxed ${forgotFeedback.type === 'success'
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                  : 'bg-red-500/10 border-red-500/30 text-red-400'
+                  }`}
               >
                 {forgotFeedback.type === 'success' ? (
                   <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-400" />
