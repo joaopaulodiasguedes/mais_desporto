@@ -161,14 +161,14 @@ export const NotificationsTab: React.FC = () => {
         actionTab === 'calendario'
           ? 'Ver no Calendário'
           : actionTab === 'pais'
-          ? 'Abrir Área dos Pais'
-          : actionTab === 'encarregados'
-          ? 'Ver Encarregados de Educação'
-          : actionTab === 'resultados'
-          ? 'Ver Resultados'
-          : actionTab === 'atletas'
-          ? 'Ver Quadro de Atletas'
-          : undefined
+            ? 'Abrir Área dos Pais'
+            : actionTab === 'encarregados'
+              ? 'Ver Encarregados de Educação'
+              : actionTab === 'resultados'
+                ? 'Ver Resultados'
+                : actionTab === 'atletas'
+                  ? 'Ver Quadro de Atletas'
+                  : undefined
     });
 
     setIsAddModalOpen(false);
@@ -218,7 +218,7 @@ export const NotificationsTab: React.FC = () => {
         <div>
           <h2 className="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <Bell className="w-5 h-5 text-red-500" />
-            Centro de Notificações & Alertas
+            Centro de Notificações e Alertas
           </h2>
           <p className="text-xs text-slate-500">
             {unreadCount > 0 ? `${unreadCount} comunicados por ler` : 'Todas as mensagens lidas'}
@@ -273,32 +273,29 @@ export const NotificationsTab: React.FC = () => {
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
         <button
           onClick={() => setSelectedFilter('todas')}
-          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            selectedFilter === 'todas'
+          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedFilter === 'todas'
               ? 'bg-slate-900 text-white shadow-2xs'
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-          }`}
+            }`}
         >
           Todas ({visibleNotifications.length})
         </button>
         <button
           onClick={() => setSelectedFilter('nao_lidas')}
-          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            selectedFilter === 'nao_lidas'
+          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedFilter === 'nao_lidas'
               ? 'bg-red-600 text-white shadow-2xs'
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-          }`}
+            }`}
         >
           Por Ler ({unreadCount})
         </button>
         {individualNotifsCount > 0 && (
           <button
             onClick={() => setSelectedFilter('individuais')}
-            className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 cursor-pointer ${
-              selectedFilter === 'individuais'
+            className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 cursor-pointer ${selectedFilter === 'individuais'
                 ? 'bg-blue-600 text-white shadow-2xs'
                 : 'bg-white text-blue-700 hover:bg-blue-50 border border-blue-200'
-            }`}
+              }`}
           >
             <User className="w-3 h-3" />
             <span>Individuais / Por Atleta ({individualNotifsCount})</span>
@@ -306,31 +303,28 @@ export const NotificationsTab: React.FC = () => {
         )}
         <button
           onClick={() => setSelectedFilter('convocatorias')}
-          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            selectedFilter === 'convocatorias'
+          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedFilter === 'convocatorias'
               ? 'bg-orange-600 text-white shadow-2xs'
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-          }`}
+            }`}
         >
           Convocatórias
         </button>
         <button
           onClick={() => setSelectedFilter('treinos')}
-          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            selectedFilter === 'treinos'
+          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedFilter === 'treinos'
               ? 'bg-blue-600 text-white shadow-2xs'
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-          }`}
+            }`}
         >
           Avisos de Treino
         </button>
         <button
           onClick={() => setSelectedFilter('urgentes')}
-          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-            selectedFilter === 'urgentes'
+          className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedFilter === 'urgentes'
               ? 'bg-red-600 text-white shadow-2xs'
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-          }`}
+            }`}
         >
           Urgentes
         </button>
@@ -487,11 +481,10 @@ export const NotificationsTab: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setTargetAudience('atleta_especifico')}
-                    className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
-                      targetAudience === 'atleta_especifico'
+                    className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${targetAudience === 'atleta_especifico'
                         ? 'border-blue-500 bg-blue-50/80 ring-2 ring-blue-500/20 text-blue-900 font-bold'
                         : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-white font-medium'
-                    }`}
+                      }`}
                   >
                     <User className={`w-4 h-4 shrink-0 ${targetAudience === 'atleta_especifico' ? 'text-blue-600' : 'text-slate-400'}`} />
                     <div className="min-w-0">
@@ -506,11 +499,10 @@ export const NotificationsTab: React.FC = () => {
                       setTargetAudience('todos');
                       setTargetAthleteId('');
                     }}
-                    className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${
-                      targetAudience === 'todos'
+                    className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition-all cursor-pointer ${targetAudience === 'todos'
                         ? 'border-red-500 bg-red-50/80 ring-2 ring-red-500/20 text-red-900 font-bold'
                         : 'border-slate-200 hover:border-slate-300 text-slate-700 bg-white font-medium'
-                    }`}
+                      }`}
                   >
                     <Users className={`w-4 h-4 shrink-0 ${targetAudience === 'todos' ? 'text-red-600' : 'text-slate-400'}`} />
                     <div className="min-w-0">
@@ -738,11 +730,10 @@ export const NotificationsTab: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className={`px-5 py-2 text-white rounded-xl font-bold shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer text-xs sm:text-sm ${
-                    targetAudience === 'atleta_especifico'
+                  className={`px-5 py-2 text-white rounded-xl font-bold shadow-xs flex items-center gap-1.5 active:scale-95 cursor-pointer text-xs sm:text-sm ${targetAudience === 'atleta_especifico'
                       ? 'bg-blue-600 hover:bg-blue-700'
                       : 'bg-red-600 hover:bg-red-700'
-                  }`}
+                    }`}
                 >
                   <Send className="w-4 h-4" />
                   <span>

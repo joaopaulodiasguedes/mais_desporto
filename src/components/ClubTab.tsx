@@ -186,12 +186,12 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
 
     const updatedDocs = [newDoc, ...currentDocs];
     updateClubInfo({ documents: updatedDocs });
-    showToast('Documento inserido em Instalações & Apoio com sucesso!', 'success');
+    showToast('Documento inserido em Instalações e Apoio com sucesso!', 'success');
     setIsDocModalOpen(false);
   };
 
   const handleDeleteDoc = (docId: string, docTitle: string) => {
-    if (window.confirm(`Tem a certeza que deseja remover o documento "${docTitle}" de Instalações & Apoio?`)) {
+    if (window.confirm(`Tem a certeza que deseja remover o documento "${docTitle}" de Instalações e Apoio?`)) {
       const currentDocs = clubInfo.documents && clubInfo.documents.length > 0
         ? clubInfo.documents
         : INITIAL_CLUB_DOCUMENTS;
@@ -472,7 +472,7 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
                 </div>
                 <div>
                   <h2 className="font-bold text-slate-900 text-base">
-                    Instalações & Apoio
+                    Instalações e Apoio
                   </h2>
                   <p className="text-xs text-slate-500">Pavilhões, horários, regulamentos e apoios ao atleta</p>
                 </div>
@@ -516,10 +516,10 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
                         <div className="flex items-start gap-3 min-w-0 flex-1">
                           <div
                             className={`p-2.5 rounded-xl shrink-0 ${isPdf
-                                ? 'bg-red-50 text-red-600 border border-red-200/60'
-                                : doc.fileType === 'image'
-                                  ? 'bg-emerald-50 text-emerald-600 border border-emerald-200/60'
-                                  : 'bg-indigo-50 text-indigo-600 border border-indigo-200/60'
+                              ? 'bg-red-50 text-red-600 border border-red-200/60'
+                              : doc.fileType === 'image'
+                                ? 'bg-emerald-50 text-emerald-600 border border-emerald-200/60'
+                                : 'bg-indigo-50 text-indigo-600 border border-indigo-200/60'
                               }`}
                           >
                             <FileText className="w-4 h-4" />
@@ -585,7 +585,7 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
           </div>
 
           <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>{documentsList.length} documento(s) em Instalações & Apoio</span>
+            <span>{documentsList.length} documento(s) em Instalações e Apoio</span>
             <span className="font-semibold text-blue-600">Documentação Validada</span>
           </div>
         </div>
@@ -634,7 +634,7 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
                     value={formData.modality}
                     onChange={(e) => setFormData({ ...formData, modality: e.target.value })}
                     className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
-                    placeholder="Ex: Natação & Atletismo"
+                    placeholder="Ex: Atletismo"
                   />
                 </div>
 
@@ -779,8 +779,8 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
                           applyClubTheme(preset.hex);
                         }}
                         className={`flex flex-col items-center gap-1 p-2 rounded-xl border transition-all text-center cursor-pointer ${isSelected
-                            ? 'border-slate-800 bg-white ring-2 ring-slate-800/20 shadow-xs'
-                            : 'border-slate-200 bg-white hover:border-slate-300'
+                          ? 'border-slate-800 bg-white ring-2 ring-slate-800/20 shadow-xs'
+                          : 'border-slate-200 bg-white hover:border-slate-300'
                           }`}
                         title={`${preset.name}: ${preset.description}`}
                       >
@@ -862,7 +862,7 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-lg text-slate-900">Inserir Documento</h3>
-                  <p className="text-xs text-slate-500">Secção Instalações & Apoio do Clube</p>
+                  <p className="text-xs text-slate-500">Secção Instalações e Apoio do Clube</p>
                 </div>
               </div>
               <button
@@ -889,7 +889,7 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Normas de Utilização dos Balneários e Ginásio"
+                  placeholder="Ex: Normas de Utilização"
                   value={docFormData.title}
                   onChange={(e) => setDocFormData({ ...docFormData, title: e.target.value })}
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
@@ -905,22 +905,20 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
                   onChange={(e) => setDocFormData({ ...docFormData, category: e.target.value })}
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium bg-white"
                 >
-                  <option value="Instalações & Recintos">Instalações & Recintos Desportivos</option>
-                  <option value="Regulamento Interno">Regulamento Interno & Conduta</option>
-                  <option value="Apoio Médico & Seguro">Apoio Médico, Saúde & Seguro</option>
-                  <option value="Horários & Reservas">Horários de Pistas & Reservas</option>
-                  <option value="Protocolos de Higiene">Normas de Higiene e Vestiários</option>
+                  <option value="Instalações">Instalações</option>
+                  <option value="Horários">Horários</option>
+                  <option value="Regulamento Interno">Regulamento Interno</option>
                   <option value="Geral">Documentação Geral</option>
                 </select>
               </div>
 
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1">
-                  Descrição / Notas Explicativas (Opcional)
+                  Descrição / Notas Explicativas
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Ex: Instruções de utilização dos cacifos, acesso ao cais e contactos de urgência."
+                  placeholder="Ex: Instruções de utilização dos cacifos e contactos de urgência."
                   value={docFormData.description}
                   onChange={(e) => setDocFormData({ ...docFormData, description: e.target.value })}
                   className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-medium"
@@ -938,10 +936,10 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
                   onDragLeave={() => setIsDragging(false)}
                   onDrop={handleDrop}
                   className={`border-2 border-dashed rounded-2xl p-5 text-center transition-all cursor-pointer ${isDragging
-                      ? 'border-indigo-500 bg-indigo-50/50'
-                      : docFormData.fileUrl
-                        ? 'border-emerald-400 bg-emerald-50/30'
-                        : 'border-slate-300 hover:border-indigo-400 bg-slate-50/50'
+                    ? 'border-indigo-500 bg-indigo-50/50'
+                    : docFormData.fileUrl
+                      ? 'border-emerald-400 bg-emerald-50/30'
+                      : 'border-slate-300 hover:border-indigo-400 bg-slate-50/50'
                     }`}
                 >
                   <label className="cursor-pointer block">

@@ -323,7 +323,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
         <div>
           <h2 className="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <HeartHandshake className="w-5 h-5 text-purple-600" />
-            Portal dos Pais & Encarregados de Educação
+            Portal dos Encarregados de Educação
           </h2>
           <p className="text-xs text-slate-500">
             Acompanhamento desportivo, autorizações de provas, ficha do educando e bolsa de boleias
@@ -357,11 +357,10 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
       <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-2xl border border-slate-200 w-full sm:w-fit overflow-x-auto">
         <button
           onClick={() => setActiveSubTab('ficha')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-            activeSubTab === 'ficha'
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${activeSubTab === 'ficha'
               ? 'bg-white text-purple-900 shadow-2xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <FileText className="w-4 h-4 text-purple-600" />
           <span>Dados do Encarregado e Atleta</span>
@@ -369,11 +368,10 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
 
         <button
           onClick={() => setActiveSubTab('visao_geral')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-            activeSubTab === 'visao_geral'
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${activeSubTab === 'visao_geral'
               ? 'bg-white text-purple-900 shadow-2xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <Calendar className="w-4 h-4 text-purple-600" />
           <span>Resumo e Provas</span>
@@ -381,11 +379,10 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
 
         <button
           onClick={() => setActiveSubTab('boleias')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-            activeSubTab === 'boleias'
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${activeSubTab === 'boleias'
               ? 'bg-white text-purple-900 shadow-2xs'
               : 'text-slate-600 hover:text-slate-900'
-          }`}
+            }`}
         >
           <Car className="w-4 h-4 text-teal-600" />
           <span>Bolsa de Boleias</span>
@@ -404,7 +401,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
             activeAthlete={activeAthlete}
             selectedAthleteId={selectedAthleteId}
             onSelectAthleteId={setSelectedAthleteId}
-            onSuccess={() => {}}
+            onSuccess={() => { }}
           />
         </div>
       )}
@@ -505,22 +502,20 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                   <button
                     type="button"
                     onClick={() => setSeptemberFilterType('todos')}
-                    className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${
-                      septemberFilterType === 'todos'
+                    className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${septemberFilterType === 'todos'
                         ? 'bg-white text-purple-900 shadow-2xs'
                         : 'text-slate-600 hover:text-slate-900'
-                    }`}
+                      }`}
                   >
                     Todos ({septemberActivities.length})
                   </button>
                   <button
                     type="button"
                     onClick={() => setSeptemberFilterType('provas')}
-                    className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                      septemberFilterType === 'provas'
+                    className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1 ${septemberFilterType === 'provas'
                         ? 'bg-white text-amber-900 shadow-2xs'
                         : 'text-slate-600 hover:text-slate-900'
-                    }`}
+                      }`}
                   >
                     <Trophy className="w-3.5 h-3.5 text-amber-500" />
                     <span>Provas ({septemberActivities.filter(a => a.type === 'prova').length})</span>
@@ -528,11 +523,10 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                   <button
                     type="button"
                     onClick={() => setSeptemberFilterType('treinos')}
-                    className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                      septemberFilterType === 'treinos'
+                    className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1 ${septemberFilterType === 'treinos'
                         ? 'bg-white text-indigo-900 shadow-2xs'
                         : 'text-slate-600 hover:text-slate-900'
-                    }`}
+                      }`}
                   >
                     <Dumbbell className="w-3.5 h-3.5 text-indigo-500" />
                     <span>Treinos ({septemberActivities.filter(a => a.type !== 'prova' && a.type !== 'tarefa').length})</span>
@@ -557,11 +551,10 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                     {filteredSeptemberActivities.map((act) => (
                       <div
                         key={act.id}
-                        className={`p-4 rounded-2xl border transition-all ${
-                          act.type === 'prova'
+                        className={`p-4 rounded-2xl border transition-all ${act.type === 'prova'
                             ? 'bg-amber-50/60 border-amber-200'
                             : 'bg-slate-50/80 border-slate-200'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3">
@@ -799,11 +792,10 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
 
                     <div className="flex items-center gap-2 shrink-0">
                       <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${
-                          remaining > 0
+                        className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${remaining > 0
                             ? 'bg-teal-100 text-teal-800'
                             : 'bg-slate-200 text-slate-600'
-                        }`}
+                          }`}
                       >
                         {remaining > 0 ? `${remaining} lugares livres` : 'Esgotado'}
                       </span>

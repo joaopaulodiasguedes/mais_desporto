@@ -56,7 +56,7 @@ export const TrainingPlansTab: React.FC = () => {
         sessionStorage.removeItem('plus_selected_athlete_plan_id');
         return saved;
       }
-    } catch {}
+    } catch { }
     if (currentUser.role === 'atleta' && currentUser.athleteProfileId) {
       return currentUser.athleteProfileId;
     }
@@ -335,7 +335,7 @@ export const TrainingPlansTab: React.FC = () => {
     if (!dateStr) return '';
     const now = new Date();
     const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    
+
     const tomorrow = new Date(now);
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
@@ -588,11 +588,10 @@ export const TrainingPlansTab: React.FC = () => {
                   assignedAthletes.map((ath) => (
                     <span
                       key={ath.id}
-                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold ${
-                        highlightAthlete?.id === ath.id
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold ${highlightAthlete?.id === ath.id
                           ? 'bg-indigo-600 text-white shadow-2xs'
                           : 'bg-indigo-50 border border-indigo-100 text-indigo-800'
-                      }`}
+                        }`}
                     >
                       {ath.photoUrl ? (
                         <img
@@ -724,7 +723,7 @@ export const TrainingPlansTab: React.FC = () => {
             Planos de Treino por Atleta
           </h2>
           <p className="text-xs text-slate-500">
-            Prescrição individualizada, séries fracionadas, intensidades e registo de esforço por atleta
+            Prescrição individualizadae registo de esforço por atleta
           </p>
         </div>
 
@@ -806,11 +805,10 @@ export const TrainingPlansTab: React.FC = () => {
                       key={ath.id}
                       type="button"
                       onClick={() => setSelectedAthleteId(ath.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                        isSelected
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isSelected
                           ? 'bg-purple-700 text-white shadow-xs'
                           : 'bg-white text-slate-700 hover:bg-purple-100/70 border border-purple-100'
-                      }`}
+                        }`}
                     >
                       {ath.photoUrl ? (
                         <img
@@ -887,11 +885,10 @@ export const TrainingPlansTab: React.FC = () => {
                 <button
                   key={ath.id}
                   onClick={() => setSelectedAthleteId(ath.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
-                    isSelected
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0 ${isSelected
                       ? 'bg-indigo-600 text-white shadow-2xs'
                       : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
-                  }`}
+                    }`}
                 >
                   {ath.photoUrl ? (
                     <img
@@ -902,22 +899,20 @@ export const TrainingPlansTab: React.FC = () => {
                     />
                   ) : (
                     <div
-                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 ${
-                        isSelected ? 'bg-indigo-700 text-white' : 'bg-indigo-100 text-indigo-700'
-                      }`}
+                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 ${isSelected ? 'bg-indigo-700 text-white' : 'bg-indigo-100 text-indigo-700'
+                        }`}
                     >
                       {ath.name.charAt(0)}
                     </div>
                   )}
                   <span>{ath.name}</span>
                   <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                      isSelected
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${isSelected
                         ? 'bg-indigo-700 text-white'
                         : count > 0
-                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                        : 'bg-slate-100 text-slate-400'
-                    }`}
+                          ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                          : 'bg-slate-100 text-slate-400'
+                      }`}
                   >
                     {count}
                   </span>
@@ -929,18 +924,16 @@ export const TrainingPlansTab: React.FC = () => {
             {plansCountByAthlete.generalCount > 0 && (
               <button
                 onClick={() => setSelectedAthleteId('geral')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${
-                  selectedAthleteId === 'geral'
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${selectedAthleteId === 'geral'
                     ? 'bg-indigo-600 text-white shadow-2xs'
                     : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
-                }`}
+                  }`}
               >
                 <Users className="w-3.5 h-3.5 text-slate-500" />
                 <span>Gerais / Coletivos</span>
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                    selectedAthleteId === 'geral' ? 'bg-indigo-700 text-white' : 'bg-slate-100 text-slate-700'
-                  }`}
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${selectedAthleteId === 'geral' ? 'bg-indigo-700 text-white' : 'bg-slate-100 text-slate-700'
+                    }`}
                 >
                   {plansCountByAthlete.generalCount}
                 </span>
@@ -960,8 +953,8 @@ export const TrainingPlansTab: React.FC = () => {
               (currentUser.role === 'atleta'
                 ? athletes.find((a) => a.id === currentUser.athleteProfileId) || athletes[0]
                 : currentUser.role === 'encarregado'
-                ? guardianAthletes.find((a) => a.id === selectedAthleteId) || guardianAthletes[0] || null
-                : null);
+                  ? guardianAthletes.find((a) => a.id === selectedAthleteId) || guardianAthletes[0] || null
+                  : null);
 
             return (
               <>
@@ -972,11 +965,10 @@ export const TrainingPlansTab: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setViewMode('calendario')}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${
-                          viewMode === 'calendario'
+                        className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${viewMode === 'calendario'
                             ? 'bg-blue-600 text-white shadow-xs'
                             : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80'
-                        }`}
+                          }`}
                       >
                         <CalendarIcon className="w-4 h-4" />
                         <span>Calendário & Treino do Dia</span>
@@ -985,11 +977,10 @@ export const TrainingPlansTab: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setViewMode('lista')}
-                        className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${
-                          viewMode === 'lista'
+                        className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${viewMode === 'lista'
                             ? 'bg-blue-600 text-white shadow-xs'
                             : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80'
-                        }`}
+                          }`}
                       >
                         <Layers className="w-4 h-4" />
                         <span>Lista Completa ({plansForCurrentFilter.length})</span>
@@ -1025,8 +1016,8 @@ export const TrainingPlansTab: React.FC = () => {
                       {currentUser.role === 'encarregado'
                         ? `O treinador ainda não prescreveu planos de treino para ${targetAthlete?.name || 'o seu educando'}.`
                         : targetAthlete
-                        ? `Prescreva um plano de treino personalizado com séries, descansos e intensidades para ${targetAthlete.name}.`
-                        : 'Ainda não tens planos de treino atribuídos.'}
+                          ? `Prescreva um plano de treino personalizado com séries, descansos e intensidades para ${targetAthlete.name}.`
+                          : 'Ainda não tens planos de treino atribuídos.'}
                     </p>
                     {canCreate && targetAthlete && (
                       <button
@@ -1429,8 +1420,8 @@ export const TrainingPlansTab: React.FC = () => {
                     {newAssignedAthleteIds.length === 1
                       ? `Atleta: ${athletes.find((a) => a.id === newAssignedAthleteIds[0])?.name}`
                       : newAssignedAthleteIds.length > 1
-                      ? `${newAssignedAthleteIds.length} Atletas selecionados`
-                      : 'Plano coletivo / geral'}
+                        ? `${newAssignedAthleteIds.length} Atletas selecionados`
+                        : 'Plano coletivo / geral'}
                   </span>
                   <span className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
                     <CalendarIcon className="w-3.5 h-3.5 text-blue-600" />
@@ -1496,11 +1487,10 @@ export const TrainingPlansTab: React.FC = () => {
                             }
                           });
                         }}
-                        className={`p-2 rounded-xl text-left text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
-                          isSelected
+                        className={`p-2 rounded-xl text-left text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${isSelected
                             ? 'bg-indigo-600 text-white shadow-2xs ring-2 ring-indigo-300'
                             : 'bg-white text-slate-700 border border-slate-200 hover:border-indigo-200 hover:bg-slate-50'
-                        }`}
+                          }`}
                       >
                         {ath.photoUrl ? (
                           <img
@@ -1511,9 +1501,8 @@ export const TrainingPlansTab: React.FC = () => {
                           />
                         ) : (
                           <div
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-                              isSelected ? 'bg-indigo-700 text-white' : 'bg-indigo-100 text-indigo-700'
-                            }`}
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${isSelected ? 'bg-indigo-700 text-white' : 'bg-indigo-100 text-indigo-700'
+                              }`}
                           >
                             {ath.name.charAt(0)}
                           </div>
@@ -1521,9 +1510,8 @@ export const TrainingPlansTab: React.FC = () => {
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-bold leading-tight">{ath.name}</p>
                           <p
-                            className={`text-[10px] truncate leading-tight ${
-                              isSelected ? 'text-indigo-100' : 'text-slate-400'
-                            }`}
+                            className={`text-[10px] truncate leading-tight ${isSelected ? 'text-indigo-100' : 'text-slate-400'
+                              }`}
                           >
                             {ath.category}
                           </p>
@@ -1768,9 +1756,9 @@ export const TrainingPlansTab: React.FC = () => {
                                   blocks.map((b) =>
                                     b.id === block.id
                                       ? {
-                                          ...b,
-                                          exercises: b.exercises.map((x) => (x.id === ex.id ? { ...x, name: val } : x))
-                                        }
+                                        ...b,
+                                        exercises: b.exercises.map((x) => (x.id === ex.id ? { ...x, name: val } : x))
+                                      }
                                       : b
                                   )
                                 );
@@ -1787,9 +1775,9 @@ export const TrainingPlansTab: React.FC = () => {
                                   blocks.map((b) =>
                                     b.id === block.id
                                       ? {
-                                          ...b,
-                                          exercises: b.exercises.map((x) => (x.id === ex.id ? { ...x, repsOrDuration: val } : x))
-                                        }
+                                        ...b,
+                                        exercises: b.exercises.map((x) => (x.id === ex.id ? { ...x, repsOrDuration: val } : x))
+                                      }
                                       : b
                                   )
                                 );
