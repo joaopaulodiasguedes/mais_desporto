@@ -719,7 +719,7 @@ export const CategoriesManagement: React.FC<CategoriesManagementProps> = ({ onSe
                     onChange={(e) => setFormData({ ...formData, gender: e.target.value as any })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-blue-500 focus:bg-white outline-hidden font-medium text-slate-800"
                   >
-                    <option value="todos">Misto / Ambos os Géneros</option>
+                    <option value="todos">Ambos os Géneros</option>
                     <option value="masculino">Apenas Masculino</option>
                     <option value="feminino">Apenas Feminino</option>
                   </select>

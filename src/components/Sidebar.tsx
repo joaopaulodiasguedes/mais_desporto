@@ -103,7 +103,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         },
         {
           id: 'pais',
-          label: 'Área dos Pais',
+          label: 'Área dos Enc.',
           icon: HeartHandshake,
           badge: null
         }
@@ -130,9 +130,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Aside Container */}
       <aside
-        className={`fixed lg:sticky top-0 bottom-0 left-0 z-50 lg:z-20 w-64 bg-[#0F172A] text-slate-400 flex flex-col shrink-0 h-screen transition-transform duration-300 ease-in-out border-r border-slate-800/80 ${
-          isOpenMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
+        className={`fixed lg:sticky top-0 bottom-0 left-0 z-50 lg:z-20 w-64 bg-[#0F172A] text-slate-400 flex flex-col shrink-0 h-screen transition-transform duration-300 ease-in-out border-r border-slate-800/80 ${isOpenMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+          }`}
       >
         {/* Brand Header */}
         <div className="p-6 sm:p-7 flex items-center justify-between border-b border-slate-800/40">
@@ -196,33 +195,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         color: 'var(--club-primary)',
                         borderColor: 'var(--club-primary-border)'
                       } : undefined}
-                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all text-sm font-medium ${
-                        isActive
-                          ? 'bg-blue-600/10 text-blue-400 rounded-xl border border-blue-600/20 font-semibold shadow-xs'
-                          : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
-                      }`}
+                      className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all text-sm font-medium ${isActive
+                        ? 'bg-blue-600/10 text-blue-400 rounded-xl border border-blue-600/20 font-semibold shadow-xs'
+                        : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200 border border-transparent'
+                        }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
                           style={isActive ? { backgroundColor: 'var(--club-primary)' } : undefined}
-                          className={`w-2 h-2 rounded-full transition-colors ${
-                            isActive ? 'bg-blue-500 shadow-xs shadow-blue-400' : 'bg-slate-600'
-                          }`}
+                          className={`w-2 h-2 rounded-full transition-colors ${isActive ? 'bg-blue-500 shadow-xs shadow-blue-400' : 'bg-slate-600'
+                            }`}
                         />
                         <Icon
                           style={isActive ? { color: 'var(--club-primary)' } : undefined}
-                          className={`w-4 h-4 transition-colors ${
-                            isActive ? 'text-blue-400' : 'text-slate-500'
-                          }`}
+                          className={`w-4 h-4 transition-colors ${isActive ? 'text-blue-400' : 'text-slate-500'
+                            }`}
                         />
                         <span>{item.label}</span>
                       </div>
 
                       {item.badge && (
                         <span
-                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${
-                            item.badgeColor || 'bg-slate-800 text-slate-300 border border-slate-700'
-                          }`}
+                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${item.badgeColor || 'bg-slate-800 text-slate-300 border border-slate-700'
+                            }`}
                         >
                           {item.badge}
                         </span>

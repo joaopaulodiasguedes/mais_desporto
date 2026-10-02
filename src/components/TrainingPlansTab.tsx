@@ -119,7 +119,7 @@ export const TrainingPlansTab: React.FC = () => {
       exercises: [
         {
           id: 'ex-1',
-          name: '400m Nado suave variado + 4x50m progressivo',
+          name: '400m suave variado + 4x50m progressivo',
           sets: '1',
           repsOrDuration: '600m',
           rest: '30s',
@@ -151,12 +151,12 @@ export const TrainingPlansTab: React.FC = () => {
       exercises: [
         {
           id: 'ex-3',
-          name: '200m Costas / Bruços descompressão',
+          name: 'descompressão',
           sets: '1',
-          repsOrDuration: '200m',
+          repsOrDuration: '2000m',
           rest: '0s',
           intensity: 'R1',
-          notes: 'Respiração profunda e soltura.'
+          notes: 'Respiração.'
         }
       ]
     }
@@ -423,7 +423,7 @@ export const TrainingPlansTab: React.FC = () => {
   const handleOpenAddPlan = (targetAthleteId?: string, defaultDate?: string) => {
     setEditingPlan(null);
     setNewTitle('');
-    setNewModality('Natação Pura');
+    setNewModality('Atletismo');
 
     // If specific athlete was provided or active in filter
     const initialAthId = targetAthleteId || (selectedAthleteId !== 'todos' && selectedAthleteId !== 'geral' ? selectedAthleteId : '');
@@ -589,8 +589,8 @@ export const TrainingPlansTab: React.FC = () => {
                     <span
                       key={ath.id}
                       className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-bold ${highlightAthlete?.id === ath.id
-                          ? 'bg-indigo-600 text-white shadow-2xs'
-                          : 'bg-indigo-50 border border-indigo-100 text-indigo-800'
+                        ? 'bg-indigo-600 text-white shadow-2xs'
+                        : 'bg-indigo-50 border border-indigo-100 text-indigo-800'
                         }`}
                     >
                       {ath.photoUrl ? (
@@ -806,8 +806,8 @@ export const TrainingPlansTab: React.FC = () => {
                       type="button"
                       onClick={() => setSelectedAthleteId(ath.id)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${isSelected
-                          ? 'bg-purple-700 text-white shadow-xs'
-                          : 'bg-white text-slate-700 hover:bg-purple-100/70 border border-purple-100'
+                        ? 'bg-purple-700 text-white shadow-xs'
+                        : 'bg-white text-slate-700 hover:bg-purple-100/70 border border-purple-100'
                         }`}
                     >
                       {ath.photoUrl ? (
@@ -886,8 +886,8 @@ export const TrainingPlansTab: React.FC = () => {
                   key={ath.id}
                   onClick={() => setSelectedAthleteId(ath.id)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0 ${isSelected
-                      ? 'bg-indigo-600 text-white shadow-2xs'
-                      : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
+                    ? 'bg-indigo-600 text-white shadow-2xs'
+                    : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
                     }`}
                 >
                   {ath.photoUrl ? (
@@ -908,10 +908,10 @@ export const TrainingPlansTab: React.FC = () => {
                   <span>{ath.name}</span>
                   <span
                     className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${isSelected
-                        ? 'bg-indigo-700 text-white'
-                        : count > 0
-                          ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                          : 'bg-slate-100 text-slate-400'
+                      ? 'bg-indigo-700 text-white'
+                      : count > 0
+                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                        : 'bg-slate-100 text-slate-400'
                       }`}
                   >
                     {count}
@@ -925,8 +925,8 @@ export const TrainingPlansTab: React.FC = () => {
               <button
                 onClick={() => setSelectedAthleteId('geral')}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${selectedAthleteId === 'geral'
-                    ? 'bg-indigo-600 text-white shadow-2xs'
-                    : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
+                  ? 'bg-indigo-600 text-white shadow-2xs'
+                  : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
                   }`}
               >
                 <Users className="w-3.5 h-3.5 text-slate-500" />
@@ -966,8 +966,8 @@ export const TrainingPlansTab: React.FC = () => {
                         type="button"
                         onClick={() => setViewMode('calendario')}
                         className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${viewMode === 'calendario'
-                            ? 'bg-blue-600 text-white shadow-xs'
-                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80'
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80'
                           }`}
                       >
                         <CalendarIcon className="w-4 h-4" />
@@ -978,8 +978,8 @@ export const TrainingPlansTab: React.FC = () => {
                         type="button"
                         onClick={() => setViewMode('lista')}
                         className={`px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all cursor-pointer ${viewMode === 'lista'
-                            ? 'bg-blue-600 text-white shadow-xs'
-                            : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80'
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80'
                           }`}
                       >
                         <Layers className="w-4 h-4" />
@@ -1488,8 +1488,8 @@ export const TrainingPlansTab: React.FC = () => {
                           });
                         }}
                         className={`p-2 rounded-xl text-left text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${isSelected
-                            ? 'bg-indigo-600 text-white shadow-2xs ring-2 ring-indigo-300'
-                            : 'bg-white text-slate-700 border border-slate-200 hover:border-indigo-200 hover:bg-slate-50'
+                          ? 'bg-indigo-600 text-white shadow-2xs ring-2 ring-indigo-300'
+                          : 'bg-white text-slate-700 border border-slate-200 hover:border-indigo-200 hover:bg-slate-50'
                           }`}
                       >
                         {ath.photoUrl ? (
