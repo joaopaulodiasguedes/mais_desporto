@@ -174,30 +174,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<'treinador' | 'atleta' | 'encarreg
 };
 
 export const INITIAL_CLUB_DOCUMENTS: ClubDocument[] = [
-  {
-    id: 'doc-reg-1',
-    title: 'Regulamento Interno Oficial',
-    category: 'Regulamento Interno',
-    description: 'Código de conduta, direitos e deveres dos atletas, regime disciplinar e valores do clube.',
-    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-    fileName: 'Regulamento_Interno_MaisDesporto.pdf',
-    fileType: 'pdf',
-    fileSize: '420 KB',
-    uploadedAt: '2026-09-01',
-    uploadedByCoachName: 'Dr. Henrique Valente'
-  },
-  {
-    id: 'doc-inst-2',
-    title: 'Normas de Utilização das Instalações & Piscinas',
-    category: 'Instalações & Recintos',
-    description: 'Regras de acesso ao cais da piscina, pistas, vestiários, cacifos e material de treino.',
-    fileUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-    fileName: 'Normas_Utilizacao_Complexo.pdf',
-    fileType: 'pdf',
-    fileSize: '285 KB',
-    uploadedAt: '2026-09-05',
-    uploadedByCoachName: 'Equipa Técnica'
-  }
+
 ];
 
 export const INITIAL_CLUB_INFO: ClubInfo = {

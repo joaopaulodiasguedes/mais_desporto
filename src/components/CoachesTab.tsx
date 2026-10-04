@@ -296,8 +296,8 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
               id="subtab-coaches"
               onClick={() => setActiveSubTab('coaches')}
               className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${activeSubTab === 'coaches'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               <UserCheck className="w-4 h-4 text-teal-600" />
@@ -308,8 +308,8 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
               id="subtab-categories"
               onClick={() => setActiveSubTab('categories')}
               className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${activeSubTab === 'categories'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               <Layers className="w-4 h-4 text-blue-600" />
@@ -320,8 +320,8 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
               id="subtab-approvals"
               onClick={() => setActiveSubTab('approvals')}
               className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${activeSubTab === 'approvals'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
                 }`}
             >
               <ShieldCheck className={`w-4 h-4 ${pendingApprovalsCount > 0 ? 'text-amber-500' : 'text-slate-500'}`} />
@@ -976,8 +976,8 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                     type="button"
                     onClick={() => setFormData({ ...formData, isAdmin: true })}
                     className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${formData.isAdmin
-                        ? 'bg-white border-amber-500 ring-2 ring-amber-400/40 shadow-xs'
-                        : 'bg-amber-100/40 border-amber-200 text-slate-600 hover:bg-white'
+                      ? 'bg-white border-amber-500 ring-2 ring-amber-400/40 shadow-xs'
+                      : 'bg-amber-100/40 border-amber-200 text-slate-600 hover:bg-white'
                       }`}
                   >
                     <div className={`w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0 ${formData.isAdmin ? 'border-amber-600 bg-amber-600' : 'border-slate-400 bg-white'
@@ -998,8 +998,8 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                     type="button"
                     onClick={() => setFormData({ ...formData, isAdmin: false })}
                     className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${!formData.isAdmin
-                        ? 'bg-white border-teal-600 ring-2 ring-teal-400/40 shadow-xs'
-                        : 'bg-amber-100/40 border-amber-200 text-slate-600 hover:bg-white'
+                      ? 'bg-white border-teal-600 ring-2 ring-teal-400/40 shadow-xs'
+                      : 'bg-amber-100/40 border-amber-200 text-slate-600 hover:bg-white'
                       }`}
                   >
                     <div className={`w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0 ${!formData.isAdmin ? 'border-teal-600 bg-teal-600' : 'border-slate-400 bg-white'

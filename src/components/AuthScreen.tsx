@@ -66,7 +66,7 @@ export const AuthScreen: React.FC = () => {
   const [regBirthDate, setRegBirthDate] = useState('2009-05-15');
   const [regRole, setRegRole] = useState<UserRole>('atleta');
   const [regFedNumber, setRegFedNumber] = useState('');
-  const [regCoachGrade, setRegCoachGrade] = useState('Grau II - Treinador de Desporto');
+  const [regCoachGrade, setRegCoachGrade] = useState('');
   const [regNotes, setRegNotes] = useState('');
   const [regGuardianName, setRegGuardianName] = useState('');
   const [regError, setRegError] = useState('');
@@ -563,7 +563,7 @@ export const AuthScreen: React.FC = () => {
 
                       <div>
                         <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                          Nº Cédula TPTD
+                          Nº Cédula / Certificado / Diploma
                         </label>
                         <input
                           type="text"
