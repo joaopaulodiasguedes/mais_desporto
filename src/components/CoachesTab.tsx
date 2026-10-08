@@ -530,11 +530,11 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                     <ShieldAlert className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-amber-950 block">Estatuto de Administrador:</span>
+                    <span className="text-xs font-bold text-amber-950 block">Perfil de Administrador:</span>
                     <span className="text-[11px] text-amber-900/80">
                       {selectedCoach.isAdmin
-                        ? 'Tem acesso ao separador exclusivo Administrador (Regras & Cloud)'
-                        : 'Treinador padrão (não tem acesso ao separador Administrador)'}
+                        ? 'Tem acesso ao separador exclusivo'
+                        : 'Treinador padrão'}
                     </span>
                   </div>
                 </div>
@@ -545,7 +545,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                     </span>
                   ) : (
                     <span className="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-700 font-bold text-xs whitespace-nowrap">
-                      Não é Admin
+                      Não é Administrador
                     </span>
                   )}
                 </div>
