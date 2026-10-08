@@ -551,7 +551,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                 </div>
               </div>
 
-              {/* Diploma & Certification Section */}
+              {/* Diploma & Certification Section 
               <div className="p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <h4 className="font-bold text-teal-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
@@ -639,6 +639,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                   </label>
                 )}
               </div>
+              */}
 
               {/* Bio & Experience */}
               <div className="p-3.5 rounded-2xl bg-teal-50/50 border border-teal-100 space-y-1.5">
@@ -840,7 +841,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                 />
               </div>
 
-              {/* Diploma / Certificate Upload Section */}
+              {/* Diploma / Certificate Upload Section 
               <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
@@ -916,6 +917,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                   </div>
                 )}
               </div>
+              */}
 
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
                 <div className="flex items-center justify-between">
