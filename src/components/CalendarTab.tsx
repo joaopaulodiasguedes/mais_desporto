@@ -56,18 +56,14 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
     toggleEventCompletion
   } = useApp();
 
-  // Current view: Month and Year (defaulting to September 2026 as per sample data or current date)
-  const [currentDate, setCurrentDate] = useState(() => {
-    if (calendarEvents.length > 0) {
-      const firstDate = new Date(calendarEvents[0].date);
-      if (!isNaN(firstDate.getTime())) {
-        return new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
-      }
-    }
-    return new Date(2026, 8, 1); // Setembro 2026
-  });
+  // Current view: Month and Year — defaults to today
+  const today = new Date();
+  const [currentDate, setCurrentDate] = useState(
+    () => new Date(today.getFullYear(), today.getMonth(), 1)
+  );
 
-  const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  // Pre-select today's day number
+  const [selectedDay, setSelectedDay] = useState<number | null>(() => today.getDate());
   const [filterType, setFilterType] = useState<'todos' | 'treino' | 'competicao' | 'tarefas'>('todos');
 
   // Day Manager Modal (Full Day CRUD)
@@ -417,6 +413,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             const hasEstagio = dayEvents.some((e) => e.type === 'estagio');
             const hasReuniao = dayEvents.some((e) => e.type === 'reuniao');
             const isSelected = selectedDay === dayNum;
+            const isToday = dayNum === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
 
             return (
               <div
@@ -425,6 +422,8 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 className={`group min-h-[64px] sm:min-h-[90px] p-1.5 sm:p-2 rounded-xl border transition-all flex flex-col justify-between cursor-pointer relative ${
                   isSelected
                     ? 'border-orange-500 ring-2 ring-orange-400/40 bg-orange-50/50 shadow-sm'
+                    : isToday
+                    ? 'border-blue-400 ring-1 ring-blue-300/50 bg-blue-50/30 hover:border-blue-500'
                     : dayEvents.length > 0
                     ? 'border-slate-200 bg-white hover:border-orange-400 hover:shadow-xs'
                     : 'border-slate-100 bg-slate-50/50 hover:border-slate-300 hover:bg-white'
@@ -434,9 +433,11 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 {/* Day Number and indicator */}
                 <div className="flex items-center justify-between">
                   <span
-                    className={`text-xs sm:text-sm font-extrabold ${
+                    className={`inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs sm:text-sm font-extrabold ${
                       isSelected
-                        ? 'text-orange-600 font-black'
+                        ? 'bg-orange-500 text-white font-black shadow-xs'
+                        : isToday
+                        ? 'bg-blue-600 text-white font-black shadow-xs'
                         : dayEvents.length > 0
                         ? 'text-slate-900'
                         : 'text-slate-400'
