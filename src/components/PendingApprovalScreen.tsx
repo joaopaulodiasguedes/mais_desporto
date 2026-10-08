@@ -157,7 +157,7 @@ export const PendingApprovalScreen: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Demo Testing Shortcuts */}
+          {/* Quick Demo Testing Shortcuts
           <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/30 space-y-3">
             <div className="flex items-center gap-2 text-blue-400 text-xs font-bold">
               <Sparkles className="w-4 h-4" />
@@ -186,7 +186,7 @@ export const PendingApprovalScreen: React.FC = () => {
               </button>
             </div>
           </div>
-
+ */}
           {/* Logout / Switch Account */}
           <div className="pt-2 flex items-center justify-between border-t border-slate-800">
             <button
