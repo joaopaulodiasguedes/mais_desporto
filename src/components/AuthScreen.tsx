@@ -453,7 +453,7 @@ export const AuthScreen: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 gap-4">
                     {/* Palavra-passe sem preenchimento por defeito e com toggle de visualização */}
                     <div>
                       <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
@@ -480,6 +480,7 @@ export const AuthScreen: React.FC = () => {
                       </div>
                     </div>
 
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {/* Telefone para Atleta, Encarregado e Treinador */}
                     <div>
                       <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
@@ -499,17 +500,18 @@ export const AuthScreen: React.FC = () => {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Data Nascimento
+                        Data de Nascimento
                       </label>
                       <div className="relative">
-                        <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <Calendar className="w-4 h-4 text-white absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
                         <input
                           type="date"
                           value={regBirthDate}
                           onChange={e => setRegBirthDate(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium"
+                          className="w-full pl-10 pr-2 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium [color-scheme:dark]"
                         />
                       </div>
+                    </div>
                     </div>
                   </div>
 
