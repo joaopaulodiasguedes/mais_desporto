@@ -209,7 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                       {item.badge && (
                         <span
-                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${item.badgeColor || 'bg-slate-800 text-slate-300 border border-slate-700'
+                          className={`px-1.5 py-0.5 text-[10px] font-bold rounded-full ${(item as any).badgeColor || 'bg-slate-800 text-slate-300 border border-slate-700'
                             }`}
                         >
                           {item.badge}

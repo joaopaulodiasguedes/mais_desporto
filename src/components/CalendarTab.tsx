@@ -99,6 +99,11 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
     setSelectedDay(null);
   };
 
+  const handleGoToToday = () => {
+    setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
+    setSelectedDay(today.getDate());
+  };
+
   // Helper to check if an event is a "Competição" or "Treino"
   const isCompetition = (evt: CalendarEvent) => evt.type === 'prova';
   const isTraining = (evt: CalendarEvent) => evt.type === 'treino_oficial' || evt.type === 'treino_individual';
@@ -152,11 +157,14 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
   const totalTrainings = monthEvents.filter(isTraining).length;
   const totalTasks = monthEvents.filter((e) => e.type === 'tarefa').length;
 
-  // Day Click Handler: Opens Day CRUD Manager Modal for coaches and athletes
+  // Day Click Handler: Selects day for side-by-side view (or opens day manager if already selected)
   const handleDayClick = (dayNum: number) => {
-    setSelectedDay(dayNum);
-    setDayManagerDayNumber(dayNum);
-    setIsDayManagerOpen(true);
+    if (selectedDay === dayNum) {
+      setDayManagerDayNumber(dayNum);
+      setIsDayManagerOpen(true);
+    } else {
+      setSelectedDay(dayNum);
+    }
   };
 
   const handleOpenCreateEvent = (
@@ -248,13 +256,27 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
         </div>
       )}
 
-      {/* Month Navigation & Action Bar */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Month & Year Navigator */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-            <button
-              onClick={prevMonth}
+      {/* 50/50 SPLIT LAYOUT AS REQUESTED:
+          "em calendário quero uma visualização igual ao plano de treinos, calendário e eventos lado a lado" */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* =========================================================
+            COLUNA 1 (ESQUERDA): O CALENDÁRIO INTERATIVO E FILTROS
+            ========================================================= */}
+        <div className="space-y-5">
+          {/* Month Navigation & Action Bar */}
+          <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Month & Year Navigator */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                <button
+                  onClick={handleGoToToday}
+                  className="px-2.5 py-1 text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-white rounded-lg transition-all shadow-xs cursor-pointer"
+                  title="Ir para o dia de hoje"
+                >
+                  Hoje
+                </button>
+                <button
+                  onClick={prevMonth}
               className="p-1.5 hover:bg-white text-slate-700 hover:text-slate-900 rounded-lg transition-all shadow-xs hover:shadow-2xs cursor-pointer"
               title="Mês anterior"
             >
@@ -594,14 +616,19 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
           </div>
         )}
       </div>
+        </div>
 
-      {/* Selected Day Quick Management Bar (if a day is selected) */}
-      {selectedDay && (
-        <div className="bg-white rounded-2xl p-4 border border-orange-200 bg-gradient-to-r from-orange-50/40 to-white shadow-xs flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-orange-500 text-white font-black flex items-center justify-center text-base shrink-0 shadow-xs">
-              {selectedDay}
-            </div>
+        {/* =========================================================
+            COLUNA 2 (DIREITA): ATIVIDADES E EVENTOS DISCRIMINADOS
+            ========================================================= */}
+        <div className="space-y-5">
+          {/* Selected Day Quick Management Bar or Month Overview Header */}
+          {selectedDay ? (
+            <div className="bg-white rounded-2xl p-4 border border-orange-200 bg-gradient-to-r from-orange-50/40 to-white shadow-xs flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-500 text-white font-black flex items-center justify-center text-base shrink-0 shadow-xs">
+                  {selectedDay}
+                </div>
             <div>
               <h4 className="text-sm font-extrabold text-slate-900">
                 Dia {selectedDay} de {MONTH_NAMES[currentMonth]} de {currentYear}
@@ -673,10 +700,34 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             </button>
           </div>
         </div>
-      )}
+      ) : (
+            <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 font-black flex items-center justify-center text-base shrink-0">
+                  <CalendarDays className="w-5 h-5 text-orange-500" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900">
+                    Todas as Atividades de {MONTH_NAMES[currentMonth]}
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    {filteredMonthEvents.length} atividades • Clique num dia no calendário para focar
+                  </p>
+                </div>
+              </div>
+              {today.getMonth() === currentMonth && today.getFullYear() === currentYear && (
+                <button
+                  onClick={() => setSelectedDay(today.getDate())}
+                  className="px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-bold rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
+                >
+                  <span>Focar Hoje ({today.getDate()})</span>
+                </button>
+              )}
+            </div>
+          )}
 
-      {/* Days & Events List for the Month */}
-      <div className="space-y-3">
+          {/* Days & Events List for the Month */}
+          <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
           <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
             {selectedDay
@@ -1030,6 +1081,8 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             )}
           </div>
         )}
+      </div>
+        </div>
       </div>
 
       {/* Day Manager Modal (Full Day CRUD when clicking on any day) */}
