@@ -63,9 +63,9 @@ export const EventModal: React.FC<EventModalProps> = ({
       setTitle('');
       setType(defaultType || (currentUser.role === 'treinador' ? 'treino_oficial' : 'tarefa'));
       setDate(defaultDate || new Date().toISOString().split('T')[0]);
-      setTime('09:00');
-      setEndTime('10:30');
-      setLocation(currentUser.role === 'atleta' ? 'Piscina / Ginásio' : 'Complexo Desportivo');
+      setTime('14:00');
+      setEndTime('18:00');
+      setLocation(currentUser.role === 'atleta' ? 'Ginásio' : 'Complexo Desportivo');
       setTargetCategories(['Todos']);
       setDescription('');
       setOfficialPdfUrl('');
