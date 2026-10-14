@@ -270,17 +270,16 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
     return (
       <div
         key={`${isSelectedDaySection ? 'day' : 'up'}-${evt.id}`}
-        className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs hover:shadow-md ${
-          isCurrentlySelected
-            ? 'ring-2 ring-orange-400/50 border-orange-400 bg-orange-50/20'
-            : comp
+        className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs hover:shadow-md ${isCurrentlySelected
+          ? 'ring-2 ring-orange-400/50 border-orange-400 bg-orange-50/20'
+          : comp
             ? 'border-amber-200 hover:border-amber-400 bg-gradient-to-r from-amber-50/20 to-white'
             : isTask
-            ? 'border-teal-200 hover:border-teal-400 bg-gradient-to-r from-teal-50/20 to-white'
-            : train
-            ? 'border-blue-200 hover:border-blue-400 bg-gradient-to-r from-blue-50/20 to-white'
-            : 'border-slate-200 hover:border-slate-400 bg-gradient-to-r from-slate-50/30 to-white'
-        }`}
+              ? 'border-teal-200 hover:border-teal-400 bg-gradient-to-r from-teal-50/20 to-white'
+              : train
+                ? 'border-blue-200 hover:border-blue-400 bg-gradient-to-r from-blue-50/20 to-white'
+                : 'border-slate-200 hover:border-slate-400 bg-gradient-to-r from-slate-50/30 to-white'
+          }`}
       >
         {/* Date & Core Info */}
         <div className="flex items-start gap-4">
@@ -290,15 +289,14 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
               setCurrentDate(new Date(evYear, evMonth, 1));
               setSelectedDay(evDay);
             }}
-            className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center text-center shrink-0 border shadow-xs transition-transform hover:scale-105 cursor-pointer ${
-              comp
-                ? 'bg-amber-100/90 text-amber-950 border-amber-300'
-                : isTask
+            className={`w-14 h-14 rounded-2xl flex flex-col items-center justify-center text-center shrink-0 border shadow-xs transition-transform hover:scale-105 cursor-pointer ${comp
+              ? 'bg-amber-100/90 text-amber-950 border-amber-300'
+              : isTask
                 ? 'bg-teal-100/90 text-teal-950 border-teal-300'
                 : train
-                ? 'bg-blue-100/90 text-blue-950 border-blue-300'
-                : 'bg-slate-100 text-slate-900 border-slate-300'
-            }`}
+                  ? 'bg-blue-100/90 text-blue-950 border-blue-300'
+                  : 'bg-slate-100 text-slate-900 border-slate-300'
+              }`}
             title={`Ver dia ${evDay} de ${MONTH_NAMES[evMonth]} no calendário`}
           >
             <span className="text-[10px] font-extrabold uppercase opacity-80 leading-none">
@@ -335,11 +333,10 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 )
               )}
               {isTask && (
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
-                  evt.isCompleted
-                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                    : 'bg-amber-100 text-amber-800 border border-amber-300'
-                }`}>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${evt.isCompleted
+                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                  : 'bg-amber-100 text-amber-800 border border-amber-300'
+                  }`}>
                   {evt.isCompleted ? '✓ Concluída' : '○ Pendente'}
                 </span>
               )}
@@ -370,11 +367,10 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 <button
                   type="button"
                   onClick={() => toggleEventCompletion(evt.id)}
-                  className={`w-5 h-5 rounded flex items-center justify-center border transition-all cursor-pointer ${
-                    evt.isCompleted
-                      ? 'bg-emerald-600 text-white border-emerald-600'
-                      : 'bg-white text-slate-300 border-slate-300 hover:border-teal-500'
-                  }`}
+                  className={`w-5 h-5 rounded flex items-center justify-center border transition-all cursor-pointer ${evt.isCompleted
+                    ? 'bg-emerald-600 text-white border-emerald-600'
+                    : 'bg-white text-slate-300 border-slate-300 hover:border-teal-500'
+                    }`}
                   title={evt.isCompleted ? "Marcar como pendente" : "Marcar como concluída"}
                 >
                   <CheckSquare className="w-3.5 h-3.5" />
@@ -517,13 +513,12 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                     setRsvpNote(userRsvp.note || '');
                     setIsRsvpModalOpen(true);
                   }}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer ${
-                    userRsvp.status === 'confirmado'
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                      : userRsvp.status === 'justificado'
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer ${userRsvp.status === 'confirmado'
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                    : userRsvp.status === 'justificado'
                       ? 'bg-amber-50 text-amber-800 border-amber-300'
                       : 'bg-red-50 text-red-800 border-red-300'
-                  }`}
+                    }`}
                 >
                   {userRsvp.status === 'confirmado' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
                   {userRsvp.status === 'justificado' && <AlertCircle className="w-3.5 h-3.5 text-amber-600" />}
@@ -628,7 +623,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 <h4 className="text-xs sm:text-sm font-extrabold text-teal-950 flex items-center gap-2">
                   <span>Calendário Pessoal do Atleta</span>
                 </h4>
-             
+
               </div>
               <p className="text-[11px] sm:text-xs text-teal-800 font-medium">
                 Podes adicionar as tuas tarefas e treinos pessoais (visíveis apenas para ti).
@@ -683,35 +678,31 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
           <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-bold text-slate-600 flex-wrap gap-0.5">
             <button
               onClick={() => { setFilterType('todos'); }}
-              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                filterType === 'todos' ? 'bg-white text-slate-900 shadow-xs' : 'hover:text-slate-900'
-              }`}
+              className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${filterType === 'todos' ? 'bg-white text-slate-900 shadow-xs' : 'hover:text-slate-900'
+                }`}
             >
               Todos ({monthEvents.length})
             </button>
             <button
               onClick={() => { setFilterType('treino'); }}
-              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-                filterType === 'treino' ? 'bg-blue-600 text-white shadow-xs' : 'hover:text-blue-600'
-              }`}
+              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${filterType === 'treino' ? 'bg-blue-600 text-white shadow-xs' : 'hover:text-blue-600'
+                }`}
             >
               <Dumbbell className="w-3 h-3" />
               <span>Treinos ({totalTrainings})</span>
             </button>
             <button
               onClick={() => { setFilterType('competicao'); }}
-              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-                filterType === 'competicao' ? 'bg-amber-500 text-white shadow-xs' : 'hover:text-amber-600'
-              }`}
+              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${filterType === 'competicao' ? 'bg-amber-500 text-white shadow-xs' : 'hover:text-amber-600'
+                }`}
             >
               <Trophy className="w-3 h-3" />
               <span>Competições ({totalCompetitions})</span>
             </button>
             <button
               onClick={() => { setFilterType('tarefas'); }}
-              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${
-                filterType === 'tarefas' ? 'bg-teal-600 text-white shadow-xs' : 'hover:text-teal-600'
-              }`}
+              className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1 cursor-pointer ${filterType === 'tarefas' ? 'bg-teal-600 text-white shadow-xs' : 'hover:text-teal-600'
+                }`}
             >
               <CheckSquare className="w-3.5 h-3.5" />
               <span>Tarefas ({totalTasks})</span>
@@ -820,29 +811,27 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 <div
                   key={`day-${dayNum}`}
                   onClick={() => handleDayClick(dayNum)}
-                  className={`group min-h-[64px] sm:min-h-[90px] p-1.5 sm:p-2 rounded-xl border transition-all flex flex-col justify-between cursor-pointer relative ${
-                    isSelected
-                      ? 'border-orange-500 ring-2 ring-orange-400/40 bg-orange-50/50 shadow-sm'
-                      : isToday
+                  className={`group min-h-[64px] sm:min-h-[90px] p-1.5 sm:p-2 rounded-xl border transition-all flex flex-col justify-between cursor-pointer relative ${isSelected
+                    ? 'border-orange-500 ring-2 ring-orange-400/40 bg-orange-50/50 shadow-sm'
+                    : isToday
                       ? 'border-blue-400 ring-1 ring-blue-300/50 bg-blue-50/30 hover:border-blue-500'
                       : dayEvents.length > 0
-                      ? 'border-slate-200 bg-white hover:border-orange-400 hover:shadow-xs'
-                      : 'border-slate-100 bg-slate-50/50 hover:border-slate-300 hover:bg-white'
-                  }`}
+                        ? 'border-slate-200 bg-white hover:border-orange-400 hover:shadow-xs'
+                        : 'border-slate-100 bg-slate-50/50 hover:border-slate-300 hover:bg-white'
+                    }`}
                   title={`Clique para ver as atividades do dia ${dayNum}`}
                 >
                   {/* Day Number and indicator */}
                   <div className="flex items-center justify-between">
                     <span
-                      className={`inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs sm:text-sm font-extrabold ${
-                        isSelected
-                          ? 'bg-orange-500 text-white font-black shadow-xs'
-                          : isToday
+                      className={`inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs sm:text-sm font-extrabold ${isSelected
+                        ? 'bg-orange-500 text-white font-black shadow-xs'
+                        : isToday
                           ? 'bg-blue-600 text-white font-black shadow-xs'
                           : dayEvents.length > 0
-                          ? 'text-slate-900'
-                          : 'text-slate-400'
-                      }`}
+                            ? 'text-slate-900'
+                            : 'text-slate-400'
+                        }`}
                     >
                       {dayNum}
                     </span>
@@ -975,11 +964,10 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                       setDayManagerDayNumber(selectedDay);
                       setIsDayManagerOpen(true);
                     }}
-                    className={`px-3 py-1 font-extrabold rounded-lg text-xs shadow-2xs flex items-center gap-1 cursor-pointer ${
-                      isCoach
-                        ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
-                        : 'bg-teal-600 hover:bg-teal-700 text-white'
-                    }`}
+                    className={`px-3 py-1 font-extrabold rounded-lg text-xs shadow-2xs flex items-center gap-1 cursor-pointer ${isCoach
+                      ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
+                      : 'bg-teal-600 hover:bg-teal-700 text-white'
+                      }`}
                   >
                     <CalendarDays className="w-3.5 h-3.5" />
                     <span>Painel Completo do Dia</span>
@@ -1027,29 +1015,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
               <div className="flex items-center gap-2 flex-wrap">
                 {canManage && (
                   <>
-                    <button
-                      onClick={() => handleOpenCreateEvent('treino_oficial', selectedDay)}
-                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl flex items-center gap-1 shadow-2xs cursor-pointer active:scale-95"
-                    >
-                      <Dumbbell className="w-3.5 h-3.5" />
-                      <span>+ Treino</span>
-                    </button>
 
-                    <button
-                      onClick={() => handleOpenCreateEvent('prova', selectedDay)}
-                      className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold rounded-xl flex items-center gap-1 shadow-2xs cursor-pointer active:scale-95"
-                    >
-                      <Trophy className="w-3.5 h-3.5" />
-                      <span>+ Competição</span>
-                    </button>
-
-                    <button
-                      onClick={() => handleOpenCreateEvent('tarefa', selectedDay)}
-                      className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl flex items-center gap-1 shadow-2xs cursor-pointer active:scale-95"
-                    >
-                      <CheckSquare className="w-3.5 h-3.5" />
-                      <span>+ Tarefa</span>
-                    </button>
                   </>
                 )}
 
@@ -1073,16 +1039,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                   </>
                 )}
 
-                <button
-                  onClick={() => {
-                    setDayManagerDayNumber(selectedDay);
-                    setIsDayManagerOpen(true);
-                  }}
-                  className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl flex items-center gap-1 shadow-2xs cursor-pointer"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  <span>Painel do Dia</span>
-                </button>
+
               </div>
             </div>
           ) : (
@@ -1249,11 +1206,10 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                   <button
                     type="button"
                     onClick={() => setRsvpStatus('confirmado')}
-                    className={`py-2 px-3 rounded-xl font-bold text-xs border text-center transition-all cursor-pointer ${
-                      rsvpStatus === 'confirmado'
-                        ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
+                    className={`py-2 px-3 rounded-xl font-bold text-xs border text-center transition-all cursor-pointer ${rsvpStatus === 'confirmado'
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-2xs'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
                   >
                     ✓ Presente
                   </button>
@@ -1261,11 +1217,10 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                   <button
                     type="button"
                     onClick={() => setRsvpStatus('justificado')}
-                    className={`py-2 px-3 rounded-xl font-bold text-xs border text-center transition-all cursor-pointer ${
-                      rsvpStatus === 'justificado'
-                        ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
+                    className={`py-2 px-3 rounded-xl font-bold text-xs border text-center transition-all cursor-pointer ${rsvpStatus === 'justificado'
+                      ? 'bg-amber-600 text-white border-amber-600 shadow-2xs'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
                   >
                     ⚠ Justificado
                   </button>
@@ -1273,11 +1228,10 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                   <button
                     type="button"
                     onClick={() => setRsvpStatus('ausente')}
-                    className={`py-2 px-3 rounded-xl font-bold text-xs border text-center transition-all cursor-pointer ${
-                      rsvpStatus === 'ausente'
-                        ? 'bg-red-600 text-white border-red-600 shadow-2xs'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
-                    }`}
+                    className={`py-2 px-3 rounded-xl font-bold text-xs border text-center transition-all cursor-pointer ${rsvpStatus === 'ausente'
+                      ? 'bg-red-600 text-white border-red-600 shadow-2xs'
+                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      }`}
                   >
                     ✗ Ausente
                   </button>
