@@ -39,9 +39,9 @@ export const EventModal: React.FC<EventModalProps> = ({
   const [title, setTitle] = useState('');
   const [type, setType] = useState<'prova' | 'treino_oficial' | 'treino_individual' | 'estagio' | 'reuniao' | 'tarefa'>('treino_oficial');
   const [date, setDate] = useState(defaultDate || new Date().toISOString().split('T')[0]);
-  const [time, setTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('10:30');
-  const [location, setLocation] = useState('Complexo Desportivo / Piscinas Municipais');
+  const [time, setTime] = useState('14:00');
+  const [endTime, setEndTime] = useState('18:00');
+  const [location, setLocation] = useState('Complexo Desportivo');
   const [targetCategories, setTargetCategories] = useState<string[]>(['Todos']);
   const [description, setDescription] = useState('');
   const [officialPdfUrl, setOfficialPdfUrl] = useState('');
@@ -65,7 +65,7 @@ export const EventModal: React.FC<EventModalProps> = ({
       setDate(defaultDate || new Date().toISOString().split('T')[0]);
       setTime('09:00');
       setEndTime('10:30');
-      setLocation(currentUser.role === 'atleta' ? 'Piscina / Ginásio' : 'Complexo Desportivo / Piscinas Municipais');
+      setLocation(currentUser.role === 'atleta' ? 'Piscina / Ginásio' : 'Complexo Desportivo');
       setTargetCategories(['Todos']);
       setDescription('');
       setOfficialPdfUrl('');
@@ -120,19 +120,18 @@ export const EventModal: React.FC<EventModalProps> = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className={`p-2 rounded-xl ${
-              type === 'prova'
+            <div className={`p-2 rounded-xl ${type === 'prova'
                 ? 'bg-amber-100 text-amber-700'
                 : type === 'treino_oficial'
-                ? 'bg-blue-100 text-blue-700'
-                : type === 'tarefa'
-                ? 'bg-teal-100 text-teal-700'
-                : type === 'estagio'
-                ? 'bg-emerald-100 text-emerald-700'
-                : type === 'reuniao'
-                ? 'bg-purple-100 text-purple-700'
-                : 'bg-slate-100 text-slate-700'
-            }`}>
+                  ? 'bg-blue-100 text-blue-700'
+                  : type === 'tarefa'
+                    ? 'bg-teal-100 text-teal-700'
+                    : type === 'estagio'
+                      ? 'bg-emerald-100 text-emerald-700'
+                      : type === 'reuniao'
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-slate-100 text-slate-700'
+              }`}>
               {type === 'prova' && <Trophy className="w-5 h-5" />}
               {type === 'treino_oficial' && <Dumbbell className="w-5 h-5" />}
               {type === 'tarefa' && <CheckSquare className="w-5 h-5" />}
@@ -169,11 +168,10 @@ export const EventModal: React.FC<EventModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setType('tarefa')}
-                  className={`p-3 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
-                    type === 'tarefa'
+                  className={`p-3 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'tarefa'
                       ? 'bg-teal-50 border-teal-500 text-teal-950 ring-2 ring-teal-500/20 font-black'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
-                  }`}
+                    }`}
                 >
                   <CheckSquare className="w-5 h-5 text-teal-600" />
                   <span className="text-xs font-bold">Tarefa Individual</span>
@@ -182,11 +180,10 @@ export const EventModal: React.FC<EventModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setType('treino_individual')}
-                  className={`p-3 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
-                    type === 'treino_individual'
+                  className={`p-3 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'treino_individual'
                       ? 'bg-blue-50 border-blue-500 text-blue-900 ring-2 ring-blue-500/20 font-black'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
-                  }`}
+                    }`}
                 >
                   <Dumbbell className="w-5 h-5 text-blue-600" />
                   <span className="text-xs font-bold">Treino Individual</span>
@@ -198,11 +195,10 @@ export const EventModal: React.FC<EventModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setType('treino_oficial')}
-                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
-                    type === 'treino_oficial'
+                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'treino_oficial'
                       ? 'bg-blue-50 border-blue-500 text-blue-900 ring-2 ring-blue-500/20 font-black'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
-                  }`}
+                    }`}
                 >
                   <Dumbbell className="w-4 h-4 text-blue-600" />
                   <span className="text-[11px]">Treino Oficial</span>
@@ -211,11 +207,10 @@ export const EventModal: React.FC<EventModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setType('prova')}
-                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
-                    type === 'prova'
+                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'prova'
                       ? 'bg-amber-50 border-amber-500 text-amber-950 ring-2 ring-amber-500/20 font-black'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
-                  }`}
+                    }`}
                 >
                   <Trophy className="w-4 h-4 text-amber-600" />
                   <span className="text-[11px]">Competição</span>
@@ -224,11 +219,10 @@ export const EventModal: React.FC<EventModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setType('tarefa')}
-                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
-                    type === 'tarefa'
+                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'tarefa'
                       ? 'bg-teal-50 border-teal-500 text-teal-950 ring-2 ring-teal-500/20 font-black'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
-                  }`}
+                    }`}
                 >
                   <CheckSquare className="w-4 h-4 text-teal-600" />
                   <span className="text-[11px]">Tarefa Equipa</span>
@@ -237,11 +231,10 @@ export const EventModal: React.FC<EventModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setType('estagio')}
-                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
-                    type === 'estagio'
+                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'estagio'
                       ? 'bg-emerald-50 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20 font-black'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
-                  }`}
+                    }`}
                 >
                   <Compass className="w-4 h-4 text-emerald-600" />
                   <span className="text-[11px]">Estágio</span>
@@ -250,11 +243,10 @@ export const EventModal: React.FC<EventModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setType('reuniao')}
-                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${
-                    type === 'reuniao'
+                  className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'reuniao'
                       ? 'bg-purple-50 border-purple-500 text-purple-950 ring-2 ring-purple-500/20 font-black'
                       : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
-                  }`}
+                    }`}
                 >
                   <Briefcase className="w-4 h-4 text-purple-600" />
                   <span className="text-[11px]">Reunião</span>
@@ -264,11 +256,10 @@ export const EventModal: React.FC<EventModalProps> = ({
 
             {/* Privacy indicator for tasks */}
             {type === 'tarefa' && (
-              <div className={`mt-2 p-2.5 rounded-xl border flex items-center gap-2 text-xs ${
-                currentUser.role === 'atleta'
+              <div className={`mt-2 p-2.5 rounded-xl border flex items-center gap-2 text-xs ${currentUser.role === 'atleta'
                   ? 'bg-teal-50/80 border-teal-200 text-teal-900'
                   : 'bg-blue-50/80 border-blue-200 text-blue-900'
-              }`}>
+                }`}>
                 {currentUser.role === 'atleta' ? (
                   <>
                     <Lock className="w-4 h-4 text-teal-600 shrink-0" />
@@ -299,10 +290,10 @@ export const EventModal: React.FC<EventModalProps> = ({
                 type === 'tarefa'
                   ? (currentUser.role === 'atleta' ? 'Ex: Trazer atestado médico / Alongamento em casa' : 'Ex: Entregar termos de responsabilidade assinados')
                   : type === 'prova'
-                  ? 'Ex: Torneio Regional de Clubes'
-                  : type === 'reuniao'
-                  ? 'Ex: Reunião com Encarregados de Educação'
-                  : 'Ex: Treino Técnico de Velocidade e Saídas'
+                    ? 'Ex: Torneio Regional de Clubes'
+                    : type === 'reuniao'
+                      ? 'Ex: Reunião com Encarregados de Educação'
+                      : 'Ex: Treino Técnico de Velocidade e Saídas'
               }
             />
           </div>
