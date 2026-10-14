@@ -121,16 +121,16 @@ export const EventModal: React.FC<EventModalProps> = ({
         <div className="flex items-center justify-between border-b border-slate-100 pb-3.5 mb-4">
           <div className="flex items-center gap-2.5">
             <div className={`p-2 rounded-xl ${type === 'prova'
-                ? 'bg-amber-100 text-amber-700'
-                : type === 'treino_oficial'
-                  ? 'bg-blue-100 text-blue-700'
-                  : type === 'tarefa'
-                    ? 'bg-teal-100 text-teal-700'
-                    : type === 'estagio'
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : type === 'reuniao'
-                        ? 'bg-purple-100 text-purple-700'
-                        : 'bg-slate-100 text-slate-700'
+              ? 'bg-amber-100 text-amber-700'
+              : type === 'treino_oficial'
+                ? 'bg-blue-100 text-blue-700'
+                : type === 'tarefa'
+                  ? 'bg-teal-100 text-teal-700'
+                  : type === 'estagio'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : type === 'reuniao'
+                      ? 'bg-purple-100 text-purple-700'
+                      : 'bg-slate-100 text-slate-700'
               }`}>
               {type === 'prova' && <Trophy className="w-5 h-5" />}
               {type === 'treino_oficial' && <Dumbbell className="w-5 h-5" />}
@@ -169,8 +169,8 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="button"
                   onClick={() => setType('tarefa')}
                   className={`p-3 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'tarefa'
-                      ? 'bg-teal-50 border-teal-500 text-teal-950 ring-2 ring-teal-500/20 font-black'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
+                    ? 'bg-teal-50 border-teal-500 text-teal-950 ring-2 ring-teal-500/20 font-black'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
                     }`}
                 >
                   <CheckSquare className="w-5 h-5 text-teal-600" />
@@ -181,8 +181,8 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="button"
                   onClick={() => setType('treino_individual')}
                   className={`p-3 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'treino_individual'
-                      ? 'bg-blue-50 border-blue-500 text-blue-900 ring-2 ring-blue-500/20 font-black'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
+                    ? 'bg-blue-50 border-blue-500 text-blue-900 ring-2 ring-blue-500/20 font-black'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
                     }`}
                 >
                   <Dumbbell className="w-5 h-5 text-blue-600" />
@@ -196,8 +196,8 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="button"
                   onClick={() => setType('treino_oficial')}
                   className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'treino_oficial'
-                      ? 'bg-blue-50 border-blue-500 text-blue-900 ring-2 ring-blue-500/20 font-black'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
+                    ? 'bg-blue-50 border-blue-500 text-blue-900 ring-2 ring-blue-500/20 font-black'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
                     }`}
                 >
                   <Dumbbell className="w-4 h-4 text-blue-600" />
@@ -208,8 +208,8 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="button"
                   onClick={() => setType('prova')}
                   className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'prova'
-                      ? 'bg-amber-50 border-amber-500 text-amber-950 ring-2 ring-amber-500/20 font-black'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
+                    ? 'bg-amber-50 border-amber-500 text-amber-950 ring-2 ring-amber-500/20 font-black'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
                     }`}
                 >
                   <Trophy className="w-4 h-4 text-amber-600" />
@@ -220,8 +220,8 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="button"
                   onClick={() => setType('tarefa')}
                   className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'tarefa'
-                      ? 'bg-teal-50 border-teal-500 text-teal-950 ring-2 ring-teal-500/20 font-black'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
+                    ? 'bg-teal-50 border-teal-500 text-teal-950 ring-2 ring-teal-500/20 font-black'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
                     }`}
                 >
                   <CheckSquare className="w-4 h-4 text-teal-600" />
@@ -232,8 +232,8 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="button"
                   onClick={() => setType('estagio')}
                   className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'estagio'
-                      ? 'bg-emerald-50 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20 font-black'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
+                    ? 'bg-emerald-50 border-emerald-500 text-emerald-950 ring-2 ring-emerald-500/20 font-black'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
                     }`}
                 >
                   <Compass className="w-4 h-4 text-emerald-600" />
@@ -244,8 +244,8 @@ export const EventModal: React.FC<EventModalProps> = ({
                   type="button"
                   onClick={() => setType('reuniao')}
                   className={`p-2 rounded-xl border flex flex-col items-center gap-1 text-center transition-all cursor-pointer ${type === 'reuniao'
-                      ? 'bg-purple-50 border-purple-500 text-purple-950 ring-2 ring-purple-500/20 font-black'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
+                    ? 'bg-purple-50 border-purple-500 text-purple-950 ring-2 ring-purple-500/20 font-black'
+                    : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold'
                     }`}
                 >
                   <Briefcase className="w-4 h-4 text-purple-600" />
@@ -257,8 +257,8 @@ export const EventModal: React.FC<EventModalProps> = ({
             {/* Privacy indicator for tasks */}
             {type === 'tarefa' && (
               <div className={`mt-2 p-2.5 rounded-xl border flex items-center gap-2 text-xs ${currentUser.role === 'atleta'
-                  ? 'bg-teal-50/80 border-teal-200 text-teal-900'
-                  : 'bg-blue-50/80 border-blue-200 text-blue-900'
+                ? 'bg-teal-50/80 border-teal-200 text-teal-900'
+                : 'bg-blue-50/80 border-blue-200 text-blue-900'
                 }`}>
                 {currentUser.role === 'atleta' ? (
                   <>
@@ -367,7 +367,7 @@ export const EventModal: React.FC<EventModalProps> = ({
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500 font-medium"
-              placeholder="Ex: Piscina Municipal de Guimarães / Complexo Desportivo"
+              placeholder="Ex: Complexo Desportivo"
             />
           </div>
 
@@ -375,7 +375,7 @@ export const EventModal: React.FC<EventModalProps> = ({
           <div>
             <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center gap-1">
               <FileText className="w-3.5 h-3.5 text-slate-400" />
-              Link do Regulamento / Documento Oficial (PDF)
+              Documento Oficial (PDF)
             </label>
             <input
               type="url"
@@ -389,7 +389,7 @@ export const EventModal: React.FC<EventModalProps> = ({
           {/* Description */}
           <div>
             <label className="text-xs font-bold text-slate-700 block mb-1">
-              Instruções Técnicas / Observações / Convocatória
+              Instruções Técnicas / Observações
             </label>
             <textarea
               rows={2}
