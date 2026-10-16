@@ -1004,27 +1004,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
         <div className="space-y-5">
           {/* Selected Day Quick Management Bar */}
 
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-700 font-black flex items-center justify-center text-base shrink-0">
-                <CalendarDays className="w-6 h-6 text-orange-500" />
-              </div>
-              <div>
-                <h4 className="text-sm font-extrabold text-slate-900">
-                  Calendário Geral de Atividades
-                </h4>
-                <p className="text-xs text-slate-500">
-                  Clique num dia no calendário à esquerda para focar esse dia específico
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => setSelectedDay(today.getDate())}
-              className="px-3.5 py-2 bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 text-xs font-bold rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
-            >
-              <span>Focar Hoje ({today.getDate()})</span>
-            </button>
-          </div>
+
 
 
           {/* Atividades Específicas do Dia Selecionado (se existirem) */}
