@@ -933,7 +933,7 @@ export const AthletesTab: React.FC = () => {
 
                 <div className="sm:col-span-2">
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Morada Completa <span className="text-slate-400 font-normal">(Não obrigatório)</span>
+                    Morada
                   </label>
                   <input
                     type="text"
