@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useApp, getLinkedAthletesForGuardian } from '../context/AppContext';
 import { Athlete } from '../types';
-import { calculateMedicalStatus } from '../utils/athleteRules';
+import { calculateMedicalStatus, formatBirthDate } from '../utils/athleteRules';
 import {
   User,
   Shield,
@@ -397,7 +397,7 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
                   </span>
                   <span className="font-bold text-slate-800">
                     {athleteAge !== null ? `${athleteAge} anos` : '—'}{' '}
-                    {currentAthlete.birthDate ? `(${currentAthlete.birthDate})` : ''}
+                    {currentAthlete.birthDate ? `(${formatBirthDate(currentAthlete.birthDate)})` : ''}
                   </span>
                 </div>
 
@@ -689,7 +689,7 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
                     Data de Nascimento & Idade
                   </span>
                   <p className="font-bold text-slate-900">
-                    {currentAthlete.birthDate || '—'} {athleteAge !== null && `(${athleteAge} anos)`}
+                    {formatBirthDate(currentAthlete.birthDate) || '—'} {athleteAge !== null && `(${athleteAge} anos)`}
                   </p>
                 </div>
 

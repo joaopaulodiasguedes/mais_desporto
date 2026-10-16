@@ -14,7 +14,8 @@ import {
   Briefcase,
   CheckSquare,
   Lock,
-  Globe2
+  Globe2,
+  ExternalLink
 } from 'lucide-react';
 
 interface EventModalProps {
@@ -45,6 +46,7 @@ export const EventModal: React.FC<EventModalProps> = ({
   const [targetCategories, setTargetCategories] = useState<string[]>(['Todos']);
   const [description, setDescription] = useState('');
   const [officialPdfUrl, setOfficialPdfUrl] = useState('');
+  const [registrationLink, setRegistrationLink] = useState('');
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -58,6 +60,7 @@ export const EventModal: React.FC<EventModalProps> = ({
       setTargetCategories(eventToEdit.targetCategories && eventToEdit.targetCategories.length > 0 ? eventToEdit.targetCategories : ['Todos']);
       setDescription(eventToEdit.description || '');
       setOfficialPdfUrl(eventToEdit.officialPdfUrl || '');
+      setRegistrationLink(eventToEdit.registrationLink || '');
       setIsCompleted(eventToEdit.isCompleted || false);
     } else {
       setTitle('');
@@ -69,6 +72,7 @@ export const EventModal: React.FC<EventModalProps> = ({
       setTargetCategories(['Todos']);
       setDescription('');
       setOfficialPdfUrl('');
+      setRegistrationLink('');
       setIsCompleted(false);
     }
   }, [eventToEdit, defaultDate, defaultType, currentUser.role, isOpen]);
@@ -90,6 +94,7 @@ export const EventModal: React.FC<EventModalProps> = ({
         targetCategories,
         description: description.trim() || undefined,
         officialPdfUrl: officialPdfUrl.trim() || undefined,
+        registrationLink: registrationLink.trim() || undefined,
         isCompleted: type === 'tarefa' ? isCompleted : undefined
       });
     } else {
@@ -103,6 +108,7 @@ export const EventModal: React.FC<EventModalProps> = ({
         targetCategories,
         description: description.trim() || undefined,
         officialPdfUrl: officialPdfUrl.trim() || undefined,
+        registrationLink: registrationLink.trim() || undefined,
         createdByRole: currentUser.role,
         creatorName: currentUser.name,
         creatorId: currentUser.id,
@@ -371,19 +377,36 @@ export const EventModal: React.FC<EventModalProps> = ({
             />
           </div>
 
-          {/* Official PDF URL */}
-          <div>
-            <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center gap-1">
-              <FileText className="w-3.5 h-3.5 text-slate-400" />
-              Documento Oficial (PDF)
-            </label>
-            <input
-              type="url"
-              value={officialPdfUrl}
-              onChange={(e) => setOfficialPdfUrl(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500 font-medium text-xs"
-              placeholder="https://exemplo.com/regulamento.pdf"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Official PDF URL */}
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center gap-1">
+                <FileText className="w-3.5 h-3.5 text-slate-400" />
+                Documento Oficial (PDF)
+              </label>
+              <input
+                type="url"
+                value={officialPdfUrl}
+                onChange={(e) => setOfficialPdfUrl(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500 font-medium text-xs"
+                placeholder="https://exemplo.com/regulamento.pdf"
+              />
+            </div>
+
+            {/* Registration Link */}
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center gap-1">
+                <ExternalLink className="w-3.5 h-3.5 text-orange-600" />
+                Link da Inscrição <span className="text-slate-400 font-normal">(Opcional)</span>
+              </label>
+              <input
+                type="url"
+                value={registrationLink}
+                onChange={(e) => setRegistrationLink(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500 font-medium text-xs"
+                placeholder="https://fpnatacao.pt ou Google Forms"
+              />
+            </div>
           </div>
 
           {/* Description */}

@@ -445,7 +445,7 @@ export const TrainingPlansTab: React.FC = () => {
         exercises: [
           {
             id: `ex-${Date.now()}-1`,
-            name: '400m Nado variado + 4x50m progressivo',
+            name: '400m corrida + 4x100m progressivo',
             sets: '1',
             repsOrDuration: '600m',
             rest: '30s',
@@ -1663,7 +1663,7 @@ export const TrainingPlansTab: React.FC = () => {
                     value={newObjective}
                     onChange={(e) => setNewObjective(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 font-medium"
-                    placeholder="Ex: Foco no controlo da frequência de braçada e viragens rápidas."
+                    placeholder="Ex: Foco na técnica de corrida."
                   />
                 </div>
 

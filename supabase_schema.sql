@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS public.calendar_events (
     target_categories TEXT[] DEFAULT '{}',
     description TEXT,
     official_pdf_url TEXT,
+    registration_link TEXT,
     created_by_role TEXT NOT NULL CHECK (created_by_role IN ('treinador', 'atleta', 'encarregado')),
     creator_name TEXT NOT NULL,
     creator_id TEXT NOT NULL,

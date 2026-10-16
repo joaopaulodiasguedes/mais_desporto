@@ -397,32 +397,32 @@ export const INITIAL_TRAINING_PLANS: TrainingPlan[] = [
         exercises: [
           {
             id: 'ex-3',
-            name: '5 x 200m Crol Ritmo de Prova',
+            name: '5 x 200m Ritmo de Prova',
             sets: '5',
             repsOrDuration: '200m',
             rest: '45s',
             intensity: 'R4 (Limiar)',
-            notes: 'Desvio máximo de 1.5s entre repetições. Controlo de braçadas.'
+            notes: 'Desvio máximo de 1.5s entre repetições.'
           },
           {
             id: 'ex-4',
-            name: '8 x 100m Estilos (25 Mariposa + 25 Costas + 25 Bruços + 25 Crol)',
+            name: '8 x 100m',
             sets: '8',
             repsOrDuration: '100m',
             rest: '30s',
             intensity: 'R3-R4',
-            notes: 'Excelentes viragens e deslizes subaquáticos até aos 7 metros.'
+            notes: 'Excelentes viragens.'
           }
         ]
       },
       {
         id: 'b-3',
-        title: 'Retorno à Calma & Soltura',
+        title: 'Retorno à Calma',
         type: 'retorno_calma',
         exercises: [
           {
             id: 'ex-5',
-            name: '300m Costas / Bruços suave descompressão',
+            name: '300m',
             sets: '1',
             repsOrDuration: '300m',
             rest: '0s',
@@ -436,7 +436,7 @@ export const INITIAL_TRAINING_PLANS: TrainingPlan[] = [
   {
     id: 'plan-2',
     title: 'Velocidade Pura & Partidas Rápidas',
-    modality: 'Natação / Atletismo',
+    modality: 'Atletismo',
     targetCategory: 'Juniores (Sub-18)',
     assignedAthleteIds: ['ath-2'],
     durationMinutes: 75,
@@ -575,10 +575,11 @@ export const INITIAL_CALENDAR_EVENTS: CalendarEvent[] = [
     date: '2026-09-12',
     time: '09:00',
     endTime: '18:00',
-    location: 'Piscina Municipal de Guimarães',
+    location: 'Estádio Municipal de Guimarães',
     targetCategories: ['Juvenis (Sub-16)', 'Juniores (Sub-18)', 'Seniores'],
-    description: 'Primeira prova oficial de apuramento para os Campeonatos Nacionais. Presença obrigatória de todos os atletas convocados às 08h00 no cais da piscina.',
+    description: 'Primeira prova oficial de apuramento para os Campeonatos Nacionais.',
     officialPdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    registrationLink: 'https://fpnatacao.pt/inscricoes',
     createdByRole: 'treinador',
     creatorName: 'Prof. Carlos Silva',
     creatorId: 'user-coach-1',
@@ -613,7 +614,7 @@ export const INITIAL_CALENDAR_EVENTS: CalendarEvent[] = [
     date: '2026-09-04',
     time: '17:30',
     endTime: '19:30',
-    location: 'Complexo Municipal do Porto (Piscina Olímpica)',
+    location: 'Complexo Municipal do Porto ()',
     targetCategories: ['Juvenis (Sub-16)', 'Juniores (Sub-18)'],
     description: 'Sessão de filmagem subaquática de viragens e análise biométrica.',
     createdByRole: 'treinador',

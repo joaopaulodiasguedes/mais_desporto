@@ -165,3 +165,20 @@ export function createMedicalExpiryNotification(
     actionTab: 'atletas'
   };
 }
+
+/**
+ * Converte data de nascimento de AAAA-MM-DD para dia-mês-ano (DD-MM-AAAA)
+ */
+export function formatBirthDate(dateStr?: string): string {
+  if (!dateStr || !dateStr.trim()) return '';
+  const clean = dateStr.trim().split('T')[0];
+  if (clean.includes('-')) {
+    const parts = clean.split('-');
+    if (parts.length === 3 && parts[0].length === 4) {
+      const [year, month, day] = parts;
+      return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`;
+    }
+  }
+  return clean;
+}
+

@@ -246,6 +246,7 @@ export function mapCalendarEventFromDb(row: any): CalendarEvent {
     targetCategories: row.target_categories || [],
     description: row.description || undefined,
     officialPdfUrl: row.official_pdf_url || undefined,
+    registrationLink: row.registration_link || row.registrationLink || row.link_inscricao || undefined,
     createdByRole: row.created_by_role || 'treinador',
     creatorName: row.creator_name || 'Treinador',
     creatorId: row.creator_id || 'user-coach-1',
@@ -267,6 +268,7 @@ export function mapCalendarEventToDb(evt: CalendarEvent): any {
     target_categories: evt.targetCategories || [],
     description: evt.description || null,
     official_pdf_url: evt.officialPdfUrl || null,
+    registration_link: evt.registrationLink || null,
     created_by_role: evt.createdByRole,
     creator_name: evt.creatorName,
     creator_id: evt.creatorId,
@@ -1278,7 +1280,14 @@ export async function upsertCalendarEventInSupabase(evt: CalendarEvent): Promise
   if (!client) return false;
   try {
     const row = mapCalendarEventToDb(evt);
-    const { error } = await client.from('calendar_events').upsert(row);
+    let { error } = await client.from('calendar_events').upsert(row);
+    if (error) {
+      delete row.registration_link;
+      const retry = await client.from('calendar_events').upsert(row);
+      if (!retry.error) {
+        error = null;
+      }
+    }
     if (error) {
       console.warn('Erro ao sincronizar evento com Supabase:', error.message);
       return false;

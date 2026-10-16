@@ -165,6 +165,7 @@ CREATE TABLE IF NOT EXISTS public.calendar_events (
     target_categories TEXT[] DEFAULT '{}',
     description TEXT,
     official_pdf_url TEXT,
+    registration_link TEXT,
     created_by_role TEXT NOT NULL DEFAULT 'treinador' CHECK (created_by_role IN ('treinador', 'atleta', 'encarregado')),
     creator_name TEXT NOT NULL DEFAULT 'Treinador',
     creator_id TEXT NOT NULL DEFAULT 'user-coach-1',
@@ -346,6 +347,7 @@ ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS emergency_contact TEXT;
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS allergies_or_conditions TEXT;
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS attendance_rate NUMERIC(5,2) DEFAULT 100.00;
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE public.athletes ALTER COLUMN address DROP NOT NULL;
 
 -- 3.5 training_plans: Agendamentos diários, múltiplos dias, tags e feedbacks de conclusão RPE
 ALTER TABLE public.training_plans ADD COLUMN IF NOT EXISTS scheduled_date DATE;
@@ -366,6 +368,7 @@ ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS is_completed BOOLEAN
 ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS rsvps JSONB DEFAULT '{}'::JSONB;
 ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS target_categories TEXT[] DEFAULT '{}';
 ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS registration_link TEXT;
 
 -- 3.7 competition_results: Evento associado, PDF de classificações, pódios, recordes e fotos
 ALTER TABLE public.competition_results ADD COLUMN IF NOT EXISTS event_id TEXT;

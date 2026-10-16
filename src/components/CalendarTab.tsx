@@ -554,6 +554,20 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             </button>
           )}
 
+          {/* Registration Link */}
+          {evt.registrationLink && (
+            <a
+              href={evt.registrationLink.startsWith('http') ? evt.registrationLink : `https://${evt.registrationLink}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="Abrir formulário de inscrição num novo separador"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-orange-600" />
+              <span>Inscrição</span>
+            </a>
+          )}
+
           {/* Coach CRUD: Edit & Delete */}
           {isOwnerOrCoach && (
             <div className="flex items-center gap-1">

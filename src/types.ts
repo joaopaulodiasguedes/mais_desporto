@@ -168,6 +168,7 @@ export interface CalendarEvent {
   targetCategories: string[];
   description?: string;
   officialPdfUrl?: string;
+  registrationLink?: string; // Link de inscrição para o evento / prova
   createdByRole: UserRole;
   creatorName: string;
   creatorId: string;

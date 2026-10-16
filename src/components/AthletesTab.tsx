@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { Athlete, NotificationItem } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
-import { calculateMedicalStatus, determineAgeCategory } from '../utils/athleteRules';
+import { calculateMedicalStatus, determineAgeCategory, formatBirthDate } from '../utils/athleteRules';
 
 export const AthletesTab: React.FC = () => {
   const {
@@ -585,7 +585,7 @@ export const AthletesTab: React.FC = () => {
                 <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
                   <div className="flex items-center gap-2 truncate">
                     <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>Nasc: {ath.birthDate} ({age} anos)</span>
+                    <span>Nasc: {formatBirthDate(ath.birthDate)} ({age} anos)</span>
                   </div>
 
                   <div className="flex items-center gap-2 truncate">
@@ -701,7 +701,7 @@ export const AthletesTab: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
                   <div>
                     <span className="text-[11px] text-slate-400 block font-semibold">Data de Nascimento:</span>
-                    <span className="font-medium text-slate-900">{selectedAthlete.birthDate}</span>
+                    <span className="font-medium text-slate-900">{formatBirthDate(selectedAthlete.birthDate)}</span>
                   </div>
                   <div>
                     <span className="text-[11px] text-slate-400 block font-semibold">Contacto do Atleta:</span>

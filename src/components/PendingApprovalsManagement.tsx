@@ -15,6 +15,7 @@ import {
   Users
 } from 'lucide-react';
 import { UserProfile } from '../types';
+import { formatBirthDate } from '../utils/athleteRules';
 
 interface PendingApprovalsManagementProps {
   onClose?: () => void;
@@ -225,7 +226,7 @@ export const PendingApprovalsManagement: React.FC<PendingApprovalsManagementProp
                       {user.birthDate && (
                         <span className="inline-flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                          <span>{user.birthDate}</span>
+                          <span>{formatBirthDate(user.birthDate)}</span>
                         </span>
                       )}
                     </div>

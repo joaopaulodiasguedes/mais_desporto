@@ -30,6 +30,7 @@ import { Coach } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { CategoriesManagement } from './CategoriesManagement';
 import { PendingApprovalsManagement } from './PendingApprovalsManagement';
+import { formatBirthDate } from '../utils/athleteRules';
 
 interface CoachesTabProps {
   onOpenPdf?: (title: string, url: string) => void;
@@ -385,7 +386,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                   <div className="space-y-1.5 text-xs text-slate-600 pt-2 border-t border-slate-100">
                     <div className="flex items-center gap-2">
                       <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      <span>{coach.birthDate} {age ? `(${age} anos)` : ''}</span>
+                      <span>{formatBirthDate(coach.birthDate)} {age ? `(${age} anos)` : ''}</span>
                     </div>
                     {coach.address && (
                       <div className="flex items-center gap-2">
@@ -479,7 +480,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                   <div>
                     <span className="text-[11px] text-slate-400 block font-semibold">Nascimento:</span>
                     <span className="font-medium text-slate-900">
-                      {selectedCoach.birthDate} {getAge(selectedCoach.birthDate) ? `(${getAge(selectedCoach.birthDate)} anos)` : ''}
+                      {formatBirthDate(selectedCoach.birthDate)} {getAge(selectedCoach.birthDate) ? `(${getAge(selectedCoach.birthDate)} anos)` : ''}
                     </span>
                   </div>
                   <div>
