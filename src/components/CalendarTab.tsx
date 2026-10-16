@@ -270,7 +270,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
     return (
       <div
         key={`${isSelectedDaySection ? 'day' : 'up'}-${evt.id}`}
-        className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs hover:shadow-md ${isCurrentlySelected
+        className={`bg-white rounded-2xl p-4 sm:p-5 border transition-all flex flex-col gap-4 shadow-2xs hover:shadow-md ${isCurrentlySelected
           ? 'ring-2 ring-orange-400/50 border-orange-400 bg-orange-50/20'
           : comp
             ? 'border-amber-200 hover:border-amber-400 bg-gradient-to-r from-amber-50/20 to-white'
@@ -282,7 +282,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
           }`}
       >
         {/* Date & Core Info */}
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4 w-full">
           {/* Day & Month Badge (Clickable to jump to that month/day in the calendar) */}
           <button
             onClick={() => {
@@ -308,7 +308,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
           </button>
 
           {/* Event Details */}
-          <div className="space-y-1">
+          <div className="space-y-1 flex-1 min-w-0">
             {/* Type Badge & Timing */}
             <div className="flex items-center gap-2 flex-wrap">
               {comp && (
@@ -1002,11 +1002,6 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             COLUNA 2 (DIREITA - 50%): OS 4 PRÓXIMOS EVENTOS E ATIVIDADES DO DIA
             ========================================================= */}
         <div className="space-y-5">
-          {/* Selected Day Quick Management Bar */}
-
-
-
-
           {/* Atividades Específicas do Dia Selecionado (se existirem) */}
           {selectedDay && selectedDayEvents.length > 0 && (
             <div className="space-y-3">
@@ -1050,7 +1045,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                     Não existem eventos futuros agendados.
                   </p>
                   {canManage && (
-                    <div className="mt-4 flex items-center justify-center gap-2">
+                    <div className="mt-4 flex flex-col items-center justify-center gap-2">
                       <button
                         onClick={() => handleOpenCreateEvent('treino_oficial')}
                         className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
