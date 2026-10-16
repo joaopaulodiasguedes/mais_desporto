@@ -200,7 +200,7 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
 
               {/* Right: Actions (Ver PDF, Download, Gestão) */}
               <div className="flex items-center justify-between md:justify-end gap-2 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
-               
+
 
                 {/* Ver PDF Original */}
                 <button
@@ -211,7 +211,7 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
                 >
                   <FileText className="w-4 h-4" />
                   <span>Ver PDF</span>
-                  <ExternalLink className="w-3 h-3 text-blue-200" />
+
                 </button>
 
                 {/* Coach Edit & Delete */}

@@ -98,12 +98,12 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
 
   const prevMonth = () => {
     setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
-    setSelectedDay(null);
+    setSelectedDay(1);
   };
 
   const nextMonth = () => {
     setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
-    setSelectedDay(null);
+    setSelectedDay(1);
   };
 
   const handleGoToToday = () => {
@@ -204,7 +204,16 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
     return event.rsvps?.[key];
   };
 
-  // 4 Próximos eventos (independentemente do mês selecionado)
+  // Data de referência para os próximos eventos: dia selecionado (no mês em vista) ou hoje
+  const selectedDateStr = useMemo(() => {
+    if (selectedDay === null) return todayDateStr;
+    const y = currentYear;
+    const m = String(currentMonth + 1).padStart(2, '0');
+    const d = String(selectedDay).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }, [selectedDay, currentYear, currentMonth, todayDateStr]);
+
+  // 4 Próximos eventos a partir da data selecionada (ou hoje se nenhum dia estiver selecionado)
   const upcomingEvents = useMemo(() => {
     const visibleEvents = calendarEvents
       .filter((evt) => isCalendarEventVisibleForUser(evt, currentUser, athletes))
@@ -215,9 +224,9 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
         return true;
       });
 
-    // 1) Eventos a partir de hoje (futuros)
+    // 1) Eventos a partir da data de referência
     const future = visibleEvents
-      .filter((evt) => evt.date >= todayDateStr)
+      .filter((evt) => evt.date >= selectedDateStr)
       .sort((a, b) => {
         const timeA = a.time || '00:00';
         const timeB = b.time || '00:00';
@@ -228,7 +237,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
       return future.slice(0, 4);
     }
 
-    // 2) Fallback: se não houver eventos futuros a partir de hoje, mostra os mais recentes
+    // 2) Fallback: se não houver eventos futuros, mostra os mais recentes antes da data
     return visibleEvents
       .sort((a, b) => {
         const timeA = a.time || '00:00';
@@ -237,7 +246,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
       })
       .slice(0, 4)
       .reverse();
-  }, [calendarEvents, currentUser, athletes, filterType, todayDateStr]);
+  }, [calendarEvents, currentUser, athletes, filterType, selectedDateStr]);
 
   // Eventos específicos do dia selecionado no mês em visualização
   const selectedDayEvents = useMemo(() => {
@@ -1026,7 +1035,9 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                   <span>4 Próximos Eventos</span>
                 </h3>
                 <p className="text-[11px] text-slate-400 font-medium">
-                  Independentemente do mês selecionado no calendário
+                  {selectedDay
+                    ? `A partir de ${selectedDay} de ${MONTH_NAMES[currentMonth]}`
+                    : 'A partir de hoje'}
                 </p>
               </div>
               <span className="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded-xl shadow-2xs">
