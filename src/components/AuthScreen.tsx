@@ -231,7 +231,7 @@ export const AuthScreen: React.FC = () => {
             <ShieldCheck className="w-9 h-9" />
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-            {clubInfo.name}
+            + Desporto
           </h1>
           <p className="text-sm sm:text-base text-slate-400 max-w-md mx-auto">
             Plataforma Integrada de Gestão Desportiva
@@ -481,37 +481,37 @@ export const AuthScreen: React.FC = () => {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Telefone para Atleta, Encarregado e Treinador */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Telefone
-                      </label>
-                      <div className="relative">
-                        <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                        <input
-                          type="tel"
-                          value={regPhone}
-                          onChange={e => setRegPhone(e.target.value)}
-                          placeholder="Ex: 912 345 678"
-                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium"
-                        />
+                      {/* Telefone para Atleta, Encarregado e Treinador */}
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                          Telefone
+                        </label>
+                        <div className="relative">
+                          <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                          <input
+                            type="tel"
+                            value={regPhone}
+                            onChange={e => setRegPhone(e.target.value)}
+                            placeholder="Ex: 912 345 678"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium"
+                          />
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Data de Nascimento
-                      </label>
-                      <div className="relative">
-                        <Calendar className="w-4 h-4 text-white absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
-                        <input
-                          type="date"
-                          value={regBirthDate}
-                          onChange={e => setRegBirthDate(e.target.value)}
-                          className="w-full pl-10 pr-2 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium [color-scheme:dark]"
-                        />
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                          Data de Nascimento
+                        </label>
+                        <div className="relative">
+                          <Calendar className="w-4 h-4 text-white absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
+                          <input
+                            type="date"
+                            value={regBirthDate}
+                            onChange={e => setRegBirthDate(e.target.value)}
+                            className="w-full pl-10 pr-2 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium [color-scheme:dark]"
+                          />
+                        </div>
                       </div>
-                    </div>
                     </div>
                   </div>
 

@@ -640,21 +640,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
               </div>
 
               {/* Teams Assigned */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-                <h4 className="font-bold text-slate-500 text-xs uppercase tracking-wider mb-2">
-                  Grupos de Treino / Escalões
-                </h4>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedCoach.assignedCategories.map((cat, i) => (
-                    <span
-                      key={i}
-                      className="px-2.5 py-1 bg-white text-teal-800 font-bold rounded-lg border border-teal-200 text-xs shadow-2xs"
-                    >
-                      {cat}
-                    </span>
-                  ))}
-                </div>
-              </div>
+
             </div>
 
             {/* Modal Actions */}
