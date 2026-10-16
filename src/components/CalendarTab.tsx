@@ -549,8 +549,8 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
               title="Abrir Regulamento Oficial em PDF noutro separador"
             >
               <FileText className="w-3.5 h-3.5 text-red-500" />
-              <span>Regulamento PDF</span>
-              <ExternalLink className="w-3 h-3 text-slate-400" />
+              <span>Regulamento</span>
+
             </button>
           )}
 
