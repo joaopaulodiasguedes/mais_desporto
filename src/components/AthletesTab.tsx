@@ -442,7 +442,7 @@ export const AthletesTab: React.FC = () => {
                   </p>
                   <p className="text-xs text-blue-100/90 pt-1 flex items-center gap-2">
                     <MapPin className="w-3.5 h-3.5 text-blue-300 shrink-0" />
-                    <span>{myAthleteProfile.address}</span>
+                    <span>{myAthleteProfile.address || 'Não indicada'}</span>
                   </p>
                 </div>
               </div>
@@ -590,7 +590,7 @@ export const AthletesTab: React.FC = () => {
 
                   <div className="flex items-center gap-2 truncate">
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{ath.address}</span>
+                    <span className="truncate">{ath.address || 'Sem morada'}</span>
                   </div>
 
                   <div className="flex items-center gap-2 truncate">
@@ -696,7 +696,7 @@ export const AthletesTab: React.FC = () => {
               <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2.5">
                 <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5 text-blue-600" />
-                  Dados Pessoais & Contactos
+                  Dados Pessoais
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
                   <div>
@@ -709,7 +709,7 @@ export const AthletesTab: React.FC = () => {
                   </div>
                   <div className="sm:col-span-2">
                     <span className="text-[11px] text-slate-400 block font-semibold">Morada de Residência:</span>
-                    <span className="font-medium text-slate-900">{selectedAthlete.address}</span>
+                    <span className="font-medium text-slate-900">{selectedAthlete.address || 'Não indicada'}</span>
                   </div>
                   <div className="sm:col-span-2">
                     <span className="text-[11px] text-slate-400 block font-semibold">E-mail:</span>
@@ -932,10 +932,11 @@ export const AthletesTab: React.FC = () => {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-xs font-bold text-slate-700 block mb-1">Morada Completa *</label>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    Morada Completa <span className="text-slate-400 font-normal">(Não obrigatório)</span>
+                  </label>
                   <input
                     type="text"
-                    required
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 font-medium"

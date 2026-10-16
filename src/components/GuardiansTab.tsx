@@ -16,7 +16,6 @@ import {
   CheckCircle2,
   Copy,
   FileText,
-  CreditCard,
   Search,
   Filter,
   ShieldCheck,
@@ -40,7 +39,6 @@ export interface GuardianRecord {
   email: string;
   phone: string;
   altPhone?: string;
-  nif?: string;
   address?: string;
   relation: string;
   profession?: string;
@@ -94,7 +92,6 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
     email: '',
     phone: '',
     altPhone: '',
-    nif: '',
     address: '',
     profession: '',
     notes: '',
@@ -110,7 +107,6 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
       email: '',
       phone: '',
       altPhone: '',
-      nif: '',
       address: '',
       profession: '',
       notes: '',
@@ -128,7 +124,6 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
       email: guardian.email || '',
       phone: guardian.phone || '',
       altPhone: guardian.altPhone || '',
-      nif: guardian.nif || '',
       address: guardian.address || '',
       profession: guardian.profession || '',
       notes: guardian.notes || '',
@@ -216,7 +211,6 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
         email: u.email || '',
         phone: u.phone || '',
         altPhone: u.altPhone || '',
-        nif: u.nif || '',
         address: u.address || '',
         relation,
         profession: u.profession || '',
@@ -265,7 +259,6 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
             email: ath.guardianEmail || '',
             phone: ath.guardianPhone || ath.emergencyContact || '',
             altPhone: ath.emergencyContact,
-            nif: (ath as any).guardianNif || '',
             address: ath.address || '',
             relation,
             profession: '',
@@ -570,33 +563,14 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                     </div>
                   </div>
 
-                  {/* Parentesco e NIF */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 block mb-1">
-                        Grau de Parentesco
-                      </label>
-                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-800 truncate">
-                        {activeGuardian.relation}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 block mb-1">
-                        NIF (Fiscal)
-                      </label>
-                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono font-bold text-slate-800">
-                        <span>{activeGuardian.nif || '—'}</span>
-                        {activeGuardian.nif && (
-                          <button
-                            type="button"
-                            onClick={() => copyToClipboard(activeGuardian.nif || '', 'NIF')}
-                            className="text-slate-400 hover:text-purple-600 p-0.5 cursor-pointer"
-                            title="Copiar NIF"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                          </button>
-                        )}
-                      </div>
+                  {/* Grau de Parentesco */}
+                  <div>
+                    <label className="text-xs font-bold text-slate-500 block mb-1">
+                      Grau de Parentesco
+                    </label>
+                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-800">
+                      <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0" />
+                      <span className="truncate">{activeGuardian.relation}</span>
                     </div>
                   </div>
 
@@ -1235,21 +1209,6 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
 
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">
-                    NIF (Número Fiscal)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.nif}
-                    onChange={(e) => setFormData({ ...formData, nif: e.target.value })}
-                    placeholder="9 dígitos fiscais"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono font-medium"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
                     Profissão / Ocupação
                   </label>
                   <input
@@ -1260,19 +1219,19 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                     className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="text-xs font-bold text-slate-700 block mb-1">
-                    Morada / Residência
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    placeholder="Rua, número e localidade"
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium"
-                  />
-                </div>
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">
+                  Morada / Residência
+                </label>
+                <input
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="Rua, número e localidade"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium"
+                />
               </div>
 
               {/* Atletas a Cargo (Vincular) */}

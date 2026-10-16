@@ -71,7 +71,7 @@ export interface Athlete {
   id: string;
   name: string;
   birthDate: string; // YYYY-MM-DD
-  address: string;
+  address?: string; // Morada Completa (não obrigatório)
   phone: string;
   email: string;
   photoUrl: string;

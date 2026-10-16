@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   Copy,
   FileText,
-  CreditCard,
   Users,
   ArrowLeft,
   Printer,
@@ -80,7 +79,6 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
         id: currentUser.id,
         name: cleanName || currentUser.name,
         relation: rel,
-        nif: currentUser.nif || '',
         phone: currentUser.phone || '',
         email: currentUser.email || '',
         altPhone: currentUser.altPhone || '',
@@ -115,7 +113,6 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
           id: matchedUser.id,
           name: cleanName || matchedUser.name,
           relation: rel,
-          nif: matchedUser.nif || '',
           phone: matchedUser.phone || currentAthlete.guardianPhone || '',
           email: matchedUser.email || currentAthlete.guardianEmail || '',
           altPhone: matchedUser.altPhone || currentAthlete.emergencyContact || '',
@@ -138,7 +135,6 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
         id: currentAthlete.guardianId || '',
         name: currentAthlete.guardianName || 'Encarregado de Educação',
         relation: rel || 'Encarregado de Educação',
-        nif: currentAthlete.guardianNif || currentAthlete.nif || '',
         phone: currentAthlete.guardianPhone || '',
         email: currentAthlete.guardianEmail || '',
         altPhone: currentAthlete.emergencyContact || '',
@@ -152,7 +148,6 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
     return {
       name: 'Encarregado de Educação',
       relation: 'Encarregado de Educação',
-      nif: '',
       phone: '',
       email: '',
       altPhone: '',
@@ -353,34 +348,6 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
                   )}
                 </div>
 
-                {/* NIF */}
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-500 font-medium flex items-center gap-1.5">
-                    <CreditCard className="w-3.5 h-3.5 text-purple-600" />
-                    NIF:
-                  </span>
-                  {guardianData.nif ? (
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono font-bold text-slate-800">
-                        {guardianData.nif}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(guardianData.nif, 'nif_card', 'NIF do Encarregado')}
-                        className="p-1 hover:bg-slate-200 rounded text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
-                        title="Copiar NIF"
-                      >
-                        {copiedKey === 'nif_card' ? (
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        ) : (
-                          <Copy className="w-3 h-3" />
-                        )}
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="text-slate-400 font-medium">—</span>
-                  )}
-                </div>
 
                 {/* Contacto Alternativo */}
                 {guardianData.altPhone && (
@@ -592,29 +559,6 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
                   <p className="font-extrabold text-purple-900">{guardianData.relation}</p>
                 </div>
 
-                {/* NIF */}
-                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] font-bold text-slate-400">
-                      NIF (Identificação Fiscal)
-                    </span>
-                    {guardianData.nif && (
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(guardianData.nif, 'nif_ficha', 'NIF')}
-                        className="text-slate-400 hover:text-purple-600 cursor-pointer"
-                        title="Copiar NIF"
-                      >
-                        {copiedKey === 'nif_ficha' ? (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        ) : (
-                          <Copy className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                  <p className="font-mono font-bold text-slate-900">{guardianData.nif || '—'}</p>
-                </div>
 
                 {/* Telemóvel Principal */}
                 <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
