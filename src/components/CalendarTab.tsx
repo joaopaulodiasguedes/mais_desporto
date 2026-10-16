@@ -234,7 +234,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
       });
 
     if (future.length > 0) {
-      return future.slice(0, 4);
+      return future.slice(0, 3);
     }
 
     // 2) Fallback: se não houver eventos futuros, mostra os mais recentes antes da data
@@ -996,12 +996,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                     <span>Painel Completo do Dia</span>
                   </button>
                 )}
-                <button
-                  onClick={() => setSelectedDay(null)}
-                  className="text-xs text-slate-500 hover:text-slate-800 underline font-medium cursor-pointer"
-                >
-                  Ver todos
-                </button>
+
               </div>
             </div>
           )}
@@ -1032,7 +1027,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
               <div>
                 <h3 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
                   <Clock className="w-4 h-4 text-blue-600" />
-                  <span>4 Próximos Eventos</span>
+                  <span>Próximos 3 Eventos</span>
                 </h3>
                 <p className="text-[11px] text-slate-400 font-medium">
                   {selectedDay
