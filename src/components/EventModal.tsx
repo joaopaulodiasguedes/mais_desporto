@@ -207,7 +207,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                     }`}
                 >
                   <Dumbbell className="w-4 h-4 text-blue-600" />
-                  <span className="text-[11px]">Treino Oficial</span>
+                  <span className="text-[11px]">Treino</span>
                 </button>
 
                 <button
@@ -219,7 +219,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                     }`}
                 >
                   <Trophy className="w-4 h-4 text-amber-600" />
-                  <span className="text-[11px]">Competição</span>
+                  <span className="text-[11px]">Prova</span>
                 </button>
 
                 <button
@@ -231,7 +231,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                     }`}
                 >
                   <CheckSquare className="w-4 h-4 text-teal-600" />
-                  <span className="text-[11px]">Tarefa Equipa</span>
+                  <span className="text-[11px]">Tarefa</span>
                 </button>
 
                 <button
