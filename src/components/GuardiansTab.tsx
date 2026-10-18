@@ -280,8 +280,8 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
     if (currentUser.role === 'encarregado' && allGuardians.length > 0) {
       const match = allGuardians.find(
         g => g.id === currentUser.id ||
-             (currentUser.email && g.email.toLowerCase() === currentUser.email.toLowerCase()) ||
-             (currentUser.name && g.name.toLowerCase() === currentUser.name.toLowerCase())
+          (currentUser.email && g.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+          (currentUser.name && g.name.toLowerCase() === currentUser.name.toLowerCase())
       );
       if (match) return match.id;
     }
@@ -292,8 +292,8 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
     if (currentUser.role === 'encarregado' && allGuardians.length > 0) {
       const match = allGuardians.find(
         g => g.id === currentUser.id ||
-             (currentUser.email && g.email.toLowerCase() === currentUser.email.toLowerCase()) ||
-             (currentUser.name && g.name.toLowerCase() === currentUser.name.toLowerCase())
+          (currentUser.email && g.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+          (currentUser.name && g.name.toLowerCase() === currentUser.name.toLowerCase())
       );
       if (match && selectedGuardianId !== match.id) {
         setSelectedGuardianId(match.id);
@@ -517,9 +517,7 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
 
               {/* Botões de Ação */}
               <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs text-purple-600 font-bold group-hover:underline flex items-center gap-1">
-                  Ver ficha &rarr;
-                </span>
+                <span className="text-[11px] text-slate-400 font-medium">Ver Ficha &rarr;</span>
 
                 <div className="flex items-center gap-1.5">
                   {(canManage || isCurrentUserThisGuardian(g)) && (
@@ -751,11 +749,10 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                       return (
                         <label
                           key={ath.id}
-                          className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all text-xs ${
-                            isChecked
-                              ? 'bg-purple-100/80 border border-purple-300 shadow-2xs'
-                              : 'bg-white hover:bg-slate-100 border border-slate-200'
-                          }`}
+                          className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-all text-xs ${isChecked
+                            ? 'bg-purple-100/80 border border-purple-300 shadow-2xs'
+                            : 'bg-white hover:bg-slate-100 border border-slate-200'
+                            }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <input
