@@ -169,6 +169,8 @@ export interface CalendarEvent {
   description?: string;
   officialPdfUrl?: string;
   registrationLink?: string; // Link de inscrição para o evento / prova
+  resultsUrl?: string; // Link / documento PDF com resultados oficiais da prova/evento
+  photosUrl?: string; // Link do álbum ou galeria de fotos do evento
   createdByRole: UserRole;
   creatorName: string;
   creatorId: string;

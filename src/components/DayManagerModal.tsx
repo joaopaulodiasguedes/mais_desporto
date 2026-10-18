@@ -26,7 +26,8 @@ import {
   Lock,
   Globe2,
   Check,
-  ExternalLink
+  ExternalLink,
+  Camera
 } from 'lucide-react';
 import { EventModal } from './EventModal';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
@@ -508,6 +509,42 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
                         >
                           <ExternalLink className="w-3.5 h-3.5 text-orange-600" />
                           <span>Link de Inscrição</span>
+                        </a>
+                      )}
+
+                      {/* Resultados */}
+                      {evt.resultsUrl && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (evt.resultsUrl!.toLowerCase().endsWith('.pdf')) {
+                              openOriginalDocument(evt.resultsUrl!, `${evt.title || 'Resultados'}.pdf`);
+                            } else {
+                              const url = evt.resultsUrl!.startsWith('http') ? evt.resultsUrl! : `https://${evt.resultsUrl!}`;
+                              window.open(url, '_blank', 'noopener,noreferrer');
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                          title="Ver resultados do evento num novo separador"
+                        >
+                          <Trophy className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Resultados</span>
+                          <ExternalLink className="w-3 h-3 text-amber-500" />
+                        </button>
+                      )}
+
+                      {/* Fotos */}
+                      {evt.photosUrl && (
+                        <a
+                          href={evt.photosUrl.startsWith('http') ? evt.photosUrl : `https://${evt.photosUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                          title="Ver fotos do evento num novo separador"
+                        >
+                          <Camera className="w-3.5 h-3.5 text-emerald-600" />
+                          <span>Fotos</span>
+                          <ExternalLink className="w-3 h-3 text-emerald-500" />
                         </a>
                       )}
                     </div>

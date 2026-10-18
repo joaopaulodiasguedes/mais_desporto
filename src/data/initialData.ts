@@ -580,6 +580,8 @@ export const INITIAL_CALENDAR_EVENTS: CalendarEvent[] = [
     description: 'Primeira prova oficial de apuramento para os Campeonatos Nacionais.',
     officialPdfUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
     registrationLink: 'https://fpnatacao.pt/inscricoes',
+    resultsUrl: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+    photosUrl: 'https://images.unsplash.com/photo-1530549387789-4c1017266635',
     createdByRole: 'treinador',
     creatorName: 'Prof. Carlos Silva',
     creatorId: 'user-coach-1',

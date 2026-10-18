@@ -247,6 +247,8 @@ export function mapCalendarEventFromDb(row: any): CalendarEvent {
     description: row.description || undefined,
     officialPdfUrl: row.official_pdf_url || undefined,
     registrationLink: row.registration_link || row.registrationLink || row.link_inscricao || undefined,
+    resultsUrl: row.results_url || row.resultsUrl || row.link_resultados || undefined,
+    photosUrl: row.photos_url || row.photosUrl || row.link_fotos || undefined,
     createdByRole: row.created_by_role || 'treinador',
     creatorName: row.creator_name || 'Treinador',
     creatorId: row.creator_id || 'user-coach-1',
@@ -269,6 +271,8 @@ export function mapCalendarEventToDb(evt: CalendarEvent): any {
     description: evt.description || null,
     official_pdf_url: evt.officialPdfUrl || null,
     registration_link: evt.registrationLink || null,
+    results_url: evt.resultsUrl || null,
+    photos_url: evt.photosUrl || null,
     created_by_role: evt.createdByRole,
     creator_name: evt.creatorName,
     creator_id: evt.creatorId,
@@ -1283,6 +1287,8 @@ export async function upsertCalendarEventInSupabase(evt: CalendarEvent): Promise
     let { error } = await client.from('calendar_events').upsert(row);
     if (error) {
       delete row.registration_link;
+      delete row.results_url;
+      delete row.photos_url;
       const retry = await client.from('calendar_events').upsert(row);
       if (!retry.error) {
         error = null;

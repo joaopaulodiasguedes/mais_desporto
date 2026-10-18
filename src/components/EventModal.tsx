@@ -15,7 +15,8 @@ import {
   CheckSquare,
   Lock,
   Globe2,
-  ExternalLink
+  ExternalLink,
+  Camera
 } from 'lucide-react';
 
 interface EventModalProps {
@@ -47,6 +48,8 @@ export const EventModal: React.FC<EventModalProps> = ({
   const [description, setDescription] = useState('');
   const [officialPdfUrl, setOfficialPdfUrl] = useState('');
   const [registrationLink, setRegistrationLink] = useState('');
+  const [resultsUrl, setResultsUrl] = useState('');
+  const [photosUrl, setPhotosUrl] = useState('');
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
 
   useEffect(() => {
@@ -61,6 +64,8 @@ export const EventModal: React.FC<EventModalProps> = ({
       setDescription(eventToEdit.description || '');
       setOfficialPdfUrl(eventToEdit.officialPdfUrl || '');
       setRegistrationLink(eventToEdit.registrationLink || '');
+      setResultsUrl(eventToEdit.resultsUrl || '');
+      setPhotosUrl(eventToEdit.photosUrl || '');
       setIsCompleted(eventToEdit.isCompleted || false);
     } else {
       setTitle('');
@@ -73,6 +78,8 @@ export const EventModal: React.FC<EventModalProps> = ({
       setDescription('');
       setOfficialPdfUrl('');
       setRegistrationLink('');
+      setResultsUrl('');
+      setPhotosUrl('');
       setIsCompleted(false);
     }
   }, [eventToEdit, defaultDate, defaultType, currentUser.role, isOpen]);
@@ -95,6 +102,8 @@ export const EventModal: React.FC<EventModalProps> = ({
         description: description.trim() || undefined,
         officialPdfUrl: officialPdfUrl.trim() || undefined,
         registrationLink: registrationLink.trim() || undefined,
+        resultsUrl: resultsUrl.trim() || undefined,
+        photosUrl: photosUrl.trim() || undefined,
         isCompleted: type === 'tarefa' ? isCompleted : undefined
       });
     } else {
@@ -109,6 +118,8 @@ export const EventModal: React.FC<EventModalProps> = ({
         description: description.trim() || undefined,
         officialPdfUrl: officialPdfUrl.trim() || undefined,
         registrationLink: registrationLink.trim() || undefined,
+        resultsUrl: resultsUrl.trim() || undefined,
+        photosUrl: photosUrl.trim() || undefined,
         createdByRole: currentUser.role,
         creatorName: currentUser.name,
         creatorId: currentUser.id,
@@ -380,9 +391,23 @@ export const EventModal: React.FC<EventModalProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Official PDF URL */}
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center gap-1">
-                <FileText className="w-3.5 h-3.5 text-slate-400" />
-                Documento Oficial (PDF)
+              <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5 text-slate-400" />
+                  Documento Oficial (PDF)
+                </span>
+                {officialPdfUrl && (
+                  <a
+                    href={officialPdfUrl.startsWith('http') ? officialPdfUrl : `https://${officialPdfUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-orange-600 hover:text-orange-700 font-bold flex items-center gap-0.5"
+                    title="Testar link do documento"
+                  >
+                    <span>Testar</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                )}
               </label>
               <input
                 type="url"
@@ -395,9 +420,23 @@ export const EventModal: React.FC<EventModalProps> = ({
 
             {/* Registration Link */}
             <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center gap-1">
-                <ExternalLink className="w-3.5 h-3.5 text-orange-600" />
-                Link da Inscrição <span className="text-slate-400 font-normal">(Opcional)</span>
+              <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <ExternalLink className="w-3.5 h-3.5 text-orange-600" />
+                  Link da Inscrição <span className="text-slate-400 font-normal">(Opcional)</span>
+                </span>
+                {registrationLink && (
+                  <a
+                    href={registrationLink.startsWith('http') ? registrationLink : `https://${registrationLink}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-orange-600 hover:text-orange-700 font-bold flex items-center gap-0.5"
+                    title="Testar link de inscrição"
+                  >
+                    <span>Testar</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                )}
               </label>
               <input
                 type="url"
@@ -405,6 +444,67 @@ export const EventModal: React.FC<EventModalProps> = ({
                 onChange={(e) => setRegistrationLink(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500 font-medium text-xs"
                 placeholder="https://fpnatacao.pt ou Google Forms"
+              />
+            </div>
+          </div>
+
+          {/* Results and Photos Links */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Results URL */}
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                  Resultados <span className="text-slate-400 font-normal">(Link / PDF)</span>
+                </span>
+                {resultsUrl && (
+                  <a
+                    href={resultsUrl.startsWith('http') ? resultsUrl : `https://${resultsUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-amber-600 hover:text-amber-700 font-bold flex items-center gap-0.5"
+                    title="Testar link dos resultados"
+                  >
+                    <span>Testar</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                )}
+              </label>
+              <input
+                type="url"
+                value={resultsUrl}
+                onChange={(e) => setResultsUrl(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500 font-medium text-xs"
+                placeholder="https://exemplo.com/resultados.pdf ou link"
+              />
+            </div>
+
+            {/* Photos Album URL */}
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1 flex items-center justify-between">
+                <span className="flex items-center gap-1">
+                  <Camera className="w-3.5 h-3.5 text-emerald-600" />
+                  Fotos <span className="text-slate-400 font-normal">(Álbum / Galeria)</span>
+                </span>
+                {photosUrl && (
+                  <a
+                    href={photosUrl.startsWith('http') ? photosUrl : `https://${photosUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-0.5"
+                    title="Testar link das fotos"
+                  >
+                    <span>Testar</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                )}
+              </label>
+              <input
+                type="url"
+                value={photosUrl}
+                onChange={(e) => setPhotosUrl(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500 font-medium text-xs"
+                placeholder="https://photos.app.goo.gl/... ou Drive"
               />
             </div>
           </div>

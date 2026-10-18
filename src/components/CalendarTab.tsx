@@ -26,7 +26,8 @@ import {
   CheckSquare,
   Lock,
   Globe2,
-  ExternalLink
+  ExternalLink,
+  Camera
 } from 'lucide-react';
 import { CalendarEvent } from '../types';
 import { DayManagerModal } from './DayManagerModal';
@@ -574,6 +575,41 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             >
               <ExternalLink className="w-3.5 h-3.5 text-orange-600" />
               <span>Inscrição</span>
+            </a>
+          )}
+
+          {/* Resultados */}
+          {evt.resultsUrl && (
+            <button
+              onClick={() => {
+                if (evt.resultsUrl!.toLowerCase().endsWith('.pdf')) {
+                  openOriginalDocument(evt.resultsUrl!, `${evt.title || 'Resultados'}.pdf`);
+                } else {
+                  const url = evt.resultsUrl!.startsWith('http') ? evt.resultsUrl! : `https://${evt.resultsUrl!}`;
+                  window.open(url, '_blank', 'noopener,noreferrer');
+                }
+              }}
+              className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="Ver resultados oficiais do evento"
+            >
+              <Trophy className="w-3.5 h-3.5 text-amber-600" />
+              <span>Resultados</span>
+              <ExternalLink className="w-3 h-3 text-amber-500" />
+            </button>
+          )}
+
+          {/* Fotos */}
+          {evt.photosUrl && (
+            <a
+              href={evt.photosUrl.startsWith('http') ? evt.photosUrl : `https://${evt.photosUrl}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="Ver fotos / álbum do evento"
+            >
+              <Camera className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Fotos</span>
+              <ExternalLink className="w-3 h-3 text-emerald-500" />
             </a>
           )}
 
