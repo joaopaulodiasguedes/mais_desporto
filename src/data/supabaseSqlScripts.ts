@@ -374,6 +374,8 @@ ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS rsvps JSONB DEFAULT 
 ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS target_categories TEXT[] DEFAULT '{}';
 ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS registration_link TEXT;
+ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS results_url TEXT;
+ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS photos_url TEXT;
 
 -- 3.7 competition_results: Evento associado, PDF de classificações, pódios, recordes e fotos
 ALTER TABLE public.competition_results ADD COLUMN IF NOT EXISTS event_id TEXT;
