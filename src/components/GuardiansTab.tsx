@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Athlete, UserProfile } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
-import { formatBirthDate } from '../utils/athleteRules';
+import { formatBirthDate, formatShortName } from '../utils/athleteRules';
 import {
   Contact,
   Users,
@@ -81,6 +81,7 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
   // Modal and CRUD state
+  const [selectedGuardian, setSelectedGuardian] = useState<GuardianRecord | null>(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingGuardian, setEditingGuardian] = useState<GuardianRecord | null>(null);
   const [guardianToDelete, setGuardianToDelete] = useState<GuardianRecord | null>(null);
@@ -421,7 +422,8 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
           {filteredGuardians.map((g) => (
             <div
               key={g.id}
-              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+              onClick={() => setSelectedGuardian(g)}
+              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-2xs hover:shadow-md hover:border-purple-300 transition-all flex flex-col justify-between space-y-4 cursor-pointer group"
             >
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-2">
@@ -439,8 +441,8 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                       </div>
                     )}
                     <div>
-                      <h4 className="font-extrabold text-slate-900 text-sm leading-tight">
-                        {g.name}
+                      <h4 className="font-extrabold text-slate-900 text-sm leading-tight group-hover:text-purple-700 transition-colors">
+                        {formatShortName(g.name)}
                       </h4>
                       <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md inline-block mt-0.5">
                         {g.relation}
@@ -458,6 +460,7 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                     </span>
                     <a
                       href={`tel:${g.phone}`}
+                      onClick={(e) => e.stopPropagation()}
                       className="font-bold text-slate-800 hover:text-emerald-600 truncate ml-2"
                     >
                       {g.phone}
@@ -471,6 +474,7 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                     </span>
                     <a
                       href={`mailto:${g.email}`}
+                      onClick={(e) => e.stopPropagation()}
                       className="font-bold text-slate-800 hover:text-blue-600 truncate max-w-[170px] text-right"
                     >
                       {g.email}
@@ -497,7 +501,7 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                               className="w-6 h-6 rounded-lg object-cover ring-1 ring-slate-200 shrink-0"
                               referrerPolicy="no-referrer"
                             />
-                            <span className="font-bold text-slate-800 truncate">{ath.name}</span>
+                            <span className="font-bold text-slate-800 truncate">{formatShortName(ath.name)}</span>
                           </div>
                           <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded shrink-0">
                             {ath.category}
@@ -512,27 +516,39 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
               </div>
 
               {/* Botões de Ação */}
-              <div className="pt-3 border-t border-slate-100 flex items-center gap-2">
-                {(canManage || isCurrentUserThisGuardian(g)) && (
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEdit(g)}
-                    className="p-2 rounded-xl bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-700 transition-colors cursor-pointer"
-                    title="Editar Encarregado"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
-                {canManage && (
-                  <button
-                    type="button"
-                    onClick={() => setGuardianToDelete(g)}
-                    className="p-2 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-600 transition-colors cursor-pointer"
-                    title="Eliminar Encarregado"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                )}
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-xs text-purple-600 font-bold group-hover:underline flex items-center gap-1">
+                  Ver ficha &rarr;
+                </span>
+
+                <div className="flex items-center gap-1.5">
+                  {(canManage || isCurrentUserThisGuardian(g)) && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenEdit(g);
+                      }}
+                      className="p-2 rounded-xl bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-700 transition-colors cursor-pointer"
+                      title="Editar Encarregado"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  {canManage && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setGuardianToDelete(g);
+                      }}
+                      className="p-2 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-600 transition-colors cursor-pointer"
+                      title="Eliminar Encarregado"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -809,6 +825,194 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Ficha Detalhada do Encarregado de Educação */}
+      {selectedGuardian && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 animate-in zoom-in-95">
+            {/* Modal Header */}
+            <div className="flex items-start justify-between border-b border-slate-100 pb-4 mb-4">
+              <div className="flex items-center gap-3">
+                {selectedGuardian.avatarUrl ? (
+                  <img
+                    src={selectedGuardian.avatarUrl}
+                    alt={selectedGuardian.name}
+                    className="w-16 h-16 rounded-2xl object-cover ring-2 ring-purple-500/30 shadow-md bg-purple-50"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-black text-xl shadow-md">
+                    {selectedGuardian.name.slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-extrabold text-lg text-slate-900">
+                      {formatShortName(selectedGuardian.name)}
+                    </h3>
+                    <span className="px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 text-xs font-bold border border-purple-200">
+                      {selectedGuardian.relation}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    {selectedGuardian.profession ? `Profissão: ${selectedGuardian.profession}` : 'Encarregado de Educação Registado'}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedGuardian(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="space-y-4 text-xs sm:text-sm">
+              {/* Contact Info */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2.5">
+                <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                  <Contact className="w-3.5 h-3.5 text-purple-600" />
+                  Dados de Contacto
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
+                  <div>
+                    <span className="text-[11px] text-slate-400 block font-semibold">Telemóvel Principal:</span>
+                    <a
+                      href={`tel:${selectedGuardian.phone}`}
+                      className="font-bold text-emerald-600 hover:underline flex items-center gap-1"
+                    >
+                      <Phone className="w-3 h-3" />
+                      {selectedGuardian.phone}
+                    </a>
+                  </div>
+                  <div>
+                    <span className="text-[11px] text-slate-400 block font-semibold">Telemóvel Alternativo:</span>
+                    <span className="font-medium text-slate-900">
+                      {selectedGuardian.altPhone ? (
+                        <a href={`tel:${selectedGuardian.altPhone}`} className="hover:underline text-emerald-600 font-bold">
+                          {selectedGuardian.altPhone}
+                        </a>
+                      ) : (
+                        'Não indicado'
+                      )}
+                    </span>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <span className="text-[11px] text-slate-400 block font-semibold">E-mail:</span>
+                    <a
+                      href={`mailto:${selectedGuardian.email}`}
+                      className="font-bold text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      <Mail className="w-3 h-3" />
+                      {selectedGuardian.email}
+                    </a>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <span className="text-[11px] text-slate-400 block font-semibold">Morada:</span>
+                    <span className="font-medium text-slate-900">{selectedGuardian.address || 'Não indicada'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Atletas a Cargo */}
+              <div className="p-3.5 rounded-2xl bg-purple-50/50 border border-purple-100 space-y-2.5">
+                <h4 className="font-bold text-purple-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-purple-600" />
+                  Atletas a Cargo ({selectedGuardian.athletes.length})
+                </h4>
+                {selectedGuardian.athletes.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedGuardian.athletes.map((ath) => (
+                      <div
+                        key={ath.id}
+                        className="p-3 rounded-xl bg-white border border-purple-200/60 shadow-2xs flex items-center justify-between gap-3"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <img
+                            src={ath.photoUrl}
+                            alt={ath.name}
+                            className="w-10 h-10 rounded-xl object-cover ring-2 ring-purple-100 shrink-0"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="min-w-0">
+                            <h5 className="font-extrabold text-slate-900 text-xs sm:text-sm truncate">
+                              {formatShortName(ath.name)}
+                            </h5>
+                            <p className="text-[11px] text-slate-500 font-medium">
+                              Nasc: {formatBirthDate(ath.birthDate)} {ath.federationNumber ? `• Nº Fed: ${ath.federationNumber}` : ''}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 text-[11px] font-bold border border-teal-200 shrink-0">
+                          {ath.category}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500 italic">Sem atletas registados a cargo deste encarregado.</p>
+                )}
+              </div>
+
+              {/* Observações / Notas */}
+              {selectedGuardian.notes && (
+                <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-100 space-y-1">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800 block">
+                    Observações / Notas:
+                  </span>
+                  <p className="text-xs text-amber-950 leading-relaxed font-medium">
+                    {selectedGuardian.notes}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-5 mt-5 border-t border-slate-100 flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setSelectedGuardian(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
+              >
+                Fechar
+              </button>
+
+              <div className="flex items-center gap-2">
+                {(canManage || isCurrentUserThisGuardian(selectedGuardian)) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const g = selectedGuardian;
+                      setSelectedGuardian(null);
+                      handleOpenEdit(g);
+                    }}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Editar Ficha</span>
+                  </button>
+                )}
+                {canManage && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const g = selectedGuardian;
+                      setSelectedGuardian(null);
+                      setGuardianToDelete(g);
+                    }}
+                    className="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Eliminar</span>
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -24,6 +24,7 @@ import {
 import { TrainingPlan, ExerciseBlock, Athlete } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { AthleteTrainingCalendarView } from './AthleteTrainingCalendarView';
+import { formatShortName } from '../utils/athleteRules';
 
 export const TrainingPlansTab: React.FC = () => {
   const {
@@ -759,7 +760,7 @@ export const TrainingPlansTab: React.FC = () => {
                 Os Teus Treinos Individuais
               </span>
               <span className="text-xs font-bold text-slate-700">
-                {currentAthleteProfile?.name || currentUser.name}
+                {formatShortName(currentAthleteProfile?.name || currentUser.name)}
               </span>
             </div>
             <p className="text-xs text-indigo-950 mt-1">
@@ -784,7 +785,7 @@ export const TrainingPlansTab: React.FC = () => {
                   </span>
                   {activeSelectedAthlete && (
                     <span className="text-xs font-bold text-slate-800">
-                      Plano de Treino: {activeSelectedAthlete.name} ({activeSelectedAthlete.category})
+                      Plano de Treino: {formatShortName(activeSelectedAthlete.name)} ({activeSelectedAthlete.category})
                     </span>
                   )}
                 </div>
@@ -820,7 +821,7 @@ export const TrainingPlansTab: React.FC = () => {
                       ) : (
                         <User className="w-3.5 h-3.5" />
                       )}
-                      <span>{ath.name}</span>
+                      <span>{formatShortName(ath.name)}</span>
                     </button>
                   );
                 })}
@@ -905,7 +906,7 @@ export const TrainingPlansTab: React.FC = () => {
                       {ath.name.charAt(0)}
                     </div>
                   )}
-                  <span>{ath.name}</span>
+                  <span>{formatShortName(ath.name)}</span>
                   <span
                     className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${isSelected
                       ? 'bg-indigo-700 text-white'
@@ -996,6 +997,7 @@ export const TrainingPlansTab: React.FC = () => {
                     plans={plansForCurrentFilter}
                     onOpenAddPlan={(defaultDate) => handleOpenAddPlan(targetAthlete.id, defaultDate)}
                     onEditPlan={handleOpenEditPlan}
+                    onDeletePlan={(plan) => setPlanToDelete(plan)}
                     canManagePlans={canCreate}
                   />
                 ) : plansForCurrentFilter.length > 0 ? (
@@ -1014,9 +1016,9 @@ export const TrainingPlansTab: React.FC = () => {
                     </h3>
                     <p className="text-xs text-slate-500 max-w-md mx-auto">
                       {currentUser.role === 'encarregado'
-                        ? `O treinador ainda não prescreveu planos de treino para ${targetAthlete?.name || 'o seu educando'}.`
+                        ? `O treinador ainda não prescreveu planos de treino para ${targetAthlete ? formatShortName(targetAthlete.name) : 'o seu educando'}.`
                         : targetAthlete
-                          ? `Prescreva um plano de treino personalizado com séries, descansos e intensidades para ${targetAthlete.name}.`
+                          ? `Prescreva um plano de treino personalizado com séries, descansos e intensidades para ${formatShortName(targetAthlete.name)}.`
                           : 'Ainda não tens planos de treino atribuídos.'}
                     </p>
                     {canCreate && targetAthlete && (
@@ -1025,7 +1027,7 @@ export const TrainingPlansTab: React.FC = () => {
                         className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs inline-flex items-center gap-1.5 transition-all cursor-pointer"
                       >
                         <Plus className="w-4 h-4" />
-                        <span>Prescrever 1º Treino para {targetAthlete.name}</span>
+                        <span>Prescrever 1º Treino para {formatShortName(targetAthlete.name)}</span>
                       </button>
                     )}
                   </div>
@@ -1059,7 +1061,7 @@ export const TrainingPlansTab: React.FC = () => {
                   )}
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-extrabold text-slate-900 text-sm">{athlete.name}</h3>
+                      <h3 className="font-extrabold text-slate-900 text-sm">{formatShortName(athlete.name)}</h3>
                       <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[11px] font-bold">
                         {athlete.category}
                       </span>
@@ -1142,7 +1144,7 @@ export const TrainingPlansTab: React.FC = () => {
                     title={`Prescrever primeiro treino para ${ath.name}`}
                   >
                     <Plus className="w-3.5 h-3.5 text-indigo-500" />
-                    <span>{ath.name}</span>
+                    <span>{formatShortName(ath.name)}</span>
                     <span className="text-[10px] text-slate-400 font-normal">({ath.category})</span>
                   </button>
                 ))}
@@ -1194,7 +1196,7 @@ export const TrainingPlansTab: React.FC = () => {
                           ) : (
                             <User className="w-3.5 h-3.5 text-indigo-600" />
                           )}
-                          <span>Atleta: {ath.name}</span>
+                          <span>Atleta: {formatShortName(ath.name)}</span>
                           <span className="text-[10px] text-indigo-500 font-normal">({ath.category})</span>
                         </span>
                       ))
@@ -1303,17 +1305,30 @@ export const TrainingPlansTab: React.FC = () => {
                   Fechar
                 </button>
                 {canCreate && (
-                  <button
-                    onClick={() => {
-                      const p = selectedPlan;
-                      setSelectedPlan(null);
-                      handleOpenEditPlan(p);
-                    }}
-                    className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <Edit2 className="w-3.5 h-3.5" />
-                    <span>Editar Plano</span>
-                  </button>
+                  <>
+                    <button
+                      onClick={() => {
+                        const p = selectedPlan;
+                        setSelectedPlan(null);
+                        handleOpenEditPlan(p);
+                      }}
+                      className="px-3.5 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Alterar Plano</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const p = selectedPlan;
+                        setSelectedPlan(null);
+                        setPlanToDelete(p);
+                      }}
+                      className="px-3.5 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Eliminar Plano</span>
+                    </button>
+                  </>
                 )}
               </div>
 
@@ -1508,7 +1523,7 @@ export const TrainingPlansTab: React.FC = () => {
                           </div>
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="truncate font-bold leading-tight">{ath.name}</p>
+                          <p className="truncate font-bold leading-tight">{formatShortName(ath.name)}</p>
                           <p
                             className={`text-[10px] truncate leading-tight ${isSelected ? 'text-indigo-100' : 'text-slate-400'
                               }`}
@@ -1801,21 +1816,40 @@ export const TrainingPlansTab: React.FC = () => {
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold transition-colors cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Check className="w-4 h-4" />
-                  {editingPlan ? 'Guardar Alterações do Plano' : 'Prescrever Plano de Treino'}
-                </button>
+              <div className="flex items-center justify-between gap-2 pt-3 border-t border-slate-100">
+                {editingPlan ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const toDelete = editingPlan;
+                      setIsAddModalOpen(false);
+                      setPlanToDelete(toDelete);
+                    }}
+                    className="px-3.5 py-2 text-red-600 hover:bg-red-50 rounded-xl font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="Eliminar este plano de treino"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Eliminar Plano</span>
+                  </button>
+                ) : (
+                  <div />
+                )}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(false)}
+                    className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold transition-colors cursor-pointer"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-xs transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Check className="w-4 h-4" />
+                    {editingPlan ? 'Guardar Alterações do Plano' : 'Prescrever Plano de Treino'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

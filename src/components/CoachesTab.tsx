@@ -30,7 +30,7 @@ import { Coach } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { CategoriesManagement } from './CategoriesManagement';
 import { PendingApprovalsManagement } from './PendingApprovalsManagement';
-import { formatBirthDate } from '../utils/athleteRules';
+import { formatBirthDate, formatShortName } from '../utils/athleteRules';
 
 interface CoachesTabProps {
   onOpenPdf?: (title: string, url: string) => void;
@@ -365,7 +365,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 justify-between">
                         <h3 className="font-bold text-slate-900 text-sm group-hover:text-teal-700 transition-colors truncate">
-                          {coach.name}
+                          {formatShortName(coach.name)}
                         </h3>
                         {coach.isAdmin && (
                           <span className="px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-[9px] font-black border border-amber-200 shrink-0 flex items-center gap-1">
@@ -454,7 +454,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                   referrerPolicy="no-referrer"
                 />
                 <div>
-                  <h3 className="font-extrabold text-lg text-slate-900">{selectedCoach.name}</h3>
+                  <h3 className="font-extrabold text-lg text-slate-900">{formatShortName(selectedCoach.name)}</h3>
                   <span className="px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 text-xs font-bold border border-teal-200 inline-block">
                     {selectedCoach.licenseGrade}
                   </span>

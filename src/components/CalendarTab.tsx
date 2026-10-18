@@ -594,7 +594,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             >
               <Trophy className="w-3.5 h-3.5 text-amber-600" />
               <span>Resultados</span>
-              <ExternalLink className="w-3 h-3 text-amber-500" />
+
             </button>
           )}
 
@@ -609,7 +609,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             >
               <Camera className="w-3.5 h-3.5 text-emerald-600" />
               <span>Fotos</span>
-              <ExternalLink className="w-3 h-3 text-emerald-500" />
+
             </a>
           )}
 

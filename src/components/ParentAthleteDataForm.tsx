@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useApp, getLinkedAthletesForGuardian } from '../context/AppContext';
 import { Athlete } from '../types';
-import { calculateMedicalStatus, formatBirthDate } from '../utils/athleteRules';
+import { calculateMedicalStatus, formatBirthDate, formatShortName } from '../utils/athleteRules';
 import {
   User,
   Shield,
@@ -266,7 +266,7 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
                 )}
               </div>
               <h2 className="text-lg font-extrabold tracking-tight">
-                {guardianData.name} & {currentAthlete.name}
+                {formatShortName(guardianData.name)} & {formatShortName(currentAthlete.name)}
               </h2>
               <p className="text-xs text-purple-200">
                 {guardianData.relation} • Ficha individual e acompanhamento desportivo
@@ -297,7 +297,7 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
                       Encarregado(a) de Educação
                     </span>
                     <h4 className="font-extrabold text-slate-900 text-base leading-tight">
-                      {guardianData.name}
+                      {formatShortName(guardianData.name)}
                     </h4>
                     <span className="text-xs font-bold text-slate-500">
                       Grau: <span className="text-purple-700">{guardianData.relation}</span>
@@ -374,7 +374,7 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
                       Atleta a Cargo / Educando
                     </span>
                     <h4 className="font-extrabold text-slate-900 text-base leading-tight">
-                      {currentAthlete.name}
+                      {formatShortName(currentAthlete.name)}
                     </h4>
                     <span className="text-xs font-bold text-slate-500">
                       Licença: <span className="font-mono text-slate-700">{currentAthlete.federationNumber || 'Pendente'}</span>
@@ -528,7 +528,7 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
                       Encarregado de Educação
                     </span>
                     <h3 className="font-extrabold text-slate-900 text-lg leading-tight">
-                      {guardianData.name}
+                      {formatShortName(guardianData.name)}
                     </h3>
                     <p className="text-xs text-slate-500 font-medium">
                       Grau: <span className="font-bold text-purple-700">{guardianData.relation}</span>

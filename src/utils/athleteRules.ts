@@ -182,3 +182,40 @@ export function formatBirthDate(dateStr?: string): string {
   return clean;
 }
 
+/**
+ * Devolve apenas o primeiro e o último nome de uma pessoa.
+ * Exemplos:
+ *   "João Pedro da Silva" -> "João Silva"
+ *   "Maria Ferreira" -> "Maria Ferreira"
+ *   "Prof. Carlos Silva" -> "Prof. Carlos Silva"
+ *   "António Santos (Pai de Tomás)" -> "António Santos (Pai de Tomás)"
+ */
+export function formatShortName(fullName?: string): string {
+  if (!fullName || !fullName.trim()) return '';
+  const trimmed = fullName.trim();
+
+  // Tratamento de sufixos em parênteses como " (Pai de Tomás)" ou " (Atleta)"
+  const parenMatch = trimmed.match(/^(.*?)\s*(\([^)]+\))$/);
+  if (parenMatch) {
+    const baseName = parenMatch[1].trim();
+    const suffix = parenMatch[2];
+    const parts = baseName.split(/\s+/).filter(Boolean);
+    if (parts.length <= 2) return `${baseName} ${suffix}`.trim();
+    return `${parts[0]} ${parts[parts.length - 1]} ${suffix}`;
+  }
+
+  // Preserva títulos/prefixos como "Prof. ", "Treinador "
+  let prefix = '';
+  let nameWithoutPrefix = trimmed;
+  const prefixMatch = trimmed.match(/^(Prof\.\s+|Treinador\s+)/i);
+  if (prefixMatch) {
+    prefix = prefixMatch[1];
+    nameWithoutPrefix = trimmed.slice(prefix.length).trim();
+  }
+
+  const parts = nameWithoutPrefix.split(/\s+/).filter(Boolean);
+  if (parts.length <= 2) return `${prefix}${nameWithoutPrefix}`.trim();
+  return `${prefix}${parts[0]} ${parts[parts.length - 1]}`.trim();
+}
+
+

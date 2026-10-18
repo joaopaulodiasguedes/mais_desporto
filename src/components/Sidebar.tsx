@@ -88,12 +88,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: CalendarDays,
           badge: null
         },
-        {
-          id: 'resultados',
-          label: 'Resultados',
-          icon: Trophy,
-          badge: null
-        },
+        //        {
+        //          id: 'resultados',
+        //          label: 'Resultados',
+        //          icon: Trophy,
+        //          badge: null
+        //        },
         {
           id: 'pais',
           label: 'Área dos Enc.',

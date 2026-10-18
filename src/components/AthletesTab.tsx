@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { Athlete, NotificationItem } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
-import { calculateMedicalStatus, determineAgeCategory, formatBirthDate } from '../utils/athleteRules';
+import { calculateMedicalStatus, determineAgeCategory, formatBirthDate, formatShortName } from '../utils/athleteRules';
 
 export const AthletesTab: React.FC = () => {
   const {
@@ -69,7 +69,7 @@ export const AthletesTab: React.FC = () => {
 
   const applyDirectTemplate = (preset: 'convocatoria' | 'feedback' | 'exame' | 'treino') => {
     if (!athleteForDirectNotif) return;
-    const name = athleteForDirectNotif.name;
+    const name = formatShortName(athleteForDirectNotif.name);
     if (preset === 'convocatoria') {
       setNotifTitle(`Convocatória Oficial: ${name}`);
       setNotifType('convocatoria');
@@ -435,7 +435,7 @@ export const AthletesTab: React.FC = () => {
                     </span>
                   </div>
                   <h3 className="text-xl font-extrabold tracking-tight text-white">
-                    {myAthleteProfile.name}
+                    {formatShortName(myAthleteProfile.name)}
                   </h3>
                   <p className="text-xs text-blue-200/80 font-mono">
                     Nº Federado: {myAthleteProfile.federationNumber} • Assiduidade: <span className="font-bold text-emerald-300">{myAthleteProfile.attendanceRate}%</span>
@@ -556,7 +556,7 @@ export const AthletesTab: React.FC = () => {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-1">
                       <h3 className="font-bold text-slate-900 text-sm truncate group-hover:text-blue-600 transition-colors">
-                        {ath.name}
+                        {formatShortName(ath.name)}
                       </h3>
                       {isMine && (
                         <span className="shrink-0 px-2 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-extrabold shadow-2xs">
@@ -664,7 +664,7 @@ export const AthletesTab: React.FC = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-extrabold text-lg text-slate-900">
-                      {selectedAthlete.name}
+                      {formatShortName(selectedAthlete.name)}
                     </h3>
                     {selectedAthlete.category === 'Em Análise' ? (
                       <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold inline-flex items-center gap-1">
@@ -727,7 +727,7 @@ export const AthletesTab: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-700">
                   <div>
                     <span className="text-[11px] text-slate-400 block font-semibold">Nome do Encarregado:</span>
-                    <span className="font-bold text-slate-900">{selectedAthlete.guardianName}</span>
+                    <span className="font-bold text-slate-900">{formatShortName(selectedAthlete.guardianName)}</span>
                   </div>
                   <div>
                     <span className="text-[11px] text-slate-400 block font-semibold">Telefone Encarregado:</span>

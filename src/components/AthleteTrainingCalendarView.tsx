@@ -21,16 +21,19 @@ import {
   Tag,
   ArrowRight,
   TrendingUp,
-  MessageSquare,
-  Activity
+  Activity,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { TrainingPlan, TrainingPlanCompletion, Athlete } from '../types';
+import { formatShortName } from '../utils/athleteRules';
 
 interface AthleteTrainingCalendarViewProps {
   athlete: Athlete;
   plans: TrainingPlan[];
   onOpenAddPlan?: (defaultDate?: string) => void;
   onEditPlan?: (plan: TrainingPlan) => void;
+  onDeletePlan?: (plan: TrainingPlan) => void;
   canManagePlans?: boolean;
 }
 
@@ -46,6 +49,7 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
   plans,
   onOpenAddPlan,
   onEditPlan,
+  onDeletePlan,
   canManagePlans = false
 }) => {
   const {
@@ -191,8 +195,17 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
     return getPlansForDate(selectedDate);
   }, [selectedDate, athletePlans]);
 
+  // Selected workout plan ID when multiple plans exist on the same day
+  const [selectedPlanId, setSelectedPlanId] = useState<string>('');
+
   // Selected workout plan to focus on for this day (defaults to first plan if multiple)
-  const activePlan = plansForSelectedDate[0] || null;
+  const activePlan = useMemo(() => {
+    if (selectedPlanId) {
+      const found = plansForSelectedDate.find((p) => p.id === selectedPlanId);
+      if (found) return found;
+    }
+    return plansForSelectedDate[0] || null;
+  }, [plansForSelectedDate, selectedPlanId]);
 
   // Completion for the active plan on selected day
   const activeCompletion = useMemo(() => {
@@ -347,7 +360,7 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
                 </span>
               </div>
               <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mt-0.5">
-                {athlete.name}
+                {formatShortName(athlete.name)}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
                 Nº Federado: <span className="font-semibold text-slate-700">{athlete.federationNumber}</span> • Acompanhamento diário e registo de esforço
@@ -648,6 +661,31 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
           {/* Case A: A workout plan exists for this day */}
           {activePlan ? (
             <div className="space-y-5 animate-in fade-in duration-150">
+              {/* Day workouts selector if more than 1 plan scheduled */}
+              {plansForSelectedDate.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+                  <span className="text-xs font-bold text-slate-500 whitespace-nowrap">Treinos do dia:</span>
+                  {plansForSelectedDate.map((p, idx) => {
+                    const isCur = activePlan?.id === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelectedPlanId(p.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                          isCur
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
+                        }`}
+                      >
+                        <Dumbbell className="w-3.5 h-3.5" />
+                        <span>Treino {idx + 1}: {p.title}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {/* Plan Title & Metadata Card */}
               <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/40 border border-slate-200 space-y-3">
                 <div className="flex items-start justify-between gap-3">
@@ -705,6 +743,30 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
                     Prescrito por: <span className="font-bold text-slate-800">{activePlan.createdByCoachName}</span>
                   </span>
                 </div>
+
+                {/* Actions: Alterar e Eliminar Plano (para treinadores e gestores) */}
+                {canManagePlans && (
+                  <div className="flex items-center justify-end gap-2 pt-2.5 border-t border-slate-200/80">
+                    <button
+                      type="button"
+                      onClick={() => onEditPlan?.(activePlan)}
+                      className="px-3.5 py-1.5 bg-white hover:bg-indigo-50 text-indigo-700 border border-slate-200 hover:border-indigo-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
+                      title="Alterar/Editar este plano de treino"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Alterar Plano</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDeletePlan?.(activePlan)}
+                      className="px-3.5 py-1.5 bg-white hover:bg-rose-50 text-rose-700 border border-slate-200 hover:border-rose-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
+                      title="Eliminar este plano de treino"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Eliminar Plano</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* =========================================================
