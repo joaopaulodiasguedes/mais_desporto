@@ -367,7 +367,7 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Pesquisar encarregado ou atleta..."
+              placeholder="Pesquisar por encarregado / atleta"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium bg-slate-50 focus:bg-white"
@@ -381,7 +381,7 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
               className="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all active:scale-95 whitespace-nowrap cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>Novo Encarregado</span>
+              <span>Novo</span>
             </button>
           )}
         </div>

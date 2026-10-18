@@ -385,7 +385,7 @@ export const AthletesTab: React.FC = () => {
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Pesquisar por nome ou nº federado..."
+              placeholder="Pesquisar por nome / nº federado"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
@@ -399,7 +399,7 @@ export const AthletesTab: React.FC = () => {
               className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all active:scale-95 whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
-              <span>Novo Atleta</span>
+              <span>Novo</span>
             </button>
           )}
         </div>

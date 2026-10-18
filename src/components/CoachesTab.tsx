@@ -283,7 +283,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
               className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all active:scale-95 whitespace-nowrap cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              <span>Novo Treinador</span>
+              <span>Novo</span>
             </button>
           )}
         </div>

@@ -443,7 +443,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                 value={registrationLink}
                 onChange={(e) => setRegistrationLink(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-orange-500 font-medium text-xs"
-                placeholder="https://fpnatacao.pt ou Google Forms"
+                placeholder="https://fpa.pt ou Google Forms"
               />
             </div>
           </div>
