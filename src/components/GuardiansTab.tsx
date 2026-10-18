@@ -79,8 +79,6 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
 
   // Search & Filter state
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('todos');
-  const [viewMode, setViewMode] = useState<'ficha' | 'grelha'>('ficha');
 
   // Modal and CRUD state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -302,23 +300,18 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
     }
   }, [currentUser, allGuardians]);
 
-  // Filtered guardians based on search & category
+  // Filtered guardians based on search
   const filteredGuardians = useMemo(() => {
     return allGuardians.filter((g) => {
-      const matchesSearch =
+      return (
         searchTerm === '' ||
         g.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         g.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         g.phone.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        g.athletes.some((a) => a.name.toLowerCase().includes(searchTerm.toLowerCase()));
-
-      const matchesCategory =
-        categoryFilter === 'todos' ||
-        g.athletes.some((a) => a.category.toLowerCase().includes(categoryFilter.toLowerCase()));
-
-      return matchesSearch && matchesCategory;
+        g.athletes.some((a) => a.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
     });
-  }, [allGuardians, searchTerm, categoryFilter]);
+  }, [allGuardians, searchTerm]);
 
   // Active guardian for detailed view
   const activeGuardian = useMemo(() => {
@@ -380,44 +373,6 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
             />
           </div>
 
-          {/* Category Filter */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-slate-700 text-xs font-semibold focus:ring-2 focus:ring-purple-500 cursor-pointer"
-          >
-            <option value="todos">Todos os Escalões</option>
-            {ageCategories.map((c) => (
-              <option key={c.id} value={c.name}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
-          {/* View Mode Switcher */}
-          <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200">
-            <button
-              onClick={() => setViewMode('ficha')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                viewMode === 'ficha'
-                  ? 'bg-white text-purple-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Ficha
-            </button>
-            <button
-              onClick={() => setViewMode('grelha')}
-              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                viewMode === 'grelha'
-                  ? 'bg-white text-purple-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Lista ({filteredGuardians.length})
-            </button>
-          </div>
-
           {/* Novo Encarregado Button (Treinador) */}
           {canManage && (
             <button
@@ -432,631 +387,157 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
       </div>
 
       {/* ========================================================================= */}
-      {/* VIEW MODE 1: FICHA COMPLETA (ESTILO ÁREA DOS PAIS - MODO LEITURA) */}
+      {/* LISTA DE ENCARREGADOS */}
       {/* ========================================================================= */}
-      {viewMode === 'ficha' && (
-        <div className="space-y-6">
-          {/* Encarregado Selector & Atleta a Cargo Selector */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex-1">
-                <label className="text-xs font-black text-slate-700 uppercase tracking-wider block mb-1.5 flex items-center gap-1.5">
-                  <Contact className="w-4 h-4 text-purple-600" />
-                  Selecionar Encarregado de Educação para Consulta:
-                </label>
-                <select
-                  value={activeGuardian?.id || ''}
-                  onChange={(e) => {
-                    setSelectedGuardianId(e.target.value);
-                    const selG = allGuardians.find((g) => g.id === e.target.value);
-                    if (selG && selG.athletes.length > 0) {
-                      setSelectedAthleteId(selG.athletes[0].id);
-                    }
-                  }}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-purple-200 bg-purple-50/40 text-slate-800 font-bold text-sm focus:ring-2 focus:ring-purple-500 cursor-pointer shadow-2xs"
-                >
-                  {filteredGuardians.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.name} ({g.relation}) — {g.athletes.length} atleta(s) a cargo: {g.athletes.map((a) => a.name).join(', ') || 'Nenhum'}
-                    </option>
-                  ))}
-                </select>
-              </div>
 
-              {/* Athletes tabs for active guardian if multiple */}
-              {activeGuardian && activeGuardian.athletes.length > 0 && (
-                <div className="sm:self-end">
-                  <span className="text-[11px] font-bold text-slate-500 block mb-1.5">
-                    Atleta a Cargo Selecionado:
-                  </span>
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {activeGuardian.athletes.map((ath) => {
-                      const isSelected = activeAthlete?.id === ath.id;
-                      return (
-                        <button
-                          key={ath.id}
-                          type="button"
-                          onClick={() => setSelectedAthleteId(ath.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                            isSelected
-                              ? 'bg-teal-600 text-white shadow-xs'
-                              : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                          }`}
-                        >
-                          <User className="w-3.5 h-3.5" />
-                          <span>{ath.name}</span>
-                          <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${
-                            isSelected ? 'bg-teal-700 text-teal-100' : 'bg-slate-200 text-slate-600'
-                          }`}>
-                            {ath.category}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
+      {filteredGuardians.length === 0 ? (
+        <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-xs space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-3xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <Contact className="w-8 h-8" />
           </div>
-
-          {activeGuardian ? (
-            <div className="space-y-6">
-              {/* =================================================================== */}
-              {/* SEÇÃO 1: DADOS DO ENCARREGADO DE EDUCAÇÃO */}
-              {/* =================================================================== */}
-              <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
+          <div className="space-y-1">
+            <h3 className="text-base font-extrabold text-slate-800">
+              Nenhum encarregado de educação encontrado
+            </h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              {searchTerm
+                ? 'Nenhum resultado corresponde à sua pesquisa.'
+                : 'Ainda não existem encarregados de educação registados no clube.'}
+            </p>
+          </div>
+          {canManage && (
+            <button
+              type="button"
+              onClick={handleOpenAdd}
+              className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Adicionar Encarregado</span>
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredGuardians.map((g) => (
+            <div
+              key={g.id}
+              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
+            >
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={activeGuardian.avatarUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80'}
-                      alt={activeGuardian.name}
-                      className="w-12 h-12 rounded-2xl object-cover border-2 border-purple-200 shadow-xs shrink-0 bg-purple-50"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div>
-                      <h3 className="font-extrabold text-slate-900 text-base">
-                        {activeGuardian.name}
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        {activeGuardian.relation} • Ficha Oficial de Identificação
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-purple-700 bg-purple-50 px-3 py-1 rounded-xl border border-purple-100">
-                      {activeGuardian.relation}
-                    </span>
-                    {(canManage || isCurrentUserThisGuardian(activeGuardian)) && (
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => handleOpenEdit(activeGuardian)}
-                          className="px-3 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border border-purple-200"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                          <span>Editar Ficha</span>
-                        </button>
-                        {canManage && (
-                          <button
-                            type="button"
-                            onClick={() => setGuardianToDelete(activeGuardian)}
-                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-xs font-bold transition-colors cursor-pointer border border-red-200"
-                            title="Eliminar Encarregado"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                    {g.avatarUrl ? (
+                      <img
+                        src={g.avatarUrl}
+                        alt={g.name}
+                        className="w-12 h-12 rounded-2xl object-cover border-2 border-purple-200 shadow-2xs shrink-0 bg-purple-50"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-black text-base shadow-2xs shrink-0">
+                        {g.name.slice(0, 2).toUpperCase()}
                       </div>
                     )}
+                    <div>
+                      <h4 className="font-extrabold text-slate-900 text-sm leading-tight">
+                        {g.name}
+                      </h4>
+                      <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md inline-block mt-0.5">
+                        {g.relation}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
-                  {/* Nome Completo */}
-                  <div>
-                    <label className="text-xs font-bold text-slate-500 block mb-1">
-                      Nome Completo do Encarregado
-                    </label>
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-800">
-                      <User className="w-4 h-4 text-purple-600 shrink-0" />
-                      <span className="truncate">{activeGuardian.name}</span>
-                    </div>
+                {/* Contactos */}
+                <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
+                  <div className="flex items-center justify-between text-slate-600">
+                    <span className="flex items-center gap-1.5 text-slate-500 font-medium">
+                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
+                      Telemóvel:
+                    </span>
+                    <a
+                      href={`tel:${g.phone}`}
+                      className="font-bold text-slate-800 hover:text-emerald-600 truncate ml-2"
+                    >
+                      {g.phone}
+                    </a>
                   </div>
 
-                  {/* Grau de Parentesco */}
-                  <div>
-                    <label className="text-xs font-bold text-slate-500 block mb-1">
-                      Grau de Parentesco
-                    </label>
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-800">
-                      <ShieldCheck className="w-4 h-4 text-purple-600 shrink-0" />
-                      <span className="truncate">{activeGuardian.relation}</span>
-                    </div>
+                  <div className="flex items-center justify-between text-slate-600">
+                    <span className="flex items-center gap-1.5 text-slate-500 font-medium">
+                      <Mail className="w-3.5 h-3.5 text-blue-600" />
+                      Email:
+                    </span>
+                    <a
+                      href={`mailto:${g.email}`}
+                      className="font-bold text-slate-800 hover:text-blue-600 truncate max-w-[170px] text-right"
+                    >
+                      {g.email}
+                    </a>
                   </div>
+                </div>
 
-                  {/* Contacto Telefónico Principal */}
-                  <div>
-                    <label className="text-xs font-bold text-slate-500 block mb-1">
-                      Telemóvel Principal
-                    </label>
-                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-800">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Phone className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <a
-                          href={`tel:${activeGuardian.phone}`}
-                          className="truncate hover:text-emerald-700 hover:underline"
+                {/* Atletas a Cargo */}
+                <div className="pt-2 border-t border-slate-100 space-y-1.5">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    Atleta(s) a Cargo ({g.athletes.length}):
+                  </span>
+                  {g.athletes.length > 0 ? (
+                    <div className="space-y-1">
+                      {g.athletes.map((ath) => (
+                        <div
+                          key={ath.id}
+                          className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs"
                         >
-                          {activeGuardian.phone}
-                        </a>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <a
-                          href={`tel:${activeGuardian.phone}`}
-                          className="px-2 py-0.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold transition-colors"
-                        >
-                          Ligar
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(activeGuardian.phone, 'Telemóvel')}
-                          className="text-slate-400 hover:text-purple-600 p-1"
-                          title="Copiar Telemóvel"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                          <div className="flex items-center gap-2 min-w-0">
+                            <img
+                              src={ath.photoUrl}
+                              alt={ath.name}
+                              className="w-6 h-6 rounded-lg object-cover ring-1 ring-slate-200 shrink-0"
+                              referrerPolicy="no-referrer"
+                            />
+                            <span className="font-bold text-slate-800 truncate">{ath.name}</span>
+                          </div>
+                          <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded shrink-0">
+                            {ath.category}
+                          </span>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-
-                  {/* Email Oficial */}
-                  <div>
-                    <label className="text-xs font-bold text-slate-500 block mb-1">
-                      Email Oficial
-                    </label>
-                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-800">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Mail className="w-4 h-4 text-blue-600 shrink-0" />
-                        <a
-                          href={`mailto:${activeGuardian.email}`}
-                          className="truncate hover:text-blue-700 hover:underline"
-                        >
-                          {activeGuardian.email}
-                        </a>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <a
-                          href={`mailto:${activeGuardian.email}`}
-                          className="px-2 py-0.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition-colors"
-                        >
-                          Email
-                        </a>
-                        <button
-                          type="button"
-                          onClick={() => copyToClipboard(activeGuardian.email, 'Email')}
-                          className="text-slate-400 hover:text-purple-600 p-1"
-                          title="Copiar Email"
-                        >
-                          <Copy className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contacto Alternativo e Profissão */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 block mb-1">
-                        Contacto Alternativo de Urgência
-                      </label>
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-800">
-                        <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span className="truncate">{activeGuardian.altPhone || 'Não indicado'}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-bold text-slate-500 block mb-1">
-                        Profissão / Ocupação
-                      </label>
-                      <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-800">
-                        <Briefcase className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span className="truncate">{activeGuardian.profession || '—'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Morada de Residência */}
-                  <div>
-                    <label className="text-xs font-bold text-slate-500 block mb-1">
-                      Morada de Residência
-                    </label>
-                    <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-800">
-                      <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="truncate">{activeGuardian.address || '—'}</span>
-                    </div>
-                  </div>
-
-                  {/* Observações / Notas */}
-                  <div className="md:col-span-2">
-                    <label className="text-xs font-bold text-slate-500 block mb-1">
-                      Observações do Encarregado de Educação
-                    </label>
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700 text-xs leading-relaxed">
-                      {activeGuardian.notes || 'Sem observações adicionais registadas.'}
-                    </div>
-                  </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 italic">Nenhum atleta associado</p>
+                  )}
                 </div>
               </div>
 
-              {/* =================================================================== */}
-              {/* SEÇÃO 2: DADOS DO(A) ATLETA A CARGO */}
-              {/* =================================================================== */}
-              <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs space-y-5">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3 flex-wrap gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-teal-50 text-teal-700">
-                      <User className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-extrabold text-slate-900 text-base">
-                        Dados do Atleta a Cargo
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        Educando:{' '}
-                        <strong className="text-slate-800">
-                          {activeAthlete ? activeAthlete.name : 'Nenhum atleta associado'}
-                        </strong>
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="text-xs font-bold text-teal-700 bg-teal-50 px-3 py-1 rounded-xl border border-teal-100">
-                    {activeAthlete?.category || 'Atleta'}
-                  </span>
-                </div>
-
-                {activeAthlete ? (
-                  <div className="space-y-4 text-xs sm:text-sm">
-                    {/* Atleta Card Resumo */}
-                    <div className="p-4 rounded-2xl bg-gradient-to-r from-teal-50/80 via-slate-50 to-purple-50/40 border border-teal-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={activeAthlete.photoUrl}
-                          alt={activeAthlete.name}
-                          className="w-14 h-14 rounded-2xl object-cover ring-2 ring-teal-300 shadow-xs"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div>
-                          <h4 className="font-black text-slate-900 text-base">{activeAthlete.name}</h4>
-                          <p className="text-xs font-bold text-teal-800">{activeAthlete.category}</p>
-                          <p className="text-[11px] font-mono text-slate-500">
-                            Licença: {activeAthlete.federationNumber || 'FPN pendente'}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Assiduidade</span>
-                          <span className="text-sm font-black text-emerald-600">{activeAthlete.attendanceRate}%</span>
-                        </div>
-                        <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-center shadow-2xs">
-                          <span className="text-[10px] font-bold text-slate-400 block uppercase">Exame Médico</span>
-                          <span className={`text-xs font-black ${
-                            activeAthlete.medicalStatus === 'valido'
-                              ? 'text-emerald-600'
-                              : activeAthlete.medicalStatus === 'a_expirar'
-                              ? 'text-amber-600'
-                              : 'text-red-600'
-                          }`}>
-                            {activeAthlete.medicalStatus === 'valido'
-                              ? '✓ Válido'
-                              : activeAthlete.medicalStatus === 'a_expirar'
-                              ? '⚠ A Expirar'
-                              : '✕ Expirado'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Nome Completo */}
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 block mb-1">
-                          Nome Completo do Atleta
-                        </label>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-slate-800">
-                          {activeAthlete.name}
-                        </div>
-                      </div>
-
-                      {/* Data de Nascimento & Idade */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs font-bold text-slate-500 block mb-1">
-                            Data de Nascimento
-                          </label>
-                          <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-800">
-                            <Calendar className="w-4 h-4 text-slate-400" />
-                            <span>{formatBirthDate(activeAthlete.birthDate) || 'Não registada'}</span>
-                          </div>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-500 block mb-1">
-                            Idade & Escalão
-                          </label>
-                          <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-teal-800">
-                            {calculateAge(activeAthlete.birthDate) !== null
-                              ? `${calculateAge(activeAthlete.birthDate)} anos • ${activeAthlete.category}`
-                              : activeAthlete.category}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Nº Licença Federativa */}
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 block mb-1">
-                          Nº Licença Federativa / Bilhete
-                        </label>
-                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono font-bold text-slate-800">
-                          <span>{activeAthlete.federationNumber || 'Pendente de emissão'}</span>
-                          {activeAthlete.federationNumber && (
-                            <button
-                              type="button"
-                              onClick={() => copyToClipboard(activeAthlete.federationNumber, 'Nº Licença')}
-                              className="text-slate-400 hover:text-purple-600 p-0.5"
-                            >
-                              <Copy className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Contacto de Emergência Imediato */}
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 block mb-1">
-                          Contacto de Emergência Imediato
-                        </label>
-                        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-purple-50/70 border border-purple-200 font-bold text-purple-900">
-                          <Phone className="w-4 h-4 text-purple-600 shrink-0" />
-                          <span className="truncate">{activeAthlete.emergencyContact || activeGuardian.phone}</span>
-                        </div>
-                      </div>
-
-                      {/* Validade do Exame Médico Desportivo */}
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 block mb-1">
-                          Validade do Exame Médico Desportivo
-                        </label>
-                        <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-slate-800">
-                          <div className="flex items-center gap-2">
-                            <HeartPulse className="w-4 h-4 text-slate-400" />
-                            <span>{activeAthlete.medicalExamExpiry || 'Sem registo'}</span>
-                          </div>
-                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                            activeAthlete.medicalStatus === 'valido'
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : activeAthlete.medicalStatus === 'a_expirar'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {activeAthlete.medicalStatus === 'valido' ? 'Aprovado' : activeAthlete.medicalStatus === 'a_expirar' ? 'Aviso Prévio' : 'Suspenso'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Alergias ou Cuidados Especiais */}
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 block mb-1">
-                          Alergias, Patologias ou Cuidados
-                        </label>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-800 truncate">
-                          {activeAthlete.allergiesOrConditions || 'Nenhuma condição ou alergia registada'}
-                        </div>
-                      </div>
-
-                      {/* Telefone e Email do Atleta */}
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 block mb-1">
-                          Contacto Telefónico do Atleta
-                        </label>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-800">
-                          {activeAthlete.phone || 'Sem telemóvel individual (contactar encarregado)'}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-bold text-slate-500 block mb-1">
-                          Email do Atleta
-                        </label>
-                        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-800 truncate">
-                          {activeAthlete.email || 'Sem email individual'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-6 text-center text-slate-500 text-xs bg-slate-50 rounded-2xl border border-slate-200">
-                    Este encarregado de educação não tem atletas associados atualmente.
-                  </div>
+              {/* Botões de Ação */}
+              <div className="pt-3 border-t border-slate-100 flex items-center gap-2">
+                {(canManage || isCurrentUserThisGuardian(g)) && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEdit(g)}
+                    className="p-2 rounded-xl bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-700 transition-colors cursor-pointer"
+                    title="Editar Encarregado"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {canManage && (
+                  <button
+                    type="button"
+                    onClick={() => setGuardianToDelete(g)}
+                    className="p-2 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-600 transition-colors cursor-pointer"
+                    title="Eliminar Encarregado"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                 )}
               </div>
             </div>
-          ) : (
-            <div className="p-8 text-center bg-white rounded-3xl border border-slate-200 text-slate-500 text-sm">
-              Nenhum encarregado de educação encontrado com os filtros selecionados.
-            </div>
-          )}
+          ))}
         </div>
       )}
-
-      {/* ========================================================================= */}
-      {/* VIEW MODE 2: GRELHA / LISTA DE ENCARREGADOS DE EDUCAÇÃO */}
-      {/* ========================================================================= */}
-      {viewMode === 'grelha' && (
-        filteredGuardians.length === 0 ? (
-          <div className="p-12 text-center bg-white rounded-3xl border border-slate-200 shadow-xs space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-3xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Contact className="w-8 h-8" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-base font-extrabold text-slate-800">
-                Nenhum encarregado de educação encontrado
-              </h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                {searchTerm || categoryFilter !== 'todos'
-                  ? 'Nenhum resultado corresponde à sua pesquisa ou filtro de escalão.'
-                  : 'Ainda não existem encarregados de educação registados no clube.'}
-              </p>
-            </div>
-            {canManage && (
-              <button
-                type="button"
-                onClick={handleOpenAdd}
-                className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Adicionar Encarregado</span>
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredGuardians.map((g) => (
-              <div
-                key={g.id}
-                className="bg-white rounded-3xl p-5 border border-slate-200 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-4"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-3">
-                      {g.avatarUrl ? (
-                        <img
-                          src={g.avatarUrl}
-                          alt={g.name}
-                          className="w-12 h-12 rounded-2xl object-cover border-2 border-purple-200 shadow-2xs shrink-0 bg-purple-50"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-black text-base shadow-2xs shrink-0">
-                          {g.name.slice(0, 2).toUpperCase()}
-                        </div>
-                      )}
-                      <div>
-                        <h4 className="font-extrabold text-slate-900 text-sm leading-tight">
-                          {g.name}
-                        </h4>
-                        <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md inline-block mt-0.5">
-                          {g.relation}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Contactos */}
-                  <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs">
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="flex items-center gap-1.5 text-slate-500 font-medium">
-                        <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                        Telemóvel:
-                      </span>
-                      <a
-                        href={`tel:${g.phone}`}
-                        className="font-bold text-slate-800 hover:text-emerald-600 truncate ml-2"
-                      >
-                        {g.phone}
-                      </a>
-                    </div>
-
-                    <div className="flex items-center justify-between text-slate-600">
-                      <span className="flex items-center gap-1.5 text-slate-500 font-medium">
-                        <Mail className="w-3.5 h-3.5 text-blue-600" />
-                        Email:
-                      </span>
-                      <a
-                        href={`mailto:${g.email}`}
-                        className="font-bold text-slate-800 hover:text-blue-600 truncate max-w-[170px] text-right"
-                      >
-                        {g.email}
-                      </a>
-                    </div>
-                  </div>
-
-                  {/* Atletas a Cargo */}
-                  <div className="pt-2 border-t border-slate-100 space-y-1.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Atleta(s) a Cargo ({g.athletes.length}):
-                    </span>
-                    {g.athletes.length > 0 ? (
-                      <div className="space-y-1">
-                        {g.athletes.map((ath) => (
-                          <div
-                            key={ath.id}
-                            className="flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-100 text-xs"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <img
-                                src={ath.photoUrl}
-                                alt={ath.name}
-                                className="w-6 h-6 rounded-lg object-cover ring-1 ring-slate-200 shrink-0"
-                                referrerPolicy="no-referrer"
-                              />
-                              <span className="font-bold text-slate-800 truncate">{ath.name}</span>
-                            </div>
-                            <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded shrink-0">
-                              {ath.category}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-slate-400 italic">Nenhum atleta associado</p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Botões de Ação */}
-                <div className="pt-3 border-t border-slate-100 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedGuardianId(g.id);
-                      setViewMode('ficha');
-                    }}
-                    className="flex-1 py-2 px-3 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>Ver Ficha</span>
-                  </button>
-                  {(canManage || isCurrentUserThisGuardian(g)) && (
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEdit(g)}
-                      className="p-2 rounded-xl bg-slate-100 hover:bg-purple-100 text-slate-700 hover:text-purple-700 transition-colors cursor-pointer"
-                      title="Editar Encarregado"
-                    >
-                      <Edit2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                  {canManage && (
-                    <button
-                      type="button"
-                      onClick={() => setGuardianToDelete(g)}
-                      className="p-2 rounded-xl bg-slate-100 hover:bg-red-100 text-slate-700 hover:text-red-600 transition-colors cursor-pointer"
-                      title="Eliminar Encarregado"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )
-      )}
-
       {/* Modal: Adicionar / Editar Encarregado de Educação */}
       {isFormModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">

@@ -472,22 +472,16 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
                 </div>
                 <div>
                   <h2 className="font-bold text-slate-900 text-base">
-                    Instalações e Apoio
+                    Documentos Oficiais
                   </h2>
-                  <p className="text-xs text-slate-500">Pavilhões, horários, regulamentos e apoios ao atleta</p>
+                  <p className="text-xs text-slate-500">Regulamentos, procedimentos e outros documentos de apoio</p>
                 </div>
               </div>
 
               {/* Secção de Documentos Oficiais em Instalações & Apoio */}
               <div>
                 <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                    <FileText className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Documentos Oficiais</span>
-                    <span className="ml-1 px-1.5 py-0.2 text-[10px] font-extrabold bg-blue-100 text-blue-800 rounded-full">
-                      {documentsList.length}
-                    </span>
-                  </span>
+
 
                   {canEdit && (
                     <button
@@ -586,7 +580,7 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
 
           <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
             <span>{documentsList.length} documento(s)</span>
-            <span className="font-semibold text-blue-600">Documentação Validada</span>
+
           </div>
         </div>
       </div>
