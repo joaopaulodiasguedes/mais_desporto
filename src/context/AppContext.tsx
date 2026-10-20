@@ -93,7 +93,7 @@ interface AppContextType {
     email: string,
     code: string,
     newPassword: string
-  ) => { success: boolean; message: string };
+  ) => Promise<{ success: boolean; message: string }>;
   resetPassword: (email: string, newPassword: string) => { success: boolean; message: string };
   register: (data: {
     name: string;
@@ -1094,6 +1094,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return { success: false, message: 'Por favor indique o seu endereço de email registado.' };
     }
 
+    // Com Supabase configurado: o código é gerado, guardado e enviado por email no servidor (/api/password-reset)
+    if (getSupabaseConfig().isConfigured) {
+      try {
+        const response = await fetch('/api/password-reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'request', email: cleanEmail })
+        });
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data?.success) {
+          return {
+            success: false,
+            message: data?.message || 'Serviço de envio de email indisponível. Tente novamente mais tarde.'
+          };
+        }
+        showToast(`Email de recuperação enviado para ${cleanEmail}`, 'info');
+        return { success: true, message: data.message };
+      } catch (err) {
+        console.error('Erro ao pedir código de recuperação:', err);
+        return { success: false, message: 'Não foi possível contactar o serviço de envio de email.' };
+      }
+    }
+
+    // Modo local (sem base de dados): o código é apenas apresentado no ecrã
     const targetUser = availableUsers.find(u => u.email.toLowerCase() === cleanEmail) ||
       INITIAL_PROFILES.find(u => u.email.toLowerCase() === cleanEmail);
 
@@ -1124,18 +1148,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       console.error('Erro ao guardar token de recuperação:', e);
     }
 
-    // If Supabase Auth is configured, also trigger official Supabase Auth reset email
-    try {
-      const sb = getSupabase();
-      if (sb) {
-        await sb.auth.resetPasswordForEmail(cleanEmail, {
-          redirectTo: window.location.origin
-        });
-      }
-    } catch (sbErr) {
-      console.warn('Tentativa de envio via Supabase Auth:', sbErr);
-    }
-
     const preview: PasswordResetEmailPreview = {
       to: cleanEmail,
       recipientName: targetUser.name,
@@ -1154,11 +1166,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
   };
 
-  const verifyResetCodeAndSetPassword = (
+  const verifyResetCodeAndSetPassword = async (
     email: string,
     code: string,
     newPassword: string
-  ): { success: boolean; message: string } => {
+  ): Promise<{ success: boolean; message: string }> => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanCode = code.trim();
 
@@ -1168,6 +1180,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     if (!newPassword || newPassword.length < 6) {
       return { success: false, message: 'A nova palavra-passe deve conter pelo menos 6 carateres.' };
+    }
+
+    // Com Supabase configurado: o código é validado (e invalidado) no servidor
+    if (getSupabaseConfig().isConfigured) {
+      try {
+        const response = await fetch('/api/password-reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'verify', email: cleanEmail, code: cleanCode })
+        });
+        const data = await response.json().catch(() => null);
+        if (!response.ok || !data?.success) {
+          return { success: false, message: data?.message || 'Não foi possível validar o código. Tente novamente.' };
+        }
+      } catch (err) {
+        console.error('Erro ao validar código de recuperação:', err);
+        return { success: false, message: 'Não foi possível contactar o serviço de validação.' };
+      }
+      return applyNewPassword(cleanEmail, newPassword);
     }
 
     // Retrieve active token
@@ -1203,19 +1234,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    // Code is valid! Update the password for the user
-    let userIndex = availableUsers.findIndex(u => u.email.toLowerCase() === cleanEmail);
-    let targetUser: UserProfile | undefined;
-
-    if (userIndex !== -1) {
-      targetUser = availableUsers[userIndex];
-    } else {
-      targetUser = INITIAL_PROFILES.find(u => u.email.toLowerCase() === cleanEmail);
-      if (targetUser) {
-        setAvailableUsers(prev => [targetUser!, ...prev]);
-        userIndex = 0;
+    // Invalidate the token so it cannot be reused
+    try {
+      const storedTokensStr = localStorage.getItem(`${LOCAL_STORAGE_KEY}_pwd_reset_tokens`);
+      if (storedTokensStr) {
+        const storedTokens = JSON.parse(storedTokensStr);
+        delete storedTokens[cleanEmail];
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_pwd_reset_tokens`, JSON.stringify(storedTokens));
       }
+    } catch (e) {
+      console.error('Erro ao limpar token de recuperação:', e);
     }
+
+    return applyNewPassword(cleanEmail, newPassword);
+  };
+
+  // Code is valid! Update the password for the user
+  const applyNewPassword = (cleanEmail: string, newPassword: string): { success: boolean; message: string } => {
+    let targetUser: UserProfile | undefined = availableUsers.find(u => u.email.toLowerCase() === cleanEmail) ||
+      INITIAL_PROFILES.find(u => u.email.toLowerCase() === cleanEmail);
 
     if (!targetUser) {
       return {
@@ -1233,18 +1270,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAvailableUsers(updatedList);
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(updatedList));
     upsertUserProfileInSupabase(updatedUser);
-
-    // Invalidate the token so it cannot be reused
-    try {
-      const storedTokensStr = localStorage.getItem(`${LOCAL_STORAGE_KEY}_pwd_reset_tokens`);
-      if (storedTokensStr) {
-        const storedTokens = JSON.parse(storedTokensStr);
-        delete storedTokens[cleanEmail];
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_pwd_reset_tokens`, JSON.stringify(storedTokens));
-      }
-    } catch (e) {
-      console.error('Erro ao limpar token de recuperação:', e);
-    }
 
     showToast('Palavra-passe atualizada com segurança! Pode agora iniciar sessão.', 'success');
     return { success: true, message: 'Palavra-passe alterada com sucesso!' };

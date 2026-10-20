@@ -532,5 +532,18 @@ INSERT INTO public.club_info (id, name, modality, foundation_year, president_nam
 VALUES (1, 'Clube Náutico & Desportivo Mais Desporto', 'Natação & Triatlo', 1998, 'Dr. Manuel Guimarães')
 ON CONFLICT (id) DO NOTHING;
 
+-- ==============================================================================
+-- 9. CÓDIGOS DE RECUPERAÇÃO DE PALAVRA-PASSE (usados apenas pela função /api/password-reset)
+--    RLS ativo e sem políticas: só a chave service_role (servidor) tem acesso.
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.password_reset_codes (
+    email TEXT PRIMARY KEY,
+    code_hash TEXT NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    attempts INTEGER NOT NULL DEFAULT 0,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW())
+);
+ALTER TABLE public.password_reset_codes ENABLE ROW LEVEL SECURITY;
+
 -- FIM DO SCRIPT DE ATUALIZAÇÃO
 SELECT 'Base de Dados Atualizada com Sucesso! Todas as 11 tabelas, colunas, RLS, Storage e Realtime verificados e sincronizados.' AS status;`;

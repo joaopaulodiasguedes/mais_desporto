@@ -110,7 +110,7 @@ export const AuthScreen: React.FC = () => {
         setForgotStep('verify');
         setForgotFeedback({
           type: 'success',
-          message: `Código de recuperação gerado e enviado para ${cleanEmail}.`
+          message: `Código de recuperação enviado para ${cleanEmail}. Verifique a caixa de entrada (e a pasta de spam).`
         });
       } else {
         setForgotFeedback({ type: 'error', message: res.message });
@@ -143,7 +143,7 @@ export const AuthScreen: React.FC = () => {
   };
 
   // Step 3: Validate code and set new password
-  const handleVerifyAndResetPassword = (e: React.FormEvent) => {
+  const handleVerifyAndResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setForgotFeedback(null);
 
@@ -174,7 +174,7 @@ export const AuthScreen: React.FC = () => {
 
     setIsVerifyingCode(true);
     try {
-      const res = verifyResetCodeAndSetPassword(forgotEmail, cleanCode, forgotNewPassword);
+      const res = await verifyResetCodeAndSetPassword(forgotEmail, cleanCode, forgotNewPassword);
       if (res.success) {
         setForgotStep('success');
         setLoginEmail(forgotEmail);
