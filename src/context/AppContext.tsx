@@ -30,6 +30,7 @@ import {
   INITIAL_AGE_CATEGORIES
 } from '../data/initialData';
 import { applyClubTheme } from '../utils/theme';
+import { generateInitialsAvatar } from '../utils/avatarUtils';
 import {
   calculateMedicalStatus,
   determineAgeCategory,
@@ -1329,12 +1330,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       diplomaName: data.diplomaName || '',
       diplomaType: data.diplomaType || 'pdf',
       notes: data.notes || (data.relatedAthleteName ? `Educando: ${data.relatedAthleteName}` : ''),
-      avatarUrl:
-        data.role === 'treinador'
-          ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80'
-          : data.role === 'atleta'
-          ? 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=300&auto=format&fit=crop&q=80'
-          : 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80'
+      avatarUrl: generateInitialsAvatar(data.name)
     };
 
     const updatedList = [newProfile, ...availableUsers];
@@ -1827,7 +1823,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       email: data.email.trim(),
       phone: data.phone.trim(),
       role: 'encarregado',
-      avatarUrl: data.avatarUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80',
+      avatarUrl: data.avatarUrl || generateInitialsAvatar(cleanName),
       status: 'aprovado',
       notes: data.notes?.trim() || undefined,
       address: data.address?.trim() || undefined,
@@ -1933,7 +1929,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           email: data.email.trim(),
           phone: data.phone.trim(),
           role: 'encarregado',
-          avatarUrl: data.avatarUrl || 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80',
+          avatarUrl: data.avatarUrl || generateInitialsAvatar(formattedName),
           status: 'aprovado',
           notes: data.notes?.trim() || undefined,
           address: data.address?.trim() || undefined,

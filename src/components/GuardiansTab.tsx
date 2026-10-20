@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Athlete, UserProfile } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { formatBirthDate, formatShortName } from '../utils/athleteRules';
+import { generateInitialsAvatar, isInitialsAvatar } from '../utils/avatarUtils';
 import {
   Contact,
   Users,
@@ -27,7 +28,8 @@ import {
   Trash2,
   X,
   Camera,
-  Upload
+  Upload,
+  RotateCcw
 } from 'lucide-react';
 
 interface GuardiansTabProps {
@@ -604,19 +606,32 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                     referrerPolicy="no-referrer"
                   />
                   <div className="flex-1 space-y-1.5">
-                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>Carregar Foto do Computador / Telemóvel</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoFileUpload}
-                        className="hidden"
-                      />
-                    </label>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-purple-50 text-purple-700 border border-purple-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Carregar Foto do Computador / Telemóvel</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoFileUpload}
+                          className="hidden"
+                        />
+                      </label>
+                      {!isInitialsAvatar(formData.avatarUrl) && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, avatarUrl: generateInitialsAvatar(formData.name) })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                          title="Remover a foto e voltar ao avatar com as iniciais do nome"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          <span>Usar Iniciais</span>
+                        </button>
+                      )}
+                    </div>
                     <input
                       type="url"
-                      value={formData.avatarUrl}
+                      value={isInitialsAvatar(formData.avatarUrl) ? '' : formData.avatarUrl}
                       onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
                       placeholder="Ou cole aqui o link / URL da foto..."
                       className="w-full px-2.5 py-1.5 text-xs rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-purple-500 font-medium"

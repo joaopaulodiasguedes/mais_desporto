@@ -433,7 +433,8 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between sm:justify-end gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+        <div className="flex flex-col items-stretch sm:items-end gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 shrink-0">
+          <div className="flex items-center flex-wrap justify-between sm:justify-end gap-2">
           {/* RSVP for Tasks (Athlete) */}
           {isTask && currentUser.role === 'atleta' && (
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -612,10 +613,11 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
 
             </a>
           )}
+          </div>
 
-          {/* Coach CRUD: Edit & Delete */}
+          {/* Coach CRUD: Edit & Delete (linha própria, abaixo dos restantes botões) */}
           {isOwnerOrCoach && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center justify-end gap-1">
               <button
                 onClick={() => handleOpenEditEvent(evt)}
                 className="p-2 text-slate-500 hover:text-orange-600 hover:bg-orange-50 rounded-xl transition-colors cursor-pointer"

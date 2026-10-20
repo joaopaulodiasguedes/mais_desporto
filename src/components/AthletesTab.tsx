@@ -23,11 +23,13 @@ import {
   Lock,
   Sparkles,
   Camera,
-  Upload
+  Upload,
+  RotateCcw
 } from 'lucide-react';
 import { Athlete, NotificationItem } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { calculateMedicalStatus, calculateMedicalExpiryFromExamDate, calculateMedicalExamDateFromExpiry, determineAgeCategory, formatBirthDate, formatShortName } from '../utils/athleteRules';
+import { generateInitialsAvatar, isInitialsAvatar } from '../utils/avatarUtils';
 
 export const AthletesTab: React.FC = () => {
   const {
@@ -966,19 +968,32 @@ export const AthletesTab: React.FC = () => {
                       referrerPolicy="no-referrer"
                     />
                     <div className="flex-1 space-y-1.5">
-                      <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs">
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>Carregar Foto do Computador / Telemóvel</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handlePhotoFileUpload}
-                          className="hidden"
-                        />
-                      </label>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs">
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>Carregar Foto do Computador / Telemóvel</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handlePhotoFileUpload}
+                            className="hidden"
+                          />
+                        </label>
+                        {!isInitialsAvatar(formData.photoUrl) && (
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, photoUrl: generateInitialsAvatar(formData.name) })}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                            title="Remover a foto e voltar ao avatar com as iniciais do nome"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Usar Iniciais</span>
+                          </button>
+                        )}
+                      </div>
                       <input
                         type="url"
-                        value={formData.photoUrl}
+                        value={isInitialsAvatar(formData.photoUrl) ? '' : formData.photoUrl}
                         onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
                         placeholder="Ou cole aqui o link / URL da foto..."
                         className="w-full px-2.5 py-1.5 text-xs rounded-xl border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500 font-medium"
