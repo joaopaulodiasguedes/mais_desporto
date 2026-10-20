@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { Athlete, NotificationItem } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
-import { calculateMedicalStatus, determineAgeCategory, formatBirthDate, formatShortName } from '../utils/athleteRules';
+import { calculateMedicalStatus, calculateMedicalExpiryFromExamDate, calculateMedicalExamDateFromExpiry, determineAgeCategory, formatBirthDate, formatShortName } from '../utils/athleteRules';
 
 export const AthletesTab: React.FC = () => {
   const {
@@ -195,8 +195,9 @@ export const AthletesTab: React.FC = () => {
     }));
   };
 
-  // Cálculo automático do estado clínico e de aptidão do exame médico
-  const handleMedicalExpiryChange = (newExpiry: string) => {
+  // O atleta indica a data do exame; a validade (1 ano) e o estado são calculados automaticamente
+  const handleMedicalExamDateChange = (examDate: string) => {
+    const newExpiry = calculateMedicalExpiryFromExamDate(examDate);
     const { status } = calculateMedicalStatus(newExpiry);
     setFormData(prev => ({
       ...prev,
@@ -1010,17 +1011,18 @@ export const AthletesTab: React.FC = () => {
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-slate-700">Validade Exame Médico</label>
-                    <span className="text-[10px] font-bold text-slate-500">
-                      Alerta a 15 dias
-                    </span>
+                    <label className="text-xs font-bold text-slate-700">Data do Exame Médico</label>
+
                   </div>
                   <input
                     type="date"
-                    value={formData.medicalExamExpiry}
-                    onChange={(e) => handleMedicalExpiryChange(e.target.value)}
+                    value={calculateMedicalExamDateFromExpiry(formData.medicalExamExpiry)}
+                    onChange={(e) => handleMedicalExamDateChange(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 font-medium"
                   />
+                  <p className="text-[11px] font-semibold text-slate-500 mt-1">
+                    Válido até: {formData.medicalExamExpiry || '—'}
+                  </p>
                 </div>
 
                 <div>

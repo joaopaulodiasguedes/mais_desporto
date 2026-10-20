@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useApp, getLinkedAthletesForGuardian } from '../context/AppContext';
 import { Athlete } from '../types';
-import { calculateMedicalStatus, formatBirthDate, formatShortName } from '../utils/athleteRules';
+import { calculateMedicalStatus, calculateMedicalExamDateFromExpiry, formatBirthDate, formatShortName } from '../utils/athleteRules';
 import {
   User,
   Shield,
@@ -708,7 +708,9 @@ export const ParentAthleteDataForm: React.FC<ParentAthleteDataFormProps> = ({
                       Exame Médico Desportivo
                     </span>
                     <span className="text-xs font-semibold text-slate-700">
-                      Validade: {currentAthlete.medicalExamExpiry || 'Sem data registada'}
+                      {currentAthlete.medicalExamExpiry
+                        ? `Realizado a ${calculateMedicalExamDateFromExpiry(currentAthlete.medicalExamExpiry)} · Válido até ${currentAthlete.medicalExamExpiry}`
+                        : 'Sem data registada'}
                     </span>
                   </div>
                   <span className={`font-bold px-3 py-1 rounded-xl border text-xs self-start sm:self-auto ${medicalStatusInfo.badgeColor}`}>

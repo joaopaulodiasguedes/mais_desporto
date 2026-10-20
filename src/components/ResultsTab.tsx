@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useApp } from '../context/AppContext';
+import { useApp, isCalendarEventVisibleForUser } from '../context/AppContext';
 import {
   Trophy,
   Plus,
@@ -15,7 +15,7 @@ import {
   FileCheck,
   ExternalLink
 } from 'lucide-react';
-import { CompetitionResult } from '../types';
+import { CompetitionResult, CalendarEvent } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { openOriginalDocument } from '../utils/documentUtils';
 
@@ -24,7 +24,7 @@ interface ResultsTabProps {
 }
 
 export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
-  const { results, addResult, updateResult, deleteResult, hasPermission, currentUser } = useApp();
+  const { results, addResult, updateResult, deleteResult, hasPermission, currentUser, calendarEvents, athletes } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -97,15 +97,46 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
     setIsModalOpen(false);
   };
 
+  const q = searchQuery.toLowerCase();
+
   const filteredResults = results.filter((res) => {
-    const q = searchQuery.toLowerCase();
     return (
       res.title.toLowerCase().includes(q) ||
       res.location.toLowerCase().includes(q) ||
       res.summary.toLowerCase().includes(q) ||
       res.competitionDate.includes(q)
     );
-  }).sort((a, b) => new Date(b.competitionDate).getTime() - new Date(a.competitionDate).getTime());
+  });
+
+  // Eventos do calendário (calendar_events) com results_url preenchido
+  const filteredEventResults = calendarEvents
+    .filter((evt) => !!evt.resultsUrl && evt.resultsUrl.trim() !== '')
+    .filter((evt) => isCalendarEventVisibleForUser(evt, currentUser, athletes))
+    .filter((evt) =>
+      evt.title.toLowerCase().includes(q) ||
+      (evt.location || '').toLowerCase().includes(q) ||
+      (evt.description || '').toLowerCase().includes(q) ||
+      evt.date.includes(q)
+    );
+
+  type ResultListItem =
+    | { kind: 'result'; date: string; res: CompetitionResult }
+    | { kind: 'event'; date: string; evt: CalendarEvent };
+
+  const listItems: ResultListItem[] = [
+    ...filteredResults.map((res) => ({ kind: 'result' as const, date: res.competitionDate, res })),
+    ...filteredEventResults.map((evt) => ({ kind: 'event' as const, date: evt.date, evt }))
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const openEventResults = (evt: CalendarEvent) => {
+    const resultsUrl = evt.resultsUrl!;
+    if (resultsUrl.toLowerCase().endsWith('.pdf')) {
+      openOriginalDocument(resultsUrl, `${evt.title || 'Resultados'}.pdf`);
+    } else {
+      const url = resultsUrl.startsWith('http') ? resultsUrl : `https://${resultsUrl}`;
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
@@ -149,7 +180,71 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
 
       {/* Simple Results List */}
       <div className="space-y-3">
-        {filteredResults.map((res) => {
+        {listItems.map((item) => {
+          if (item.kind === 'event') {
+            const evt = item.evt;
+            const evtDateObj = new Date(evt.date);
+            const evtFormattedDate = !isNaN(evtDateObj.getTime())
+              ? evtDateObj.toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' })
+              : evt.date;
+
+            return (
+              <div
+                key={`evt-${evt.id}`}
+                className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-2xs hover:border-amber-300 hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 group"
+              >
+                <div className="space-y-2 flex-1 min-w-0">
+                  <div className="flex items-center gap-3 flex-wrap text-xs">
+                    <span className="inline-flex items-center gap-1.5 font-extrabold text-slate-900 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+                      <Calendar className="w-3.5 h-3.5 text-amber-600" />
+                      <span>{evtFormattedDate}</span>
+                    </span>
+
+                    {evt.location && (
+                      <span className="inline-flex items-center gap-1 text-slate-600 font-semibold">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span>{evt.location}</span>
+                      </span>
+                    )}
+
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-500 font-bold text-[10px] uppercase tracking-wider">
+                      Calendário
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 group-hover:text-amber-700 transition-colors">
+                      {evt.title}
+                    </h3>
+                    {evt.description && (
+                      <p className="text-xs text-slate-600 mt-1 leading-relaxed font-medium">
+                        {evt.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono pt-0.5">
+                    <ExternalLink className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                    <span className="truncate">{evt.resultsUrl}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between md:justify-end gap-2 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => openEventResults(evt)}
+                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                    title="Ver resultados oficiais do evento"
+                  >
+                    <Trophy className="w-4 h-4" />
+                    <span>Ver Resultados</span>
+                  </button>
+                </div>
+              </div>
+            );
+          }
+
+          const res = item.res;
           const dateObj = new Date(res.competitionDate);
           const formattedDate = !isNaN(dateObj.getTime())
             ? dateObj.toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -243,7 +338,7 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
           );
         })}
 
-        {filteredResults.length === 0 && (
+        {listItems.length === 0 && (
           <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 p-8">
             <Trophy className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <h4 className="font-bold text-slate-800 text-base">Sem resultados encontrados</h4>

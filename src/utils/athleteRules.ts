@@ -1,6 +1,31 @@
 import { Athlete, AgeCategory, NotificationItem } from '../types';
 
 /**
+ * Validade do exame médico desportivo: 1 ano a contar da data de realização.
+ * Recebe a data do exame (YYYY-MM-DD) e devolve a data de validade (YYYY-MM-DD).
+ * Um exame a 29 de fevereiro expira a 28 de fevereiro do ano seguinte.
+ */
+export function calculateMedicalExpiryFromExamDate(examDate?: string): string {
+  if (!examDate) return '';
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(examDate.trim());
+  if (!match) return '';
+  const year = parseInt(match[1], 10) + 1;
+  const month = match[2];
+  const day = month === '02' && match[3] === '29' ? '28' : match[3];
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Operação inversa: obtém a data de realização do exame a partir da validade guardada.
+ */
+export function calculateMedicalExamDateFromExpiry(expiryDate?: string): string {
+  if (!expiryDate) return '';
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(expiryDate.trim());
+  if (!match) return '';
+  return `${parseInt(match[1], 10) - 1}-${match[2]}-${match[3]}`;
+}
+
+/**
  * Calcula o estado clínico e de aptidão do exame médico desportivo
  * de acordo com a data de validade.
  * 
