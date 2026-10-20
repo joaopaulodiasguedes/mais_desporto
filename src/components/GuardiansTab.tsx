@@ -193,9 +193,10 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
         if (u.relatedAthleteIds && u.relatedAthleteIds.map(String).includes(String(a.id))) return true;
         if (a.guardianId && String(a.guardianId) === String(u.id)) return true;
         if (uEmail && a.guardianEmail && a.guardianEmail.trim().toLowerCase() === uEmail) return true;
-        if (a.guardianName) {
+        // Sem id/email, só associa por nome exato (sem parentesco) e se o atleta não tiver outro encarregado definido
+        if (a.guardianName && !a.guardianId && !a.guardianEmail) {
           const cleanAName = a.guardianName.replace(/\s*\([^)]*\)\s*/g, '').trim().toLowerCase();
-          if (cleanAName && cleanUName && (cleanAName.includes(cleanUName) || cleanUName.includes(cleanAName))) {
+          if (cleanAName && cleanUName && cleanAName === cleanUName) {
             return true;
           }
         }
@@ -232,55 +233,8 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
       processedNames.add(u.name.toLowerCase());
     });
 
-    // 2. Process any other guardians present in athletes list not yet processed
-    athletes.forEach((ath) => {
-      const gName = ath.guardianName?.trim();
-      const gEmail = ath.guardianEmail?.trim()?.toLowerCase();
-      const isSelf = gName?.toLowerCase().includes('próprio') || gName?.toLowerCase().includes('auto-responsável');
-
-      if (gName && !isSelf) {
-        const alreadyExists =
-          (gEmail && processedEmails.has(gEmail)) ||
-          processedNames.has(gName.toLowerCase()) ||
-          list.some(
-            (g) =>
-              g.name.toLowerCase() === gName.toLowerCase() ||
-              (gEmail && g.email.toLowerCase() === gEmail)
-          );
-
-        if (!alreadyExists) {
-          // Gather all athletes for this guardian
-          const aths = athletes.filter(
-            (a) =>
-              (gEmail && a.guardianEmail && a.guardianEmail.toLowerCase() === gEmail) ||
-              (a.guardianName && a.guardianName.toLowerCase() === gName.toLowerCase())
-          );
-
-          let relation = 'Pai / Mãe';
-          if (ath.emergencyContact?.toLowerCase().includes('mãe')) relation = 'Mãe';
-          if (ath.emergencyContact?.toLowerCase().includes('pai')) relation = 'Pai';
-
-          const stableId = ath.guardianId || `guard-${gName.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'unlinked'}`;
-
-          list.push({
-            id: stableId,
-            name: gName,
-            email: ath.guardianEmail || '',
-            phone: ath.guardianPhone || ath.emergencyContact || '',
-            altPhone: ath.emergencyContact,
-            address: ath.address || '',
-            relation,
-            profession: '',
-            notes: ath.notes || '',
-            athletes: aths
-          });
-
-          if (gEmail) processedEmails.add(gEmail);
-          processedNames.add(gName.toLowerCase());
-        }
-      }
-    });
-
+    // Apenas encarregados registados (tabela profiles). Nomes escritos nas fichas dos atletas
+    // sem conta associada não geram encarregados "virtuais".
     return list;
   }, [availableUsers, athletes]);
 

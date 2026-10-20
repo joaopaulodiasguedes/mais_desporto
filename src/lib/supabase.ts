@@ -333,7 +333,8 @@ export async function mapAthleteFromDb(row: any): Promise<Athlete> {
     emergencyContact: decryptedEmergencyContact || row.emergency_contact || row.emergencyContact || row.contacto_emergencia || '',
     allergiesOrConditions: decryptedAllergies || row.allergies_or_conditions || row.allergiesOrConditions || row.alergias || undefined,
     attendanceRate: (row.attendance_rate !== undefined && row.attendance_rate !== null) ? Number(row.attendance_rate) : ((row.attendanceRate !== undefined && row.attendanceRate !== null) ? Number(row.attendanceRate) : ((row.assiduidade !== undefined && row.assiduidade !== null) ? Number(row.assiduidade) : 100)),
-    notes: decryptedNotes || row.notes || row.observacoes || row.notas || undefined
+    notes: decryptedNotes || row.notes || row.observacoes || row.notas || undefined,
+    technicalSpecs: Array.isArray(row.technical_specs) ? row.technical_specs : (Array.isArray(row.technicalSpecs) ? row.technicalSpecs : [])
   };
 }
 
@@ -384,6 +385,7 @@ export async function mapAthleteToDb(ath: Athlete): Promise<any> {
     allergies_or_conditions: encryptedAllergies || null,
     attendance_rate: ath.attendanceRate ?? 100,
     notes: encryptedNotes || null,
+    technical_specs: ath.technicalSpecs || [],
     updated_at: new Date().toISOString()
   };
 }
@@ -1013,47 +1015,21 @@ export async function fetchAllFromSupabase(): Promise<{
   if (!result.profiles) result.profiles = [];
   if (!result.coaches) result.coaches = [];
 
-  // A) Atletas registados na tabela 'profiles' que não existam na lista de 'athletes'
-  for (const prof of result.profiles) {
-    if (prof.role === 'atleta') {
-      const exists = result.athletes.some(
-        (a) => a.id === prof.id || (prof.email && a.email && a.email.toLowerCase() === prof.email.toLowerCase())
-      );
-      if (!exists) {
-        result.athletes.push({
-          id: prof.id,
-          name: prof.name,
-          birthDate: prof.birthDate || '',
-          address: prof.address || '',
-          phone: prof.phone || '',
-          email: prof.email,
-          photoUrl: prof.avatarUrl || '',
-          federationNumber: prof.federationNumber || '',
-          category: prof.requestedCategory || 'Em Análise',
-          guardianName: prof.notes || '',
-          guardianPhone: prof.altPhone || '',
-          guardianEmail: '',
-          guardianRelation: prof.relation,
-          guardianNif: prof.nif,
-          medicalExamExpiry: '',
-          medicalStatus: 'valido',
-          emergencyContact: prof.altPhone || prof.phone || '',
-          attendanceRate: 100
-        });
-      }
-    }
-  }
+  // Nota: a lista de atletas e de encarregados mostra apenas o que existe na base de dados.
+  // Não são criados atletas nem encarregados "sintéticos" a partir de outras tabelas.
+  const cleanPersonName = (name?: string) => (name || '').replace(/\s*\([^)]*\)\s*/g, ' ').trim().toLowerCase();
 
   // B) Atletas da lista de 'athletes' que não tenham conta na lista de 'profiles'
+  //    (apenas em memória, para permitir o início de sessão com o email do atleta)
   for (const ath of result.athletes) {
     const exists = result.profiles.some(
       (p) => p.id === ath.id || (ath.email && p.email && p.email.toLowerCase() === ath.email.toLowerCase())
     );
-    if (!exists) {
+    if (!exists && ath.email) {
       result.profiles.push({
         id: ath.id,
         name: ath.name,
-        email: ath.email || `${ath.id}@clube.local`,
+        email: ath.email,
         role: 'atleta',
         avatarUrl: ath.photoUrl || '',
         phone: ath.phone || '',
@@ -1067,14 +1043,15 @@ export async function fetchAllFromSupabase(): Promise<{
       });
     }
 
-    // C) Criar ou vincular Encarregado de Educação se o atleta tiver dados de encarregado
-    if (ath.guardianName || ath.guardianEmail || ath.guardianPhone) {
+    // C) Vincular o atleta ao Encarregado de Educação registado (por id, email ou nome sem parentesco)
+    if (ath.guardianId || ath.guardianName || ath.guardianEmail) {
+      const athGuardianName = cleanPersonName(ath.guardianName);
       const existingGuardian = result.profiles.find(
         (p) =>
-          p.role === 'encarregado' &&
-          ((ath.guardianEmail && p.email && p.email.toLowerCase() === ath.guardianEmail.toLowerCase()) ||
-            (ath.guardianName && p.name && p.name.toLowerCase() === ath.guardianName.toLowerCase()) ||
-            (ath.guardianId && p.id === ath.guardianId))
+          (p.role === 'encarregado' || p.isAlsoGuardian) &&
+          ((ath.guardianId && p.id === ath.guardianId) ||
+            (ath.guardianEmail && p.email && p.email.toLowerCase() === ath.guardianEmail.toLowerCase()) ||
+            (athGuardianName && cleanPersonName(p.name) === athGuardianName))
       );
 
       if (existingGuardian) {
@@ -1085,30 +1062,13 @@ export async function fetchAllFromSupabase(): Promise<{
         if (!ath.guardianId) ath.guardianId = existingGuardian.id;
         if (!existingGuardian.relation && ath.guardianRelation) existingGuardian.relation = ath.guardianRelation;
         if (!existingGuardian.nif && ath.guardianNif) existingGuardian.nif = ath.guardianNif;
-      } else if (ath.guardianName || ath.guardianEmail) {
-        // Criar perfil sintético de encarregado para que a Área de Encarregados nunca venha vazia
-        const newGuardianId = ath.guardianId || `enc-${ath.id}`;
-        ath.guardianId = newGuardianId;
-        result.profiles.push({
-          id: newGuardianId,
-          name: ath.guardianName || 'Encarregado de Educação',
-          email: ath.guardianEmail || `encarregado-${ath.id}@clube.local`,
-          role: 'encarregado',
-          status: 'aprovado',
-          avatarUrl: '',
-          phone: ath.guardianPhone || '',
-          relation: ath.guardianRelation || 'Encarregado(a) de Educação',
-          nif: ath.guardianNif,
-          address: ath.address,
-          relatedAthleteIds: [ath.id]
-        });
       }
     }
   }
 
-  // D) Treinadores registados na tabela 'profiles' que não existam na lista de 'coaches'
+  // D) Treinadores aprovados na tabela 'profiles' que não existam na lista de 'coaches'
   for (const prof of result.profiles) {
-    if (prof.role === 'treinador') {
+    if (prof.role === 'treinador' && prof.status === 'aprovado') {
       const exists = result.coaches.some(
         (c) => c.id === prof.id || (prof.email && c.email && c.email.toLowerCase() === prof.email.toLowerCase())
       );
@@ -1418,6 +1378,7 @@ export async function upsertAthleteInSupabase(ath: Athlete): Promise<boolean> {
       delete row.guardian_nif;
       delete row.nif;
       delete row.gender;
+      delete row.technical_specs;
       const retry = await client.from('athletes').upsert(row);
       if (retry.error) {
         // Fallback to table 'atletas'

@@ -93,6 +93,13 @@ export interface Athlete {
   allergiesOrConditions?: string;
   attendanceRate: number; // percentagem (ex: 94)
   notes?: string;
+  technicalSpecs?: TechnicalSpec[]; // Especificações técnicas: provas e respetivas marcas/medidas
+}
+
+export interface TechnicalSpec {
+  id: string;
+  event: string; // Prova (ex: 100m Livres, Salto em Comprimento)
+  mark: string; // Marca / Medida (ex: 1:02.35, 5.42m)
 }
 
 export interface Coach {

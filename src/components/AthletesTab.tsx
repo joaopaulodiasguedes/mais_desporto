@@ -26,7 +26,7 @@ import {
   Upload,
   RotateCcw
 } from 'lucide-react';
-import { Athlete, NotificationItem } from '../types';
+import { Athlete, NotificationItem, TechnicalSpec } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { calculateMedicalStatus, calculateMedicalExpiryFromExamDate, calculateMedicalExamDateFromExpiry, determineAgeCategory, formatBirthDate, formatShortName } from '../utils/athleteRules';
 import { generateInitialsAvatar, isInitialsAvatar } from '../utils/avatarUtils';
@@ -222,6 +222,28 @@ export const AthletesTab: React.FC = () => {
     }));
   };
 
+  // Especificações Técnicas (Prova + Marca/Medida)
+  const handleAddTechnicalSpec = () => {
+    setFormData(prev => ({
+      ...prev,
+      technicalSpecs: [...(prev.technicalSpecs || []), { id: `spec-${Date.now()}`, event: '', mark: '' }]
+    }));
+  };
+
+  const handleUpdateTechnicalSpec = (specId: string, changes: Partial<TechnicalSpec>) => {
+    setFormData(prev => ({
+      ...prev,
+      technicalSpecs: (prev.technicalSpecs || []).map(s => (s.id === specId ? { ...s, ...changes } : s))
+    }));
+  };
+
+  const handleRemoveTechnicalSpec = (specId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      technicalSpecs: (prev.technicalSpecs || []).filter(s => s.id !== specId)
+    }));
+  };
+
   // Helper to calculate age safely
   const getAge = (birthDateStr?: string) => {
     if (!birthDateStr) return '';
@@ -313,7 +335,8 @@ export const AthletesTab: React.FC = () => {
       emergencyContact: athlete.emergencyContact || '',
       allergiesOrConditions: athlete.allergiesOrConditions || '',
       attendanceRate: athlete.attendanceRate ?? 90,
-      notes: athlete.notes || ''
+      notes: athlete.notes || '',
+      technicalSpecs: athlete.technicalSpecs || []
     });
     setIsAddModalOpen(true);
   };
@@ -777,6 +800,23 @@ export const AthletesTab: React.FC = () => {
                 </p>
               </div>
 
+              {/* Especificações Técnicas */}
+              {(selectedAthlete.technicalSpecs || []).length > 0 && (
+                <div className="p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100 space-y-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-800 block">
+                    Especificações Técnicas
+                  </span>
+                  <div className="divide-y divide-blue-100">
+                    {(selectedAthlete.technicalSpecs || []).map((spec) => (
+                      <div key={spec.id} className="flex items-center justify-between gap-3 py-1.5 text-xs">
+                        <span className="font-semibold text-slate-800">{spec.event || '—'}</span>
+                        <span className="font-mono font-bold text-blue-900">{spec.mark || '—'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Coach notes & performance */}
               {selectedAthlete.notes && (
                 <div className="p-3.5 rounded-2xl bg-amber-50/60 border border-amber-100">
@@ -1132,6 +1172,73 @@ export const AthletesTab: React.FC = () => {
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 font-medium"
                     placeholder="Especialidades, provas alvo, notas de evolução..."
                   />
+                </div>
+
+                {/* Especificações Técnicas: Prova + Marca/Medida */}
+                <div className="sm:col-span-2 pt-3 border-t border-slate-100 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
+                      Especificações Técnicas ({(formData.technicalSpecs || []).length})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleAddTechnicalSpec}
+                      className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" /> Adicionar Prova
+                    </button>
+                  </div>
+
+                  {(formData.technicalSpecs || []).length === 0 ? (
+                    <div className="p-6 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 text-center space-y-2">
+                      <p className="text-xs text-slate-500 font-medium">Nenhuma especificação técnica adicionada a este atleta.</p>
+                      <button
+                        type="button"
+                        onClick={handleAddTechnicalSpec}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-all cursor-pointer shadow-xs"
+                      >
+                        <Plus className="w-3.5 h-3.5" /> Adicionar Primeira Prova
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+                      <div className="hidden sm:flex items-center gap-2 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <span className="w-5 shrink-0" />
+                        <span className="flex-1">Prova</span>
+                        <span className="w-36">Marca / Medida</span>
+                        <span className="w-7 shrink-0" />
+                      </div>
+                      {(formData.technicalSpecs || []).map((spec, sIdx) => (
+                        <div key={spec.id} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200 text-xs">
+                          <span className="w-5 h-5 rounded-md bg-slate-200 text-slate-700 text-[10px] font-black flex items-center justify-center shrink-0">
+                            {sIdx + 1}
+                          </span>
+                          <input
+                            type="text"
+                            value={spec.event}
+                            onChange={(e) => handleUpdateTechnicalSpec(spec.id, { event: e.target.value })}
+                            className="flex-1 min-w-0 px-2.5 py-1 rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-1 focus:ring-blue-500"
+                            placeholder="Prova (Ex: 100m Livres)"
+                          />
+                          <input
+                            type="text"
+                            value={spec.mark}
+                            onChange={(e) => handleUpdateTechnicalSpec(spec.id, { mark: e.target.value })}
+                            className="w-28 sm:w-36 px-2.5 py-1 rounded-lg border border-slate-300 font-mono font-semibold text-slate-800 focus:ring-1 focus:ring-blue-500"
+                            placeholder="Marca (Ex: 1:02.35)"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTechnicalSpec(spec.id)}
+                            title="Eliminar esta prova"
+                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer shrink-0"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
