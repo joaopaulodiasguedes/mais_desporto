@@ -419,7 +419,9 @@ export async function mapCoachFromDb(row: any): Promise<Coach> {
     assignedCategories: Array.isArray(row.assigned_categories) ? row.assigned_categories : (Array.isArray(row.assignedCategories) ? row.assignedCategories : (Array.isArray(row.escaloes) ? row.escaloes : [])),
     experienceYears: row.experience_years ? Number(row.experience_years) : (row.experienceYears ? Number(row.experienceYears) : (row.anos_experiencia ? Number(row.anos_experiencia) : 0)),
     bio: decryptedBio || row.bio || row.biografia || row.curriculo || undefined,
-    isAdmin: Boolean(row.is_admin || row.isAdmin || row.admin || row.email?.toLowerCase() === 'joaopaulodiasguedes@gmail.com')
+    isAdmin: Boolean(row.is_admin || row.isAdmin || row.admin || row.email?.toLowerCase() === 'joaopaulodiasguedes@gmail.com'),
+    isAlsoAthlete: Boolean(row.is_also_athlete || row.isAlsoAthlete),
+    isAlsoGuardian: Boolean(row.is_also_guardian || row.isAlsoGuardian)
   };
 }
 
@@ -455,6 +457,8 @@ export async function mapCoachToDb(c: Coach): Promise<any> {
     experience_years: c.experienceYears || 0,
     bio: encryptedBio || null,
     is_admin: c.isAdmin ?? false,
+    is_also_athlete: c.isAlsoAthlete ?? false,
+    is_also_guardian: c.isAlsoGuardian ?? false,
     updated_at: new Date().toISOString()
   };
 }
@@ -745,7 +749,9 @@ export async function mapUserProfileFromDb(row: any): Promise<UserProfile> {
     relatedAthleteIds: Array.isArray(row.related_athlete_ids) ? row.related_athlete_ids.map(String) : (Array.isArray(row.relatedAthleteIds) ? row.relatedAthleteIds.map(String) : (Array.isArray(row.atletas_associados) ? row.atletas_associados.map(String) : [])),
     athleteProfileId: row.athlete_profile_id ? String(row.athlete_profile_id) : (row.athleteProfileId ? String(row.athleteProfileId) : (row.atleta_id ? String(row.atleta_id) : undefined)),
     coachProfileId: row.coach_profile_id ? String(row.coach_profile_id) : (row.coachProfileId ? String(row.coachProfileId) : (row.treinador_id ? String(row.treinador_id) : undefined)),
-    isAdmin: Boolean(row.is_admin || row.isAdmin || row.admin || row.email?.toLowerCase() === 'joaopaulodiasguedes@gmail.com')
+    isAdmin: Boolean(row.is_admin || row.isAdmin || row.admin || row.email?.toLowerCase() === 'joaopaulodiasguedes@gmail.com'),
+    isAlsoAthlete: Boolean(row.is_also_athlete || row.isAlsoAthlete),
+    isAlsoGuardian: Boolean(row.is_also_guardian || row.isAlsoGuardian)
   };
 }
 
@@ -785,6 +791,8 @@ export async function mapUserProfileToDb(user: UserProfile): Promise<any> {
     athlete_profile_id: user.athleteProfileId || null,
     coach_profile_id: user.coachProfileId || null,
     is_admin: user.isAdmin ?? false,
+    is_also_athlete: user.isAlsoAthlete ?? false,
+    is_also_guardian: user.isAlsoGuardian ?? false,
     updated_at: new Date().toISOString()
   };
 }
@@ -1447,6 +1455,13 @@ export async function upsertCoachInSupabase(coach: Coach): Promise<boolean> {
   try {
     const row = await mapCoachToDb(coach);
     let { error } = await client.from('coaches').upsert(row);
+    if (error && (error.code === 'PGRST204' || error.message?.includes('is_also_'))) {
+      // Colunas novas ainda não criadas na base de dados (executar o script SQL de atualização)
+      delete row.is_also_athlete;
+      delete row.is_also_guardian;
+      const retryCols = await client.from('coaches').upsert(row);
+      error = retryCols.error;
+    }
     if (error) {
       const retry = await client.from('treinadores').upsert(row);
       error = retry.error;
@@ -1651,6 +1666,13 @@ export async function upsertUserProfileInSupabase(user: UserProfile): Promise<bo
   try {
     const row = await mapUserProfileToDb(user);
     let { error } = await client.from('profiles').upsert(row);
+    if (error && (error.code === 'PGRST204' || error.message?.includes('is_also_'))) {
+      // Colunas novas ainda não criadas na base de dados (executar o script SQL de atualização)
+      delete row.is_also_athlete;
+      delete row.is_also_guardian;
+      const retryCols = await client.from('profiles').upsert(row);
+      error = retryCols.error;
+    }
     if (error && (error.code === 'PGRST204' || error.message?.includes('relation') || error.message?.includes('nif') || error.message?.includes('profession') || error.message?.includes('alt_phone'))) {
       delete row.relation;
       delete row.nif;

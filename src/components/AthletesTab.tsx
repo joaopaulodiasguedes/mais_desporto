@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Users,
@@ -42,8 +42,22 @@ export const AthletesTab: React.FC = () => {
     ageCategories,
     addNotification,
     showToast,
-    setActiveTab
+    setActiveTab,
+    availableUsers
   } = useApp();
+
+  // Encarregados de educação com conta registada (os únicos que podem ser associados ao atleta)
+  const registeredGuardians = useMemo(
+    () =>
+      availableUsers
+        .filter((u) => (u.role === 'encarregado' || u.isAlsoGuardian) && u.status !== 'rejeitado')
+        .map((u) => ({
+          ...u,
+          displayName: u.name.replace(/\s*\([^)]*\)\s*/g, ' ').trim()
+        }))
+        .sort((a, b) => a.displayName.localeCompare(b.displayName, 'pt-PT')),
+    [availableUsers]
+  );
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('todos');
@@ -1004,13 +1018,47 @@ export const AthletesTab: React.FC = () => {
 
                 <div>
                   <label className="text-xs font-bold text-slate-700 block mb-1">Nome do Encarregado</label>
-                  <input
-                    type="text"
-                    value={formData.guardianName}
-                    onChange={(e) => setFormData({ ...formData, guardianName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 font-medium"
-                    placeholder="Pai / Mãe / Tutor"
-                  />
+                  {(() => {
+                    const selectedGuardian = registeredGuardians.find(
+                      (g) =>
+                        (formData.guardianId && String(g.id) === String(formData.guardianId)) ||
+                        (!!formData.guardianEmail && g.email.toLowerCase() === formData.guardianEmail.trim().toLowerCase())
+                    );
+                    const hasUnregisteredGuardian = !selectedGuardian && !!formData.guardianName?.trim();
+
+                    return (
+                      <>
+                        <select
+                          value={selectedGuardian ? selectedGuardian.id : ''}
+                          onChange={(e) => {
+                            const guardian = registeredGuardians.find((g) => String(g.id) === e.target.value);
+                            setFormData({
+                              ...formData,
+                              guardianId: guardian ? guardian.id : '',
+                              guardianName: guardian ? guardian.displayName : '',
+                              guardianEmail: guardian ? guardian.email : '',
+                              guardianPhone: guardian ? guardian.phone || formData.guardianPhone : formData.guardianPhone
+                            });
+                          }}
+                          className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 font-medium bg-white"
+                        >
+                          <option value="">
+                            {registeredGuardians.length === 0 ? 'Nenhum encarregado registado' : 'Selecione um encarregado registado...'}
+                          </option>
+                          {registeredGuardians.map((g) => (
+                            <option key={g.id} value={g.id}>
+                              {g.displayName}{g.email ? ` — ${g.email}` : ''}
+                            </option>
+                          ))}
+                        </select>
+                        {hasUnregisteredGuardian && (
+                          <p className="text-[11px] font-semibold text-amber-700 mt-1">
+                            ⚠️ "{formData.guardianName}" não está registado. Selecione um encarregado da lista.
+                          </p>
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
 
                 <div>

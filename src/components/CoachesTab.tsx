@@ -73,7 +73,9 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
     assignedCategories: ['Juvenis (Sub-16)'],
     experienceYears: 10,
     bio: '',
-    isAdmin: false
+    isAdmin: false,
+    isAlsoAthlete: false,
+    isAlsoGuardian: false
   });
 
   const getAge = (birthDateStr: string) => {
@@ -104,7 +106,9 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
       assignedCategories: ['Infantis (Sub-14)', 'Juvenis (Sub-16)'],
       experienceYears: 8,
       bio: '',
-      isAdmin: false
+      isAdmin: false,
+      isAlsoAthlete: false,
+      isAlsoGuardian: false
     });
     setEditingCoach(null);
     setIsAddModalOpen(true);
@@ -127,7 +131,9 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
       assignedCategories: coach.assignedCategories,
       experienceYears: coach.experienceYears,
       bio: coach.bio,
-      isAdmin: coach.isAdmin ?? false
+      isAdmin: coach.isAdmin ?? false,
+      isAlsoAthlete: coach.isAlsoAthlete ?? false,
+      isAlsoGuardian: coach.isAlsoGuardian ?? false
     });
     setIsAddModalOpen(true);
   };
@@ -378,6 +384,20 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                       <span className="inline-block mt-0.5 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 text-[11px] font-bold border border-teal-200 max-w-full truncate">
                         {coach.licenseGrade}
                       </span>
+                      {(coach.isAlsoAthlete || coach.isAlsoGuardian) && (
+                        <div className="flex items-center gap-1 flex-wrap mt-1">
+                          {coach.isAlsoAthlete && (
+                            <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[9px] font-black border border-blue-200">
+                              Também Atleta
+                            </span>
+                          )}
+                          {coach.isAlsoGuardian && (
+                            <span className="px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[9px] font-black border border-purple-200">
+                              Também Enc. Educação
+                            </span>
+                          )}
+                        </div>
+                      )}
                       <p className="text-[11px] font-mono text-slate-400 mt-1">
                         {coach.licenseNumber}
                       </p>
@@ -1006,6 +1026,55 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                     </div>
                   </button>
                 </div>
+              </div>
+
+              {/* Outros papéis: também é atleta e/ou encarregado de educação */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2.5">
+                <label className="text-xs font-extrabold text-slate-800 block">
+                  Outros papéis no clube
+                </label>
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Um treinador também pode ser atleta e/ou encarregado de educação. Se assinalar, a ficha passa a aparecer também em <strong>Atletas</strong> e/ou <strong>Enc. Educação</strong>.
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  {([
+                    { key: 'isAlsoAthlete', label: 'Também é Atleta', desc: 'Cria a ficha em Atletas' },
+                    { key: 'isAlsoGuardian', label: 'Também é Enc. Educação', desc: 'Aparece em Enc. Educação' }
+                  ] as const).map(({ key, label, desc }) => {
+                    const checked = !!formData[key];
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, [key]: !checked })}
+                        className={`p-2.5 rounded-xl border text-left flex items-start gap-2.5 transition-all cursor-pointer ${checked
+                          ? 'bg-white border-teal-600 ring-2 ring-teal-400/40 shadow-xs'
+                          : 'bg-white/60 border-slate-200 text-slate-600 hover:bg-white'
+                          }`}
+                      >
+                        <div className={`w-4 h-4 rounded border mt-0.5 flex items-center justify-center shrink-0 ${checked ? 'border-teal-600 bg-teal-600' : 'border-slate-400 bg-white'}`}>
+                          {checked && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold block text-slate-900">{label}</span>
+                          <span className="text-[10px] text-slate-500 leading-tight block mt-0.5">{desc}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {editingCoach?.isAlsoAthlete && !formData.isAlsoAthlete && (
+                  <p className="text-[11px] font-semibold text-red-600">
+                    ⚠️ Ao guardar, a ficha de atleta deste treinador será removida de Atletas.
+                  </p>
+                )}
+                {(formData.isAlsoAthlete || formData.isAlsoGuardian) && !formData.email.trim() && (
+                  <p className="text-[11px] font-semibold text-amber-700">
+                    ⚠️ Indique o email do treinador para associar as fichas de atleta / encarregado.
+                  </p>
+                )}
               </div>
 
               <div>

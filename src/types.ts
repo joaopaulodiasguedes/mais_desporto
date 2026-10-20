@@ -31,6 +31,8 @@ export interface UserProfile {
   athleteProfileId?: string; // Se for Atleta, ID da sua ficha
   coachProfileId?: string; // Se for Treinador, ID da sua ficha
   isAdmin?: boolean; // Se for Administrador do Clube
+  isAlsoAthlete?: boolean; // Treinador/Encarregado que também é atleta (tem ficha em Atletas)
+  isAlsoGuardian?: boolean; // Treinador que também é Encarregado de Educação (aparece em Enc. Educação)
 }
 
 export interface ClubDocument {
@@ -110,6 +112,8 @@ export interface Coach {
   experienceYears: number;
   bio: string;
   isAdmin?: boolean; // Se for Administrador do Clube
+  isAlsoAthlete?: boolean; // Também é atleta (tem ficha em Atletas)
+  isAlsoGuardian?: boolean; // Também é Encarregado de Educação (aparece em Enc. Educação)
 }
 
 export interface ExerciseItem {

@@ -165,6 +165,7 @@ interface AppContextType {
     notes?: string;
     athleteIds?: string[];
     avatarUrl?: string;
+    isAlsoAthlete?: boolean;
   }) => string;
   updateGuardian: (
     id: string,
@@ -180,6 +181,7 @@ interface AppContextType {
       notes?: string;
       athleteIds?: string[];
       avatarUrl?: string;
+      isAlsoAthlete?: boolean;
     },
     oldGuardianInfo?: { email?: string; name?: string }
   ) => void;
@@ -1711,6 +1713,105 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Atleta removido com sucesso!', 'info');
   };
 
+  // Ficha de atleta de um treinador / encarregado que também é atleta.
+  // Se a opção estiver ativa e ainda não existir ficha com o mesmo email, cria-a;
+  // se a opção for desativada, remove a ficha associada. Devolve o id da ficha (se existir).
+  const syncLinkedAthleteRecord = (
+    person: { name: string; email: string; phone?: string; address?: string; birthDate?: string; photoUrl?: string },
+    enabled: boolean,
+    wasEnabled: boolean,
+    previousEmail?: string
+  ): string | undefined => {
+    const emails = [person.email, previousEmail]
+      .filter((e): e is string => !!e && e.trim() !== '')
+      .map(e => e.trim().toLowerCase());
+    const existing = emails.length > 0
+      ? athletes.find(a => a.email && emails.includes(a.email.trim().toLowerCase()))
+      : undefined;
+
+    if (enabled) {
+      if (existing) return existing.id;
+      const birthDate = person.birthDate || '';
+      const newAthlete: Athlete = {
+        id: `ath-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        name: person.name.replace(/\s*\([^)]*\)\s*/g, ' ').trim(),
+        birthDate,
+        address: person.address || '',
+        phone: person.phone || '',
+        email: person.email.trim(),
+        photoUrl: person.photoUrl || generateInitialsAvatar(person.name),
+        federationNumber: '',
+        category: birthDate ? determineAgeCategory(birthDate, ageCategories) : '',
+        guardianName: '',
+        guardianPhone: '',
+        guardianEmail: '',
+        medicalExamExpiry: '',
+        medicalStatus: 'expirado',
+        emergencyContact: person.phone || '',
+        attendanceRate: 100,
+        notes: ''
+      };
+      setAthletes(prev => [newAthlete, ...prev]);
+      upsertAthleteInSupabase(newAthlete);
+      return newAthlete.id;
+    }
+
+    if (wasEnabled && existing) {
+      setAthletes(prev => prev.filter(a => a.id !== existing.id));
+      deleteAthleteInSupabase(existing.id);
+    }
+    return undefined;
+  };
+
+  // Treinador que também é Encarregado de Educação / Atleta: sincroniza o perfil de utilizador
+  // (é o perfil que aparece em Enc. Educação). Se o treinador ainda não tiver perfil e for
+  // encarregado, cria um perfil de treinador já aprovado com essa marcação.
+  const syncCoachUserProfile = (coach: Coach, athleteProfileId: string | undefined, previousEmail?: string) => {
+    const emails = [coach.email, previousEmail]
+      .filter((e): e is string => !!e && e.trim() !== '')
+      .map(e => e.trim().toLowerCase());
+
+    setAvailableUsers(prev => {
+      const target = prev.find(u => u.coachProfileId === coach.id || (u.email && emails.includes(u.email.toLowerCase())));
+      let next = prev;
+      if (target) {
+        const updatedUser: UserProfile = {
+          ...target,
+          coachProfileId: target.coachProfileId || coach.id,
+          isAlsoGuardian: !!coach.isAlsoGuardian,
+          isAlsoAthlete: !!coach.isAlsoAthlete,
+          athleteProfileId: coach.isAlsoAthlete ? athleteProfileId || target.athleteProfileId : undefined
+        };
+        upsertUserProfileInSupabase(updatedUser);
+        next = prev.map(u => (u.id === target.id ? updatedUser : u));
+      } else if (coach.isAlsoGuardian && coach.email) {
+        const created: UserProfile = {
+          id: `user-${Date.now()}`,
+          name: coach.name,
+          email: coach.email.trim(),
+          role: 'treinador',
+          avatarUrl: coach.photoUrl || generateInitialsAvatar(coach.name),
+          phone: coach.phone || '',
+          birthDate: coach.birthDate,
+          address: coach.address,
+          status: 'aprovado',
+          registeredAt: new Date().toISOString().split('T')[0],
+          approvedAt: new Date().toISOString().split('T')[0],
+          coachProfileId: coach.id,
+          isAdmin: coach.isAdmin,
+          isAlsoGuardian: true,
+          isAlsoAthlete: !!coach.isAlsoAthlete,
+          athleteProfileId,
+          relatedAthleteIds: []
+        };
+        upsertUserProfileInSupabase(created);
+        next = [created, ...prev];
+      }
+      localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+      return next;
+    });
+  };
+
   // Coaches Operations
   const addCoach = (coachData: Omit<Coach, 'id'>) => {
     const newCoach: Coach = {
@@ -1720,6 +1821,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     };
     setCoaches(prev => [newCoach, ...prev]);
     upsertCoachInSupabase(newCoach);
+
+    if (newCoach.isAlsoAthlete || newCoach.isAlsoGuardian) {
+      const athleteId = syncLinkedAthleteRecord(newCoach, !!newCoach.isAlsoAthlete, false);
+      syncCoachUserProfile(newCoach, athleteId);
+    }
+
     showToast(`Treinador "${newCoach.name}" registado com sucesso!`);
   };
 
@@ -1737,6 +1844,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return c;
     }));
+
+    // Treinador que também é atleta / encarregado de educação
+    const previousCoach = coaches.find(c => c.id === id);
+    if (previousCoach && (updated.isAlsoAthlete !== undefined || updated.isAlsoGuardian !== undefined)) {
+      const merged: Coach = { ...previousCoach, ...updated };
+      const athleteId = syncLinkedAthleteRecord(merged, !!merged.isAlsoAthlete, !!previousCoach.isAlsoAthlete, previousCoach.email);
+      if (merged.isAlsoAthlete || merged.isAlsoGuardian || previousCoach.isAlsoAthlete || previousCoach.isAlsoGuardian) {
+        syncCoachUserProfile(merged, athleteId, previousCoach.email);
+      }
+    }
 
     const newPhoto = updated.photoUrl;
     const newName = updated.name;
@@ -1812,10 +1929,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     notes?: string;
     athleteIds?: string[];
     avatarUrl?: string;
+    isAlsoAthlete?: boolean;
   }): string => {
     const guardianId = `guard-${Date.now()}`;
     const cleanName = data.name.trim();
     const formattedName = data.relation ? `${cleanName} (${data.relation})` : cleanName;
+
+    // Encarregado que também é atleta: cria a respetiva ficha em Atletas
+    const linkedAthleteId = syncLinkedAthleteRecord(
+      { name: cleanName, email: data.email, phone: data.phone, address: data.address, photoUrl: data.avatarUrl },
+      !!data.isAlsoAthlete,
+      false
+    );
 
     const newGuardianUser: UserProfile = {
       id: guardianId,
@@ -1834,7 +1959,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       relatedAthleteIds: data.athleteIds || [],
       registeredAt: new Date().toISOString().split('T')[0],
       approvedAt: new Date().toISOString().split('T')[0],
-      approvedByCoachName: currentUser.name || 'Treinador Principal'
+      approvedByCoachName: currentUser.name || 'Treinador Principal',
+      isAlsoAthlete: !!data.isAlsoAthlete,
+      athleteProfileId: linkedAthleteId
     };
 
     setAvailableUsers(prev => {
@@ -1885,6 +2012,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       notes?: string;
       athleteIds?: string[];
       avatarUrl?: string;
+      isAlsoAthlete?: boolean;
     },
     oldGuardianInfo?: { email?: string; name?: string }
   ) => {
@@ -1893,6 +2021,31 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const oldEmail = oldGuardianInfo?.email?.trim().toLowerCase();
     const oldName = oldGuardianInfo?.name?.trim().toLowerCase();
+
+    // Encarregado que também é atleta: cria / remove a respetiva ficha em Atletas
+    const previousUser = availableUsers.find(
+      u => u.id === id || (oldEmail && u.email?.toLowerCase() === oldEmail)
+    );
+    const isAlsoAthlete = data.isAlsoAthlete ?? !!previousUser?.isAlsoAthlete;
+    const linkedAthleteId = syncLinkedAthleteRecord(
+      { name: cleanName, email: data.email, phone: data.phone, address: data.address, photoUrl: data.avatarUrl || previousUser?.avatarUrl },
+      isAlsoAthlete,
+      !!previousUser?.isAlsoAthlete,
+      oldEmail
+    );
+
+    // Treinador que também é encarregado: atualizar a marcação na ficha de treinador
+    if (previousUser && previousUser.role === 'treinador' && previousUser.coachProfileId) {
+      const coachId = previousUser.coachProfileId;
+      setCoaches(prev => prev.map(c => {
+        if (c.id === coachId && !!c.isAlsoAthlete !== isAlsoAthlete) {
+          const item = { ...c, isAlsoAthlete };
+          upsertCoachInSupabase(item);
+          return item;
+        }
+        return c;
+      }));
+    }
 
     setAvailableUsers(prev => {
       const exists = prev.some(
@@ -1905,7 +2058,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const updatedUser: UserProfile = {
               ...u,
               id: u.id || id,
-              name: formattedName,
+              // Treinadores que também são encarregados mantêm o nome sem o parentesco
+              name: u.role === 'encarregado' ? formattedName : cleanName,
+              isAlsoAthlete,
+              athleteProfileId: isAlsoAthlete ? linkedAthleteId || u.athleteProfileId : (u.role === 'atleta' ? u.athleteProfileId : undefined),
               email: data.email.trim(),
               phone: data.phone.trim(),
               address: data.address?.trim() || undefined,
@@ -1938,7 +2094,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           altPhone: data.altPhone?.trim() || undefined,
           relation: data.relation || 'Pai / Mãe',
           relatedAthleteIds: data.athleteIds || [],
-          registeredAt: new Date().toISOString().split('T')[0]
+          registeredAt: new Date().toISOString().split('T')[0],
+          isAlsoAthlete,
+          athleteProfileId: linkedAthleteId
         };
         upsertUserProfileInSupabase(created);
         next = [created, ...prev];
@@ -2020,11 +2178,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const rawTargetName = guardianUser?.name || fallbackName || '';
     const targetName = rawTargetName.replace(/\s*\((Pai|Mãe|Tutor|Avô|Avó|Outro|Encarregado)\)\s*/gi, '').trim().toLowerCase();
 
-    setAvailableUsers(prev => {
-      const next = prev.filter(u => u.id !== id && (targetEmail ? u.email?.toLowerCase() !== targetEmail : true));
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
-      return next;
-    });
+    // Treinador que também era encarregado: não apaga a conta, apenas retira a marcação
+    const keepAccount = !!guardianUser && guardianUser.role !== 'encarregado';
+
+    if (keepAccount && guardianUser) {
+      const updatedUser: UserProfile = { ...guardianUser, isAlsoGuardian: false, relatedAthleteIds: [] };
+      setAvailableUsers(prev => {
+        const next = prev.map(u => (u.id === guardianUser.id ? updatedUser : u));
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+        return next;
+      });
+      upsertUserProfileInSupabase(updatedUser);
+      if (guardianUser.coachProfileId) {
+        setCoaches(prev => prev.map(c => {
+          if (c.id === guardianUser.coachProfileId) {
+            const item = { ...c, isAlsoGuardian: false };
+            upsertCoachInSupabase(item);
+            return item;
+          }
+          return c;
+        }));
+      }
+    } else {
+      // Encarregado que também era atleta: remove a ficha de atleta associada
+      if (guardianUser?.isAlsoAthlete) {
+        syncLinkedAthleteRecord({ name: guardianUser.name, email: guardianUser.email }, false, true);
+      }
+      setAvailableUsers(prev => {
+        const next = prev.filter(u => u.id !== id && (targetEmail ? u.email?.toLowerCase() !== targetEmail : true));
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+        return next;
+      });
+    }
 
     setAthletes(prev => {
       const next = prev.map(a => {
@@ -2049,7 +2234,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return next;
     });
 
-    deleteUserProfileInSupabase(id);
+    if (!keepAccount) {
+      deleteUserProfileInSupabase(id);
+    }
     showToast('Encarregado de educação removido com sucesso!', 'info');
   };
 

@@ -29,7 +29,8 @@ import {
   X,
   Camera,
   Upload,
-  RotateCcw
+  RotateCcw,
+  Check
 } from 'lucide-react';
 
 interface GuardiansTabProps {
@@ -47,6 +48,8 @@ export interface GuardianRecord {
   profession?: string;
   notes?: string;
   avatarUrl?: string;
+  isAlsoAthlete?: boolean;
+  isCoach?: boolean;
   athletes: Athlete[];
 }
 
@@ -98,7 +101,8 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
     profession: '',
     notes: '',
     athleteIds: [] as string[],
-    avatarUrl: ''
+    avatarUrl: '',
+    isAlsoAthlete: false
   });
 
   const handleOpenAdd = () => {
@@ -113,7 +117,8 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
       profession: '',
       notes: '',
       athleteIds: [],
-      avatarUrl: ''
+      avatarUrl: '',
+      isAlsoAthlete: false
     });
     setIsFormModalOpen(true);
   };
@@ -130,7 +135,8 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
       profession: guardian.profession || '',
       notes: guardian.notes || '',
       athleteIds: guardian.athletes.map(a => a.id),
-      avatarUrl: guardian.avatarUrl || ''
+      avatarUrl: guardian.avatarUrl || '',
+      isAlsoAthlete: !!guardian.isAlsoAthlete
     });
     setIsFormModalOpen(true);
   };
@@ -166,7 +172,6 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
       const newId = addGuardian(formData);
       if (newId) {
         setSelectedGuardianId(newId);
-        setViewMode('ficha');
       }
     }
     setIsFormModalOpen(false);
@@ -179,7 +184,7 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
     const processedNames = new Set<string>();
 
     // 1. Process explicit user accounts with role === 'encarregado'
-    const parentUsers = availableUsers.filter((u) => u.role === 'encarregado');
+    const parentUsers = availableUsers.filter((u) => u.role === 'encarregado' || (u.isAlsoGuardian && u.status !== 'rejeitado'));
     parentUsers.forEach((u) => {
       // Find associated athletes with flexible matching
       const cleanUName = (u.name || '').replace(/\s*\([^)]*\)\s*/g, '').trim().toLowerCase();
@@ -218,6 +223,8 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
         profession: u.profession || '',
         notes: u.notes || '',
         avatarUrl: u.avatarUrl,
+        isAlsoAthlete: !!u.isAlsoAthlete,
+        isCoach: u.role === 'treinador',
         athletes: relatedAthletes
       });
 
@@ -449,6 +456,16 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                       <span className="text-[11px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md inline-block mt-0.5">
                         {g.relation}
                       </span>
+                      {g.isCoach && (
+                        <span className="text-[10px] font-bold text-teal-700 bg-teal-50 border border-teal-200 px-1.5 py-0.5 rounded-md inline-block mt-0.5 ml-1">
+                          Treinador
+                        </span>
+                      )}
+                      {g.isAlsoAthlete && (
+                        <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded-md inline-block mt-0.5 ml-1">
+                          Atleta
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -672,6 +689,30 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
                     <option value="Outro">Outro</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Encarregado que também é atleta */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, isAlsoAthlete: !formData.isAlsoAthlete })}
+                  className="w-full text-left flex items-start gap-2.5 cursor-pointer"
+                >
+                  <div className={`w-4 h-4 rounded border mt-0.5 flex items-center justify-center shrink-0 ${formData.isAlsoAthlete ? 'border-purple-600 bg-purple-600' : 'border-slate-400 bg-white'}`}>
+                    {formData.isAlsoAthlete && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold block text-slate-900">Também é Atleta</span>
+                    <span className="text-[10px] text-slate-500 leading-tight block mt-0.5">
+                      Se assinalar, é criada uma ficha deste encarregado em Atletas.
+                    </span>
+                  </div>
+                </button>
+                {editingGuardian?.isAlsoAthlete && !formData.isAlsoAthlete && (
+                  <p className="text-[11px] font-semibold text-red-600">
+                    ⚠️ Ao guardar, a ficha de atleta deste encarregado será removida de Atletas.
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
