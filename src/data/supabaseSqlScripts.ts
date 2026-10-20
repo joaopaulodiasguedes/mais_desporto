@@ -358,6 +358,7 @@ ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS allergies_or_conditions TEX
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS attendance_rate NUMERIC(5,2) DEFAULT 100.00;
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS notes TEXT;
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS technical_specs JSONB DEFAULT '[]'::JSONB;
+ALTER TABLE public.athletes ALTER COLUMN address DROP NOT NULL;
 
 -- 3.5 training_plans: Agendamentos diários, múltiplos dias, tags e feedbacks de conclusão RPE
 ALTER TABLE public.training_plans ADD COLUMN IF NOT EXISTS scheduled_date DATE;

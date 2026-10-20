@@ -310,6 +310,8 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS relation TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS nif TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS profession TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS alt_phone TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_also_athlete BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_also_guardian BOOLEAN DEFAULT FALSE;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS registered_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW());
 
 -- 3.3 coaches: Administrador, cédula TPTD, graus, diplomas e turmas atribuídas
@@ -326,6 +328,8 @@ ALTER TABLE public.coaches ADD COLUMN IF NOT EXISTS diploma_type TEXT;
 ALTER TABLE public.coaches ADD COLUMN IF NOT EXISTS assigned_categories TEXT[] DEFAULT '{}';
 ALTER TABLE public.coaches ADD COLUMN IF NOT EXISTS experience_years INTEGER DEFAULT 0;
 ALTER TABLE public.coaches ADD COLUMN IF NOT EXISTS bio TEXT;
+ALTER TABLE public.coaches ADD COLUMN IF NOT EXISTS is_also_athlete BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.coaches ADD COLUMN IF NOT EXISTS is_also_guardian BOOLEAN DEFAULT FALSE;
 
 -- 3.4 athletes: Dados de encarregado, exames médicos, alergias e assiduidade
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS guardian_id TEXT;
@@ -347,6 +351,7 @@ ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS emergency_contact TEXT;
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS allergies_or_conditions TEXT;
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS attendance_rate NUMERIC(5,2) DEFAULT 100.00;
 ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE public.athletes ADD COLUMN IF NOT EXISTS technical_specs JSONB DEFAULT '[]'::JSONB;
 ALTER TABLE public.athletes ALTER COLUMN address DROP NOT NULL;
 
 -- 3.5 training_plans: Agendamentos diários, múltiplos dias, tags e feedbacks de conclusão RPE
