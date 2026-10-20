@@ -223,10 +223,7 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono pt-0.5">
-                    <ExternalLink className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                    <span className="truncate">{evt.resultsUrl}</span>
-                  </div>
+
                 </div>
 
                 <div className="flex items-center justify-between md:justify-end gap-2 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
@@ -237,7 +234,7 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
                     title="Ver resultados oficiais do evento"
                   >
                     <Trophy className="w-4 h-4" />
-                    <span>Ver Resultados</span>
+                    <span>Resultados</span>
                   </button>
                 </div>
               </div>
