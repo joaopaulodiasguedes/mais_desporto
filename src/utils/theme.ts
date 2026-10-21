@@ -158,3 +158,60 @@ export function applyClubTheme(hexColor?: string): void {
     }
   `;
 }
+
+/**
+ * Modo claro / escuro
+ * A preferência é guardada em localStorage; sem escolha explícita segue o sistema.
+ */
+export type ThemeMode = 'light' | 'dark';
+
+const THEME_MODE_KEY = 'maisDesportoThemeMode';
+const THEME_MODE_EVENT = 'maisDesportoThemeModeChange';
+
+function getStoredThemeMode(): ThemeMode | null {
+  try {
+    const stored = localStorage.getItem(THEME_MODE_KEY);
+    return stored === 'light' || stored === 'dark' ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+export function getThemeMode(): ThemeMode {
+  const stored = getStoredThemeMode();
+  if (stored) return stored;
+  return typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
+}
+
+function applyThemeMode(mode: ThemeMode): void {
+  document.documentElement.classList.toggle('dark', mode === 'dark');
+  document
+    .querySelector('meta[name="theme-color"]')
+    ?.setAttribute('content', mode === 'dark' ? '#0b1120' : '#f8fafc');
+  window.dispatchEvent(new CustomEvent(THEME_MODE_EVENT, { detail: mode }));
+}
+
+export function setThemeMode(mode: ThemeMode): void {
+  try {
+    localStorage.setItem(THEME_MODE_KEY, mode);
+  } catch {
+    // armazenamento indisponível: o modo aplica-se apenas à sessão atual
+  }
+  applyThemeMode(mode);
+}
+
+export function subscribeThemeMode(listener: (mode: ThemeMode) => void): () => void {
+  const handler = (e: Event) => listener((e as CustomEvent<ThemeMode>).detail);
+  window.addEventListener(THEME_MODE_EVENT, handler);
+  return () => window.removeEventListener(THEME_MODE_EVENT, handler);
+}
+
+/** Aplica o modo guardado e acompanha alterações do sistema enquanto não houver escolha explícita. */
+export function initThemeMode(): void {
+  applyThemeMode(getThemeMode());
+  window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (!getStoredThemeMode()) applyThemeMode(getThemeMode());
+  });
+}

@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#f8fafc" />
+    <script>
+      // Evita o "flash" claro antes do React arrancar
+      try {
+        var m = localStorage.getItem('maisDesportoThemeMode');
+        if (m === 'dark' || (m !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    </script>
     <title>+ Desporto</title>
     <meta name="description" content="App móvel de gestão desportiva com perfis de Treinador, Atleta e Encarregados de Educação, Clube, Planos de Treino, Calendário, Resultados e Área dos Pais." />
     <meta property="og:title" content="+ Desporto" />

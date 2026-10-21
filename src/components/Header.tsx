@@ -15,10 +15,13 @@ import {
   LogOut,
   Clock,
   Users,
-  UserCog
+  UserCog,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { EditProfileModal } from './EditProfileModal';
 import { formatShortName } from '../utils/athleteRules';
+import { getThemeMode, setThemeMode, subscribeThemeMode, ThemeMode } from '../utils/theme';
 
 interface HeaderProps {
   onOpenPermissions: () => void;
@@ -48,6 +51,9 @@ export const Header: React.FC<HeaderProps> = ({
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(getThemeMode);
+
+  React.useEffect(() => subscribeThemeMode(setThemeModeState), []);
 
   // Resolver a foto de perfil real diretamente a partir da respetiva ficha (Treinador, Atleta ou Encarregado)
   const currentPhoto = React.useMemo(() => {
@@ -156,6 +162,17 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </button>
         )}
+
+        {/* Dark Mode Toggle */}
+        <button
+          id="header-theme-toggle-btn"
+          onClick={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
+          className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 flex items-center justify-center bg-white hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer shrink-0"
+          title={themeMode === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+          aria-label={themeMode === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
+        >
+          {themeMode === 'dark' ? <Sun className="w-4 h-4 text-slate-600" /> : <Moon className="w-4 h-4 text-slate-600" />}
+        </button>
 
         {/* Notifications Icon Button */}
         <button
