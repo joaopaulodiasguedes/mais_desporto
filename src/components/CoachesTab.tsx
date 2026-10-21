@@ -297,7 +297,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
         <div>
           <h2 className="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <UserCheck className="w-5 h-5 text-teal-600" />
-            Corpo Técnico & Treinadores
+            Treinadores
           </h2>
           <p className="text-xs text-slate-500 font-medium">
             {coaches.length} treinadores certificados pelo IPDJ / TPTD

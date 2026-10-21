@@ -721,10 +721,10 @@ export const TrainingPlansTab: React.FC = () => {
         <div>
           <h2 className="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <Dumbbell className="w-5 h-5 text-indigo-600" />
-            Planos de Treino por Atleta
+            Planos de Treino
           </h2>
-          <p className="text-xs text-slate-500">
-            Prescrição individualizadae registo de esforço por atleta
+          <p className="text-xs text-slate-500 font-medium">
+            Prescrição individualizada e registo de esforço por atleta
           </p>
         </div>
 
@@ -734,7 +734,7 @@ export const TrainingPlansTab: React.FC = () => {
             className="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 transition-all active:scale-95 whitespace-nowrap self-start sm:self-auto cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Criar Plano de Treino</span>
+            <span>Criar</span>
           </button>
         )}
       </div>

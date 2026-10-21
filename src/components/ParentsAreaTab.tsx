@@ -118,14 +118,23 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
 
   const activeAthlete = parentAthletes.find((a) => a.id === selectedAthleteId) || parentAthletes[0] || null;
 
+  // Educandos reais do utilizador (ligação guardada nas fichas), sem recorrer ao atleta "ativo" das restantes abas
+  const myAthletes = useMemo(() => {
+    if (currentUser.role === 'encarregado') return getLinkedAthletesForGuardian(currentUser, athletes);
+    if (currentUser.role === 'atleta' && currentAthleteProfile) return [currentAthleteProfile];
+    return [];
+  }, [currentUser, athletes, currentAthleteProfile]);
+
   // Modals
   const [isOfferCarpoolOpen, setIsOfferCarpoolOpen] = useState(false);
   const [isClaimSeatOpen, setIsClaimSeatOpen] = useState<CarpoolOffer | null>(null);
   const [claimSeatsCount, setClaimSeatsCount] = useState(1);
+  const [claimAthleteId, setClaimAthleteId] = useState('');
   const [carpoolToDelete, setCarpoolToDelete] = useState<CarpoolOffer | null>(null);
 
   // New Carpool Form State
   const [carpoolEventTitle, setCarpoolEventTitle] = useState('');
+  const [carpoolEventChoice, setCarpoolEventChoice] = useState(''); // id de um evento do calendário, 'outro' (escrita livre) ou ''
   const [carpoolDate, setCarpoolDate] = useState('');
   const [carpoolSeats, setCarpoolSeats] = useState(3);
   const [carpoolLocation, setCarpoolLocation] = useState('');
@@ -282,8 +291,48 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
     return result;
   }, [septemberActivities, septemberFilterType]);
 
+  // Os 3 próximos eventos do calendário a partir de hoje (inclusive)
+  const nextCalendarEvents = useMemo(() => {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return calendarEvents
+      .filter((ev) => ev.date >= today)
+      .sort((a, b) => `${a.date} ${a.time || ''}`.localeCompare(`${b.date} ${b.time || ''}`))
+      .slice(0, 3);
+  }, [calendarEvents]);
+
+  const handleCarpoolEventChoice = (choice: string) => {
+    setCarpoolEventChoice(choice);
+    const ev = nextCalendarEvents.find((e) => e.id === choice);
+    if (ev) {
+      setCarpoolEventTitle(ev.title);
+      setCarpoolDate(ev.date);
+      if (ev.time) setCarpoolTime(ev.time);
+    } else {
+      setCarpoolEventTitle('');
+    }
+  };
+
+  // Cada utilizador só pode ter uma boleia ativa (ofertas de datas passadas não contam)
+  const hasActiveCarpool = useMemo(() => {
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    return carpools.some((c) => c.parentId === currentUser.id && c.eventDate >= today);
+  }, [carpools, currentUser.id]);
+
+  const openClaimSeat = (carp: CarpoolOffer) => {
+    setClaimAthleteId(myAthletes[0]?.id || '');
+    setClaimSeatsCount(1);
+    setIsClaimSeatOpen(carp);
+  };
+
   const handleCreateCarpool = (e: React.FormEvent) => {
     e.preventDefault();
+    if (hasActiveCarpool) {
+      showToast('Já tens uma boleia ativa. Elimina-a antes de disponibilizar outra.', 'error');
+      setIsOfferCarpoolOpen(false);
+      return;
+    }
     if (isUnderageAthlete) {
       showToast('Por motivos legais de segurança rodoviária, utilizadores menores de 18 anos não podem disponibilizar lugares na bolsa de boleias.', 'error');
       setIsOfferCarpoolOpen(false);
@@ -292,8 +341,8 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
     addCarpoolOffer({
       parentId: currentUser.id,
       parentName: currentUser.name,
-      athleteName: activeAthlete?.name || 'Atleta',
-      eventId: 'evt-carpool',
+      athleteName: myAthletes.length > 0 ? myAthletes.map((a) => a.name).join(', ') : currentUser.name,
+      eventId: nextCalendarEvents.some((ev) => ev.id === carpoolEventChoice) ? carpoolEventChoice : 'evt-carpool',
       eventTitle: carpoolEventTitle,
       eventDate: carpoolDate,
       availableSeats: carpoolSeats,
@@ -311,7 +360,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
     claimCarpoolSeat(
       isClaimSeatOpen.id,
       currentUser.name,
-      activeAthlete?.name || 'Educando',
+      (myAthletes.find((a) => a.id === claimAthleteId) || myAthletes[0])?.name || currentUser.name,
       claimSeatsCount
     );
     setIsClaimSeatOpen(null);
@@ -332,7 +381,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
             <Car className="w-5 h-5 text-teal-600" />
             Bolsa de Boleias
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 font-medium">
             Partilha de lugares em viagens para treinos e competições
           </p>
         </div>
@@ -720,7 +769,9 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
             ) : (
               <button
                 onClick={() => setIsOfferCarpoolOpen(true)}
-                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-2 active:scale-95 transition-all cursor-pointer self-start sm:self-auto"
+                disabled={hasActiveCarpool}
+                title={hasActiveCarpool ? 'Já tens uma boleia ativa. Elimina-a para disponibilizar outra.' : undefined}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-2 active:scale-95 transition-all cursor-pointer self-start sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
               >
                 <Plus className="w-4 h-4" />
                 <span>Lugares</span>
@@ -863,7 +914,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
 
                       {remaining > 0 && (
                         <button
-                          onClick={() => setIsClaimSeatOpen(carp)}
+                          onClick={() => openClaimSeat(carp)}
                           className="px-4 py-1.5 text-xs font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer flex items-center gap-1"
                         >
                           <Check className="w-3.5 h-3.5" />
@@ -885,7 +936,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                     ? 'Apenas maiores de 18 anos podem criar ofertas de boleia.'
                     : 'Seja o primeiro a disponibilizar lugares para a próxima competição!'}
                 </p>
-                {!isUnderageAthlete && (
+                {!isUnderageAthlete && !hasActiveCarpool && (
                   <button
                     type="button"
                     onClick={() => setIsOfferCarpoolOpen(true)}
@@ -999,13 +1050,31 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
             <form onSubmit={handleCreateCarpool} className="space-y-3.5 text-xs sm:text-sm">
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1">Evento / Torneio *</label>
-                <input
-                  type="text"
+                <select
                   required
-                  value={carpoolEventTitle}
-                  onChange={(e) => setCarpoolEventTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 font-medium"
-                />
+                  value={carpoolEventChoice}
+                  onChange={(e) => handleCarpoolEventChoice(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 font-medium bg-white"
+                >
+                  <option value="" disabled>Selecionar evento...</option>
+                  {nextCalendarEvents.map((ev) => (
+                    <option key={ev.id} value={ev.id}>
+                      {ev.title} — {ev.date.split('-').reverse().join('/')}
+                    </option>
+                  ))}
+                  <option value="outro">Outro (escrita livre)</option>
+                </select>
+                {carpoolEventChoice === 'outro' && (
+                  <input
+                    type="text"
+                    required
+                    autoFocus
+                    placeholder="Nome do evento / torneio"
+                    value={carpoolEventTitle}
+                    onChange={(e) => setCarpoolEventTitle(e.target.value)}
+                    className="w-full mt-2 px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 font-medium"
+                  />
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -1122,12 +1191,24 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
 
               <div>
                 <label className="text-xs font-bold text-slate-700 block mb-1">Nome do Atleta / Passageiro:</label>
-                <input
-                  type="text"
-                  disabled
-                  value={activeAthlete?.name}
-                  className="w-full px-3 py-2 bg-slate-100 rounded-xl border border-slate-300 font-bold text-slate-800"
-                />
+                {myAthletes.length > 1 ? (
+                  <select
+                    value={claimAthleteId}
+                    onChange={(e) => setClaimAthleteId(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 font-bold text-slate-800 bg-white"
+                  >
+                    {myAthletes.map((a) => (
+                      <option key={a.id} value={a.id}>{a.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    disabled
+                    value={myAthletes[0]?.name || currentUser.name}
+                    className="w-full px-3 py-2 bg-slate-100 rounded-xl border border-slate-300 font-bold text-slate-800"
+                  />
+                )}
               </div>
 
               <div>

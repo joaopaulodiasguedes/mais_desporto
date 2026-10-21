@@ -2637,6 +2637,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
 
+    // Cada utilizador só pode ter uma boleia ativa (ofertas de datas passadas não contam)
+    const now = new Date();
+    const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    if (carpools.some(c => c.parentId === currentUser.id && c.eventDate >= today)) {
+      showToast('Já tens uma boleia ativa. Elimina-a antes de disponibilizar outra.', 'error');
+      return;
+    }
+
     const newCarpool: CarpoolOffer = {
       ...offerData,
       id: `carp-${Date.now()}`,
