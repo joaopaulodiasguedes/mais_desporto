@@ -123,6 +123,13 @@ interface AppContextType {
   isApprovalsModalOpen: boolean;
   setIsApprovalsModalOpen: (open: boolean) => void;
 
+  // Edição do perfil próprio (abre a ficha de atleta/treinador/encarregado, ou o formulário simples se não existir ficha)
+  profileEditRequested: boolean;
+  requestProfileEdit: () => void;
+  clearProfileEditRequest: () => void;
+  isEditProfileOpen: boolean;
+  setIsEditProfileOpen: (open: boolean) => void;
+
   // Permissions
   rolePermissions: Record<UserRole, RolePermissions>;
   updateRolePermissions: (role: UserRole, permissions: Partial<RolePermissions>) => void;
@@ -545,6 +552,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [isApprovalsModalOpen, setIsApprovalsModalOpen] = useState<boolean>(false);
+  const [profileEditRequested, setProfileEditRequested] = useState<boolean>(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState<boolean>(false);
 
   const [rolePermissions, setRolePermissions] = useState<Record<UserRole, RolePermissions>>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_permissions`);
@@ -1587,6 +1596,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     showToast('Dados do utilizador atualizados com sucesso!', 'success');
   };
+
+  const requestProfileEdit = () => {
+    const tabByRole: Record<string, string> = {
+      atleta: 'atletas',
+      treinador: 'treinadores',
+      encarregado: 'encarregados'
+    };
+    const tab = tabByRole[currentUser.role];
+    if (!tab) {
+      setIsEditProfileOpen(true);
+      return;
+    }
+    setProfileEditRequested(true);
+    setActiveTab(tab);
+  };
+
+  const clearProfileEditRequest = () => setProfileEditRequested(false);
 
   const pendingUsers = availableUsers.filter(u => u.status === 'pendente_aprovacao');
   const pendingApprovalsCount = pendingUsers.length;
@@ -2748,6 +2774,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         pendingApprovalsCount,
         isApprovalsModalOpen,
         setIsApprovalsModalOpen,
+        profileEditRequested,
+        requestProfileEdit,
+        clearProfileEditRequest,
+        isEditProfileOpen,
+        setIsEditProfileOpen,
         rolePermissions,
         updateRolePermissions,
         hasPermission,

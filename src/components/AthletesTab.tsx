@@ -43,7 +43,10 @@ export const AthletesTab: React.FC = () => {
     addNotification,
     showToast,
     setActiveTab,
-    availableUsers
+    availableUsers,
+    profileEditRequested,
+    clearProfileEditRequest,
+    setIsEditProfileOpen
   } = useApp();
 
   // Encarregados de educação com conta registada (os únicos que podem ser associados ao atleta)
@@ -312,6 +315,17 @@ export const AthletesTab: React.FC = () => {
     setIsAddModalOpen(true);
   };
 
+  // Pedido vindo do menu "Editar Perfil": abre a ficha do próprio atleta
+  React.useEffect(() => {
+    if (!profileEditRequested) return;
+    clearProfileEditRequest();
+    if (myAthleteProfile) {
+      handleOpenEdit(myAthleteProfile);
+    } else {
+      setIsEditProfileOpen(true);
+    }
+  }, [profileEditRequested]);
+
   const handleOpenEdit = (athlete: Athlete) => {
     setEditingAthlete(athlete);
     const computedStatus = calculateMedicalStatus(athlete.medicalExamExpiry).status;
@@ -542,23 +556,25 @@ export const AthletesTab: React.FC = () => {
         </div>
       )}
 
-      {/* Category Pills Filter */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
-        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider pl-1 pr-2 shrink-0 flex items-center gap-1">
-          <Filter className="w-3 h-3" /> Escalão:
-        </span>
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${selectedCategory === cat
-              ? 'bg-blue-600 text-white shadow-2xs'
-              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-              }`}
-          >
-            {cat === 'todos' ? 'Todos os Escalões' : cat}
-          </button>
-        ))}
+      {/* Category Filter */}
+      <div className="bg-white rounded-2xl px-4 py-3 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center gap-2.5">
+        <div className="flex items-center gap-2 shrink-0">
+          <Filter className="w-4 h-4 text-blue-600" />
+          <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            Escalão
+          </span>
+        </div>
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="w-full sm:w-72 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+        >
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat === 'todos' ? 'Todos os Escalões' : cat}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Athletes Card Grid */}

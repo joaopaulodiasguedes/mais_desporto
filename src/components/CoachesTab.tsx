@@ -47,7 +47,10 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
     hasPermission,
     currentUser,
     pendingApprovalsCount,
-    ageCategories
+    ageCategories,
+    profileEditRequested,
+    clearProfileEditRequest,
+    setIsEditProfileOpen
   } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'coaches' | 'categories' | 'approvals'>('coaches');
@@ -113,6 +116,23 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
     setEditingCoach(null);
     setIsAddModalOpen(true);
   };
+
+  // Pedido vindo do menu "Editar Perfil": abre a ficha do próprio treinador
+  React.useEffect(() => {
+    if (!profileEditRequested) return;
+    clearProfileEditRequest();
+    const mine = coaches.find(
+      (c) =>
+        c.id === currentUser.coachProfileId ||
+        (c.email && currentUser.email && c.email.toLowerCase() === currentUser.email.toLowerCase()) ||
+        (c.name && currentUser.name && c.name.toLowerCase() === currentUser.name.toLowerCase())
+    );
+    if (mine) {
+      handleOpenEdit(mine);
+    } else {
+      setIsEditProfileOpen(true);
+    }
+  }, [profileEditRequested]);
 
   const handleOpenEdit = (coach: Coach) => {
     setEditingCoach(coach);

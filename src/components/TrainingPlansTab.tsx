@@ -842,105 +842,28 @@ export const TrainingPlansTab: React.FC = () => {
 
       {/* Athlete Selector & Filter Bar (Treinadores / Gestores) */}
       {currentUser.role !== 'atleta' && currentUser.role !== 'encarregado' && (
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs space-y-3">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="flex items-center gap-2">
-              <UserCheck className="w-4 h-4 text-indigo-600" />
-              <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                Separação por Atleta
-              </span>
-              <span className="text-[11px] text-slate-400 font-medium">
-                ({athletes.length} atletas registados)
-              </span>
-            </div>
-
-            {/* Quick search input for athletes */}
-            <div className="relative w-full sm:w-64">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={athleteSearch}
-                onChange={(e) => setAthleteSearch(e.target.value)}
-                placeholder="Filtrar por nome do atleta..."
-                className="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 font-medium"
-              />
-              {athleteSearch && (
-                <button
-                  onClick={() => setAthleteSearch('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
+        <div className="bg-white rounded-2xl px-4 py-3 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center gap-2.5">
+          <div className="flex items-center gap-2 shrink-0">
+            <UserCheck className="w-4 h-4 text-indigo-600" />
+            <span className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              Separação por Atleta
+            </span>
           </div>
-
-          {/* Athlete Pills Carousel */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-            {/* Individual Athlete Pills */}
-            {filteredAthletesList.map((ath) => {
-              const count = plansCountByAthlete.counts[ath.id] || 0;
-              const isSelected = selectedAthleteId === ath.id;
-
-              return (
-                <button
-                  key={ath.id}
-                  onClick={() => setSelectedAthleteId(ath.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 cursor-pointer shrink-0 ${isSelected
-                    ? 'bg-indigo-600 text-white shadow-2xs'
-                    : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
-                    }`}
-                >
-                  {ath.photoUrl ? (
-                    <img
-                      src={ath.photoUrl}
-                      alt={ath.name}
-                      className="w-4 h-4 rounded-full object-cover shrink-0"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div
-                      className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black shrink-0 ${isSelected ? 'bg-indigo-700 text-white' : 'bg-indigo-100 text-indigo-700'
-                        }`}
-                    >
-                      {ath.name.charAt(0)}
-                    </div>
-                  )}
-                  <span>{formatShortName(ath.name)}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${isSelected
-                      ? 'bg-indigo-700 text-white'
-                      : count > 0
-                        ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                        : 'bg-slate-100 text-slate-400'
-                      }`}
-                  >
-                    {count}
-                  </span>
-                </button>
-              );
-            })}
-
-            {/* General Plans Pill (if any general plan exists) */}
+          <select
+            value={selectedAthleteId}
+            onChange={(e) => setSelectedAthleteId(e.target.value)}
+            className="w-full sm:w-72 px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer"
+          >
+            <option value="todos">Todos os atletas ({athletes.length})</option>
+            {availableAthletesForRoster.map((ath) => (
+              <option key={ath.id} value={ath.id}>
+                {ath.name} ({plansCountByAthlete.counts[ath.id] || 0})
+              </option>
+            ))}
             {plansCountByAthlete.generalCount > 0 && (
-              <button
-                onClick={() => setSelectedAthleteId('geral')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shrink-0 ${selectedAthleteId === 'geral'
-                  ? 'bg-indigo-600 text-white shadow-2xs'
-                  : 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
-                  }`}
-              >
-                <Users className="w-3.5 h-3.5 text-slate-500" />
-                <span>Gerais / Coletivos</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${selectedAthleteId === 'geral' ? 'bg-indigo-700 text-white' : 'bg-slate-100 text-slate-700'
-                    }`}
-                >
-                  {plansCountByAthlete.generalCount}
-                </span>
-              </button>
+              <option value="geral">Gerais / Coletivos ({plansCountByAthlete.generalCount})</option>
             )}
-          </div>
+          </select>
         </div>
       )}
 

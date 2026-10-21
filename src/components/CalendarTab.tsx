@@ -643,19 +643,15 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Coach Info Banner */}
       {isCoach && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex items-center justify-between gap-3 text-amber-900">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-amber-500 text-slate-950 rounded-xl shadow-xs shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-extrabold text-amber-950">
-                Modo de Gestão do Treinador Ativo
-              </h4>
-              <p className="text-[11px] sm:text-xs text-amber-800 font-medium">
-                Clique em qualquer dia do calendário para <strong className="font-bold">adicionar treinos, provas, tarefas para a equipa (visíveis a todos)</strong> e gerir presenças.
-              </p>
-            </div>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs">
+          <div>
+            <h2 className="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+              <CalendarDays className="w-5 h-5 text-orange-500" />
+              Calendário
+            </h2>
+            <p className="text-xs text-slate-500">
+              Clique em qualquer dia para adicionar treinos, provas e tarefas para a equipa e gerir presenças
+            </p>
           </div>
           {selectedDay && (
             <button
@@ -663,7 +659,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 setDayManagerDayNumber(selectedDay);
                 setIsDayManagerOpen(true);
               }}
-              className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs rounded-xl shadow-xs flex items-center gap-1.5 transition-all shrink-0 cursor-pointer active:scale-95"
+              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs rounded-xl shadow-xs flex items-center gap-2 transition-all shrink-0 cursor-pointer active:scale-95 self-start md:self-auto"
             >
               <Settings className="w-3.5 h-3.5" />
               <span>Gerir Dia {selectedDay}</span>

@@ -14,8 +14,11 @@ import {
   CheckCircle2,
   LogOut,
   Clock,
-  Users
+  Users,
+  UserCog
 } from 'lucide-react';
+import { EditProfileModal } from './EditProfileModal';
+import { formatShortName } from '../utils/athleteRules';
 
 interface HeaderProps {
   onOpenPermissions: () => void;
@@ -37,7 +40,10 @@ export const Header: React.FC<HeaderProps> = ({
     setIsApprovalsModalOpen,
     setActiveTab,
     clubInfo,
-    isCurrentUserAdmin
+    isCurrentUserAdmin,
+    requestProfileEdit,
+    isEditProfileOpen,
+    setIsEditProfileOpen
   } = useApp();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -201,10 +207,7 @@ export const Header: React.FC<HeaderProps> = ({
                     />
                     <div className="min-w-0 flex-1">
                       <p className="font-extrabold text-slate-900 text-sm truncate">
-                        {currentUser.name}
-                      </p>
-                      <p className="text-xs text-slate-500 truncate">
-                        {currentUser.email}
+                        {formatShortName(currentUser.name)}
                       </p>
                     </div>
                   </div>
@@ -232,7 +235,17 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
 
 
-                <div className="p-2">
+                <div className="p-2 space-y-0.5">
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      requestProfileEdit();
+                    }}
+                    className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <UserCog className="w-4 h-4" />
+                    <span>Editar Perfil</span>
+                  </button>
                   <button
                     onClick={() => {
                       setIsUserMenuOpen(false);
@@ -249,6 +262,8 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
       </div>
+
+      {isEditProfileOpen && <EditProfileModal onClose={() => setIsEditProfileOpen(false)} />}
     </header>
   );
 };

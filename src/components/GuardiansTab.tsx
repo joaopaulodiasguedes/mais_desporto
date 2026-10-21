@@ -64,7 +64,10 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
     ageCategories,
     addGuardian,
     updateGuardian,
-    deleteGuardian
+    deleteGuardian,
+    profileEditRequested,
+    clearProfileEditRequest,
+    setIsEditProfileOpen
   } = useApp();
 
   const canManage =
@@ -263,6 +266,18 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
       }
     }
   }, [currentUser, allGuardians]);
+
+  // Pedido vindo do menu "Editar Perfil": abre a ficha do próprio encarregado
+  useEffect(() => {
+    if (!profileEditRequested) return;
+    clearProfileEditRequest();
+    const mine = allGuardians.find((g) => isCurrentUserThisGuardian(g));
+    if (mine) {
+      handleOpenEdit(mine);
+    } else {
+      setIsEditProfileOpen(true);
+    }
+  }, [profileEditRequested]);
 
   // Filtered guardians based on search
   const filteredGuardians = useMemo(() => {

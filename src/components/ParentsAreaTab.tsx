@@ -42,6 +42,7 @@ interface ParentsAreaTabProps {
 export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => {
   const {
     athletes,
+    coaches,
     authorizations,
     updateAuthorizationStatus,
     carpools,
@@ -62,7 +63,12 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
     ? athletes.find(a => a.id === currentUser.athleteProfileId || a.name.toLowerCase() === currentUser.name.toLowerCase() || (a.email && a.email.toLowerCase() === currentUser.email.toLowerCase()))
     : null;
 
-  const currentBirthDate = currentUser.birthDate || currentAthleteProfile?.birthDate;
+  // Treinadores: a ficha de treinador é a fonte fiável (o registo da conta pode ter uma data por defeito)
+  const currentCoachProfile = currentUser.role === 'treinador'
+    ? coaches.find(c => (c.email && c.email.toLowerCase() === currentUser.email.toLowerCase()) || c.name.toLowerCase() === currentUser.name.toLowerCase())
+    : null;
+
+  const currentBirthDate = currentCoachProfile?.birthDate || currentUser.birthDate || currentAthleteProfile?.birthDate;
 
   const calculateAge = (birthDateStr?: string): number | null => {
     if (!birthDateStr) return null;
