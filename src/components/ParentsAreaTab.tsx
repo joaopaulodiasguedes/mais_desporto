@@ -701,7 +701,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
               </div>
               <div>
                 <h3 className="font-extrabold text-slate-900 text-base sm:text-lg">
-                  Bolsa de Boleias & Transporte Solidário
+
                 </h3>
                 <p className="text-xs text-slate-500">
                   Partilha responsável de lugares em viagens para treinos e competições
@@ -723,7 +723,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                 className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-2 active:scale-95 transition-all cursor-pointer self-start sm:self-auto"
               >
                 <Plus className="w-4 h-4" />
-                <span>Disponibilizar Lugares</span>
+                <span>Lugares</span>
               </button>
             )}
           </div>
