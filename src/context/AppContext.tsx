@@ -981,9 +981,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const hasPermission = (permission: keyof RolePermissions): boolean => {
     if (!currentUser || currentUser.status !== 'aprovado') return false;
 
-    // Regra legal e de segurança rodoviária: atletas menores de 18 anos não podem disponibilizar lugares na bolsa de boleias
-    if (permission === 'canOfferCarpool' && currentUser.role === 'atleta') {
-      const birthDate = currentUser.birthDate || athletes.find(a => a.id === currentUser.athleteProfileId || a.name.toLowerCase() === currentUser.name.toLowerCase())?.birthDate;
+    // Regra legal e de segurança rodoviária: menores de 18 anos (com base na data de nascimento de quem está logado) não podem disponibilizar lugares na bolsa de boleias
+    if (permission === 'canOfferCarpool') {
+      const birthDate = currentUser.birthDate || (currentUser.role === 'atleta'
+        ? athletes.find(a => a.id === currentUser.athleteProfileId || a.name.toLowerCase() === currentUser.name.toLowerCase())?.birthDate
+        : undefined);
       if (birthDate) {
         const birth = new Date(birthDate);
         const today = new Date();
@@ -991,7 +993,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const m = today.getMonth() - birth.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
         if (age < 18) return false;
-      } else {
+      } else if (currentUser.role === 'atleta') {
         return false;
       }
     }
