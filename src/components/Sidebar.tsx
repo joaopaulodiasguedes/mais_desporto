@@ -9,7 +9,7 @@ import {
   CalendarDays,
   Trophy,
   Bell,
-  HeartHandshake,
+  Car,
   Contact,
   Sparkles,
   Shield,
@@ -96,8 +96,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         },
         {
           id: 'pais',
-          label: 'Área dos Enc.',
-          icon: HeartHandshake,
+          label: 'Bolsa de Boleias',
+          icon: Car,
           badge: null
         }
       ]

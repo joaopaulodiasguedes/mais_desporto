@@ -55,7 +55,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
     trainingPlans
   } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<ParentsSubTab>('visao_geral');
+  const [activeSubTab, setActiveSubTab] = useState<ParentsSubTab>('boleias');
 
   // Deteção se o utilizador com sessão iniciada é um atleta menor de 18 anos
   const currentAthleteProfile = currentUser.role === 'atleta'
@@ -76,8 +76,9 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
   };
 
   const currentAthleteAge = calculateAge(currentBirthDate);
-  // Se for perfil de atleta e tiver menos de 18 anos (ou sem data comprovada), é considerado menor
-  const isUnderageAthlete = currentUser.role === 'atleta' && (currentAthleteAge === null || currentAthleteAge < 18);
+  // Qualquer perfil com menos de 18 anos é menor; atletas sem data comprovada também são considerados menores
+  const isUnderageAthlete =
+    currentAthleteAge === null ? currentUser.role === 'atleta' : currentAthleteAge < 18;
 
   // Find athletes related to this parent
   const parentAthletes = useMemo(() => {
@@ -278,7 +279,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
   const handleCreateCarpool = (e: React.FormEvent) => {
     e.preventDefault();
     if (isUnderageAthlete) {
-      showToast('Por motivos legais de segurança rodoviária, atletas menores de 18 anos não podem disponibilizar lugares na bolsa de boleias.', 'error');
+      showToast('Por motivos legais de segurança rodoviária, utilizadores menores de 18 anos não podem disponibilizar lugares na bolsa de boleias.', 'error');
       setIsOfferCarpoolOpen(false);
       return;
     }
@@ -322,44 +323,23 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs">
         <div>
           <h2 className="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <HeartHandshake className="w-5 h-5 text-purple-600" />
-            Portal dos Encarregados de Educação
+            <Car className="w-5 h-5 text-teal-600" />
+            Bolsa de Boleias
           </h2>
           <p className="text-xs text-slate-500">
-            Acompanhamento desportivo, autorizações de provas, ficha do educando e bolsa de boleias
+            Partilha de lugares em viagens para treinos e competições
           </p>
-        </div>
-
-        {/* Child / Educando Selector */}
-        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-200 self-start md:self-auto">
-          <span className="text-[11px] font-extrabold text-slate-600 pl-1.5 flex items-center gap-1.5">
-            <Users className="w-3.5 h-3.5 text-purple-600" />
-            Atleta a Cargo:
-          </span>
-          <select
-            value={selectedAthleteId}
-            onChange={(e) => setSelectedAthleteId(e.target.value)}
-            className="px-2.5 py-1 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-800 focus:ring-2 focus:ring-purple-500 shadow-2xs cursor-pointer max-w-[220px] truncate"
-          >
-            <option value="nao_inserido">⚠️ Não inserido</option>
-            <optgroup label="Atletas do Clube">
-              {athletes.map((ath) => (
-                <option key={ath.id} value={ath.id}>
-                  {ath.name} ({ath.category})
-                </option>
-              ))}
-            </optgroup>
-          </select>
         </div>
       </div>
 
       {/* Sub-Navigation Tabs */}
-      <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-2xl border border-slate-200 w-full sm:w-fit overflow-x-auto">
+      <div className="hidden">
+
         <button
           onClick={() => setActiveSubTab('ficha')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${activeSubTab === 'ficha'
-              ? 'bg-white text-purple-900 shadow-2xs'
-              : 'text-slate-600 hover:text-slate-900'
+            ? 'bg-white text-purple-900 shadow-2xs'
+            : 'text-slate-600 hover:text-slate-900'
             }`}
         >
           <FileText className="w-4 h-4 text-purple-600" />
@@ -369,8 +349,8 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
         <button
           onClick={() => setActiveSubTab('visao_geral')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${activeSubTab === 'visao_geral'
-              ? 'bg-white text-purple-900 shadow-2xs'
-              : 'text-slate-600 hover:text-slate-900'
+            ? 'bg-white text-purple-900 shadow-2xs'
+            : 'text-slate-600 hover:text-slate-900'
             }`}
         >
           <Calendar className="w-4 h-4 text-purple-600" />
@@ -380,8 +360,8 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
         <button
           onClick={() => setActiveSubTab('boleias')}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${activeSubTab === 'boleias'
-              ? 'bg-white text-purple-900 shadow-2xs'
-              : 'text-slate-600 hover:text-slate-900'
+            ? 'bg-white text-purple-900 shadow-2xs'
+            : 'text-slate-600 hover:text-slate-900'
             }`}
         >
           <Car className="w-4 h-4 text-teal-600" />
@@ -503,8 +483,8 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                     type="button"
                     onClick={() => setSeptemberFilterType('todos')}
                     className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer ${septemberFilterType === 'todos'
-                        ? 'bg-white text-purple-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white text-purple-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
                       }`}
                   >
                     Todos ({septemberActivities.length})
@@ -513,8 +493,8 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                     type="button"
                     onClick={() => setSeptemberFilterType('provas')}
                     className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1 ${septemberFilterType === 'provas'
-                        ? 'bg-white text-amber-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white text-amber-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
                       }`}
                   >
                     <Trophy className="w-3.5 h-3.5 text-amber-500" />
@@ -524,8 +504,8 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                     type="button"
                     onClick={() => setSeptemberFilterType('treinos')}
                     className={`px-3 py-1 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-1 ${septemberFilterType === 'treinos'
-                        ? 'bg-white text-indigo-900 shadow-2xs'
-                        : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white text-indigo-900 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900'
                       }`}
                   >
                     <Dumbbell className="w-3.5 h-3.5 text-indigo-500" />
@@ -552,8 +532,8 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                       <div
                         key={act.id}
                         className={`p-4 rounded-2xl border transition-all ${act.type === 'prova'
-                            ? 'bg-amber-50/60 border-amber-200'
-                            : 'bg-slate-50/80 border-slate-200'
+                          ? 'bg-amber-50/60 border-amber-200'
+                          : 'bg-slate-50/80 border-slate-200'
                           }`}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -725,7 +705,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
 
             {isUnderageAthlete ? (
               <div
-                title="Por requisitos legais de segurança rodoviária e habilitação de condução, atletas menores de 18 anos não podem disponibilizar lugares."
+                title="Por requisitos legais de segurança rodoviária e habilitação de condução, menores de 18 anos não podem disponibilizar lugares."
                 className="px-3.5 py-2 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs font-semibold flex items-center gap-2 select-none self-start sm:self-auto"
               >
                 <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
@@ -753,7 +733,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                   Restrição Legal de Segurança Rodoviária: Condutores
                 </p>
                 <p className="text-slate-600">
-                  Por razões legais de segurança e habilitação de condução, os atletas menores de 18 anos {currentAthleteAge !== null ? `(${currentAthleteAge} anos)` : ''} não podem disponibilizar lugares como condutores na bolsa de boleias. Podes, no entanto, consultar todas as viagens ativas e reservar lugares com os encarregados de educação e treinadores responsáveis.
+                  Por razões legais de segurança e habilitação de condução, os menores de 18 anos {currentAthleteAge !== null ? `(${currentAthleteAge} anos)` : ''} não podem disponibilizar lugares como condutores na bolsa de boleias. Podes, no entanto, consultar todas as viagens ativas e reservar lugares.
                 </p>
               </div>
             </div>
@@ -793,8 +773,8 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                     <div className="flex items-center gap-2 shrink-0">
                       <span
                         className={`inline-block px-3 py-1 rounded-full text-xs font-extrabold ${remaining > 0
-                            ? 'bg-teal-100 text-teal-800'
-                            : 'bg-slate-200 text-slate-600'
+                          ? 'bg-teal-100 text-teal-800'
+                          : 'bg-slate-200 text-slate-600'
                           }`}
                       >
                         {remaining > 0 ? `${remaining} lugares livres` : 'Esgotado'}
@@ -896,7 +876,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                 <p className="text-xs font-bold text-slate-700">Não existem ofertas de boleias ativas.</p>
                 <p className="text-[11px] text-slate-400 mt-0.5">
                   {isUnderageAthlete
-                    ? 'Apenas encarregados de educação, treinadores ou atletas maiores de 18 anos podem criar ofertas de boleia.'
+                    ? 'Apenas maiores de 18 anos podem criar ofertas de boleia.'
                     : 'Seja o primeiro a disponibilizar lugares para a próxima competição!'}
                 </p>
                 {!isUnderageAthlete && (
