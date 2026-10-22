@@ -67,7 +67,16 @@ async function sendResetEmail(to: string, name: string, code: string): Promise<{
   if (!response.ok) {
     const detail = await response.text().catch(() => '');
     console.error('Erro Resend:', response.status, detail);
-    return { ok: false, error: 'Não foi possível enviar o email. Tente novamente dentro de alguns minutos.' };
+    let reason = '';
+    try {
+      reason = JSON.parse(detail)?.message || '';
+    } catch {
+      reason = detail.slice(0, 200);
+    }
+    return {
+      ok: false,
+      error: `Não foi possível enviar o email (Resend ${response.status}${reason ? `: ${reason}` : ''}).`
+    };
   }
   return { ok: true };
 }
