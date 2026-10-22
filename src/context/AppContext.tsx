@@ -241,6 +241,7 @@ interface AppContextType {
   addCarpoolOffer: (offer: Omit<CarpoolOffer, 'id' | 'claimedSeats'>) => void;
   deleteCarpoolOffer: (carpoolId: string) => void;
   claimCarpoolSeat: (carpoolId: string, parentName: string, athleteName: string, seats: number) => void;
+  releaseCarpoolSeat: (carpoolId: string, claimIndex: number) => void;
 
   // Age Categories (Escalões por Data de Nascimento)
   ageCategories: AgeCategory[];
@@ -2678,6 +2679,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Lugar na boleia reservado com sucesso!');
   };
 
+  // Liberta uma reserva: o próprio passageiro, o organizador da boleia ou um treinador
+  const releaseCarpoolSeat = (carpoolId: string, claimIndex: number) => {
+    const carpool = carpools.find(c => c.id === carpoolId);
+    const claim = carpool?.claimedSeats[claimIndex];
+    if (!carpool || !claim) return;
+
+    const canRelease =
+      claim.parentName === currentUser.name ||
+      carpool.parentId === currentUser.id ||
+      currentUser.role === 'treinador';
+    if (!canRelease) {
+      showToast('Sem permissão para libertar esta reserva.', 'error');
+      return;
+    }
+
+    const updated: CarpoolOffer = {
+      ...carpool,
+      claimedSeats: carpool.claimedSeats.filter((_, i) => i !== claimIndex)
+    };
+    setCarpools(prev => prev.map(c => (c.id === carpoolId ? updated : c)));
+    upsertCarpoolOfferInSupabase(updated);
+    showToast('Lugar libertado com sucesso!');
+  };
+
   const deleteCarpoolOffer = (carpoolId: string) => {
     const carpool = carpools.find(c => c.id === carpoolId);
     if (!carpool) return;
@@ -2840,6 +2865,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addCarpoolOffer,
         deleteCarpoolOffer,
         claimCarpoolSeat,
+        releaseCarpoolSeat,
         supabaseStatus,
         isSupabaseConfigured: getSupabaseConfig().isConfigured,
         syncWithSupabase,

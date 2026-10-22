@@ -19,12 +19,33 @@ import {
   Calendar as CalendarIcon,
   CalendarCheck,
   HeartHandshake,
-  Info
+  Info,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
 import { TrainingPlan, ExerciseBlock, Athlete } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { AthleteTrainingCalendarView } from './AthleteTrainingCalendarView';
 import { formatShortName } from '../utils/athleteRules';
+
+let blockSeq = 0;
+
+// Bloco simples: descrição + duração/distância (guardada no único exercício do bloco)
+const createBlock = (title: string, value: string, type: ExerciseBlock['type'] = 'principal'): ExerciseBlock => {
+  const uid = `${Date.now()}-${blockSeq++}`;
+  return {
+    id: `b-${uid}`,
+    title,
+    type,
+    exercises: [{ id: `ex-${uid}`, name: title, sets: '', repsOrDuration: value, rest: '', intensity: '' }]
+  };
+};
+
+const createDefaultBlocks = (): ExerciseBlock[] => [
+  createBlock('Aquecimento', '20m', 'aquecimento'),
+  createBlock('Trabalho específico', '20m', 'principal'),
+  createBlock('Retorno à Calma e Alongamentos', '20m', 'retorno_calma')
+];
 
 export const TrainingPlansTab: React.FC = () => {
   const {
@@ -100,7 +121,7 @@ export const TrainingPlansTab: React.FC = () => {
   const canCreate = hasPermission('canCreateTrainingPlans') || currentUser.role === 'treinador';
 
   // Form State for creating a new workout plan
-  const [newTitle, setNewTitle] = useState('');
+  const [newTitle, setNewTitle] = useState('Treino');
   const [newModality, setNewModality] = useState('Natação Pura');
   const [newCategory, setNewCategory] = useState('Juvenis (Sub-16)');
   const [newAssignedAthleteIds, setNewAssignedAthleteIds] = useState<string[]>([]);
@@ -111,57 +132,8 @@ export const TrainingPlansTab: React.FC = () => {
   const [newScheduledDate, setNewScheduledDate] = useState<string>(() => new Date().toISOString().split('T')[0]);
   const [newScheduledTime, setNewScheduledTime] = useState<string>('18:00');
 
-  // Exercise blocks for new plan builder
-  const [blocks, setBlocks] = useState<ExerciseBlock[]>([
-    {
-      id: 'b-init-1',
-      title: 'Aquecimento Geral & Ativação',
-      type: 'aquecimento',
-      exercises: [
-        {
-          id: 'ex-1',
-          name: '400m suave variado + 4x50m progressivo',
-          sets: '1',
-          repsOrDuration: '600m',
-          rest: '30s',
-          intensity: 'Leve (R1)',
-          notes: 'Foco na sensibilidade e alinhamento hidrodinâmico.'
-        }
-      ]
-    },
-    {
-      id: 'b-init-2',
-      title: 'Série Principal de Rendimento',
-      type: 'principal',
-      exercises: [
-        {
-          id: 'ex-2',
-          name: '6 x 150m Ritmo de Prova (50m Forte + 50m Suave + 50m Forte)',
-          sets: '6',
-          repsOrDuration: '150m',
-          rest: '45s',
-          intensity: 'R4 (Limiar)',
-          notes: 'Controlo rigoroso do número de braçadas.'
-        }
-      ]
-    },
-    {
-      id: 'b-init-3',
-      title: 'Retorno à Calma',
-      type: 'retorno_calma',
-      exercises: [
-        {
-          id: 'ex-3',
-          name: 'descompressão',
-          sets: '1',
-          repsOrDuration: '2000m',
-          rest: '0s',
-          intensity: 'R1',
-          notes: 'Respiração.'
-        }
-      ]
-    }
-  ]);
+  // Blocos do plano: cada linha tem descrição + duração/distância
+  const [blocks, setBlocks] = useState<ExerciseBlock[]>(createDefaultBlocks);
 
   // Current Athlete logged in (if role === 'atleta')
   const currentAthleteProfile = useMemo(() => {
@@ -361,58 +333,33 @@ export const TrainingPlansTab: React.FC = () => {
   };
 
   const handleAddBlock = () => {
-    const newB: ExerciseBlock = {
-      id: `b-${Date.now()}`,
-      title: 'Novo Bloco de Trabalho',
-      type: 'principal',
-      exercises: [
-        {
-          id: `ex-${Date.now()}`,
-          name: 'Exercício',
-          sets: '3',
-          repsOrDuration: '100m',
-          rest: '30s',
-          intensity: 'Moderado'
-        }
-      ]
-    };
-    setBlocks([...blocks, newB]);
+    setBlocks([...blocks, createBlock('', '', 'principal')]);
   };
 
-  const handleAddExerciseToBlock = (blockId: string) => {
-    setBlocks(
-      blocks.map((b) => {
-        if (b.id === blockId) {
-          return {
-            ...b,
-            exercises: [
-              ...b.exercises,
-              {
-                id: `ex-${Date.now()}`,
-                name: 'Novo Exercício / Tarefa',
-                sets: '4',
-                repsOrDuration: '50m',
-                rest: '20s',
-                intensity: 'R3'
-              }
-            ]
-          };
-        }
-        return b;
-      })
-    );
+  const handleMoveBlock = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= blocks.length) return;
+    const next = [...blocks];
+    [next[index], next[target]] = [next[target], next[index]];
+    setBlocks(next);
   };
 
-  const handleRemoveExercise = (blockId: string, exId: string) => {
+  // Atualiza a descrição e/ou a duração/distância de um bloco (guardada no primeiro exercício)
+  const handleUpdateBlock = (blockId: string, changes: { title?: string; value?: string }) => {
     setBlocks(
       blocks.map((b) => {
-        if (b.id === blockId) {
-          return {
-            ...b,
-            exercises: b.exercises.filter((ex) => ex.id !== exId)
-          };
-        }
-        return b;
+        if (b.id !== blockId) return b;
+        const [first, ...rest] = b.exercises;
+        const nextTitle = changes.title ?? b.title;
+        const syncName = !first || first.name === b.title;
+        const nextFirst = first
+          ? {
+              ...first,
+              name: syncName ? nextTitle : first.name,
+              repsOrDuration: changes.value ?? first.repsOrDuration
+            }
+          : { ...createBlock('', '').exercises[0], name: nextTitle, repsOrDuration: changes.value ?? '' };
+        return { ...b, title: nextTitle, exercises: [nextFirst, ...rest] };
       })
     );
   };
@@ -423,7 +370,7 @@ export const TrainingPlansTab: React.FC = () => {
 
   const handleOpenAddPlan = (targetAthleteId?: string, defaultDate?: string) => {
     setEditingPlan(null);
-    setNewTitle('');
+    setNewTitle('Treino');
     setNewModality('Atletismo');
 
     // If specific athlete was provided or active in filter
@@ -438,38 +385,7 @@ export const TrainingPlansTab: React.FC = () => {
     setNewTags('Técnica, Resistência');
     setNewScheduledDate(defaultDate || new Date().toISOString().split('T')[0]);
     setNewScheduledTime('18:00');
-    setBlocks([
-      {
-        id: `b-${Date.now()}-1`,
-        title: 'Aquecimento Geral & Ativação',
-        type: 'aquecimento',
-        exercises: [
-          {
-            id: `ex-${Date.now()}-1`,
-            name: '400m corrida + 4x100m progressivo',
-            sets: '1',
-            repsOrDuration: '600m',
-            rest: '30s',
-            intensity: 'Leve (R1)'
-          }
-        ]
-      },
-      {
-        id: `b-${Date.now()}-2`,
-        title: 'Série Principal',
-        type: 'principal',
-        exercises: [
-          {
-            id: `ex-${Date.now()}-2`,
-            name: '6 x 150m Ritmo de Prova',
-            sets: '6',
-            repsOrDuration: '150m',
-            rest: '45s',
-            intensity: 'R4'
-          }
-        ]
-      }
-    ]);
+    setBlocks(createDefaultBlocks());
     setIsAddModalOpen(true);
   };
 
@@ -493,6 +409,9 @@ export const TrainingPlansTab: React.FC = () => {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
+    // Linhas totalmente vazias (ex.: o 3.º bloco por preencher) não são guardadas
+    const savedBlocks = blocks.filter((b) => b.title.trim() || b.exercises.some((ex) => ex.repsOrDuration.trim()));
+
     // Determine category based on assigned athletes if possible
     let catToSave = newCategory;
     if (newAssignedAthleteIds.length > 0) {
@@ -513,7 +432,7 @@ export const TrainingPlansTab: React.FC = () => {
         objective: newObjective.trim(),
         scheduledDate: newScheduledDate || undefined,
         scheduledTime: newScheduledTime || undefined,
-        blocks,
+        blocks: savedBlocks,
         tags: newTags.split(',').map((t) => t.trim()).filter(Boolean)
       });
       if (selectedPlan?.id === editingPlan.id) {
@@ -528,7 +447,7 @@ export const TrainingPlansTab: React.FC = () => {
           objective: newObjective.trim(),
           scheduledDate: newScheduledDate || undefined,
           scheduledTime: newScheduledTime || undefined,
-          blocks,
+          blocks: savedBlocks,
           tags: newTags.split(',').map((t) => t.trim()).filter(Boolean)
         });
       }
@@ -543,14 +462,14 @@ export const TrainingPlansTab: React.FC = () => {
         objective: newObjective.trim(),
         scheduledDate: newScheduledDate || undefined,
         scheduledTime: newScheduledTime || undefined,
-        blocks,
+        blocks: savedBlocks,
         createdByCoachName: currentUser.name || 'Treinador Principal',
         tags: newTags.split(',').map((t) => t.trim()).filter(Boolean)
       });
     }
 
     setIsAddModalOpen(false);
-    setNewTitle('');
+    setNewTitle('Treino');
     setNewObjective('');
     setNewAssignedAthleteIds([]);
   };
@@ -1202,10 +1121,12 @@ export const TrainingPlansTab: React.FC = () => {
                             {ex.sets ? `${ex.sets}x ` : ''}{ex.repsOrDuration}
                           </span>
                         </div>
-                        <div className="flex items-center gap-3 text-[11px] text-slate-500 font-medium">
-                          <span>Descanso: {ex.rest || '15s'}</span>
-                          {ex.intensity && <span>• Intensidade: {ex.intensity}</span>}
-                        </div>
+                        {(ex.rest || ex.intensity) && (
+                          <div className="flex items-center gap-3 text-[11px] text-slate-500 font-medium">
+                            {ex.rest && <span>Descanso: {ex.rest}</span>}
+                            {ex.intensity && <span>{ex.rest ? '• ' : ''}Intensidade: {ex.intensity}</span>}
+                          </div>
+                        )}
                         {ex.notes && (
                           <p className="text-[11px] text-slate-600 italic bg-white p-1.5 rounded-lg border border-slate-100">
                             💡 {ex.notes}
@@ -1617,7 +1538,7 @@ export const TrainingPlansTab: React.FC = () => {
                 </div>
               </div>
 
-              {/* Interactive Workout Builder Blocks */}
+              {/* Blocos de Exercícios: Descrição + Duração/Distância */}
               <div className="pt-3 border-t border-slate-100 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
@@ -1644,98 +1565,63 @@ export const TrainingPlansTab: React.FC = () => {
                     </button>
                   </div>
                 ) : (
-                  blocks.map((block, bIdx) => (
-                    <div key={block.id || bIdx} className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <span className="w-5 h-5 rounded-md bg-slate-200 text-slate-700 text-[10px] font-black flex items-center justify-center shrink-0">
-                            {bIdx + 1}
-                          </span>
-                          <input
-                            type="text"
-                            value={block.title}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              setBlocks(blocks.map((b) => (b.id === block.id ? { ...b, title: val } : b)));
-                            }}
-                            className="font-bold text-xs text-slate-800 bg-white px-2.5 py-1 rounded-lg border border-slate-300 w-full focus:ring-1 focus:ring-indigo-500"
-                            placeholder="Título do Bloco (Ex: Aquecimento, Série Principal)"
-                          />
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => handleAddExerciseToBlock(block.id)}
-                            className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-0.5"
-                          >
-                            <Plus className="w-3 h-3" /> Exercício
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveBlock(block.id)}
-                            title="Eliminar este bloco de exercício"
-                            className="text-slate-400 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-[11px] font-semibold"
-                          >
-                            <Trash2 className="w-3.5 h-3.5 text-red-500" />
-                            <span className="hidden sm:inline text-red-600">Eliminar Bloco</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        {block.exercises.map((ex) => (
-                          <div key={ex.id} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200 text-xs">
-                            <input
-                              type="text"
-                              value={ex.name}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setBlocks(
-                                  blocks.map((b) =>
-                                    b.id === block.id
-                                      ? {
-                                        ...b,
-                                        exercises: b.exercises.map((x) => (x.id === ex.id ? { ...x, name: val } : x))
-                                      }
-                                      : b
-                                  )
-                                );
-                              }}
-                              className="flex-1 px-2 py-1 border border-slate-200 rounded-lg text-xs"
-                              placeholder="Exercício"
-                            />
-                            <input
-                              type="text"
-                              value={ex.repsOrDuration}
-                              onChange={(e) => {
-                                const val = e.target.value;
-                                setBlocks(
-                                  blocks.map((b) =>
-                                    b.id === block.id
-                                      ? {
-                                        ...b,
-                                        exercises: b.exercises.map((x) => (x.id === ex.id ? { ...x, repsOrDuration: val } : x))
-                                      }
-                                      : b
-                                  )
-                                );
-                              }}
-                              className="w-24 px-2 py-1 border border-slate-200 rounded-lg text-xs"
-                              placeholder="Distância/Reps"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveExercise(block.id, ex.id)}
-                              title="Eliminar exercício"
-                              className="text-slate-400 hover:text-red-500 p-1 rounded hover:bg-red-50 cursor-pointer transition-colors"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-1.5">
+                    <div className="hidden sm:flex items-center gap-2 px-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <span className="w-5 shrink-0" />
+                      <span className="flex-1">Bloco</span>
+                      <span className="w-36">Duração / Distância</span>
+                      <span className="w-[76px] shrink-0" />
                     </div>
-                  ))
+                    {blocks.map((block, bIdx) => (
+                      <div key={block.id || bIdx} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200 text-xs">
+                        <span className="w-5 h-5 rounded-md bg-slate-200 text-slate-700 text-[10px] font-black flex items-center justify-center shrink-0">
+                          {bIdx + 1}
+                        </span>
+                        <input
+                          type="text"
+                          value={block.title}
+                          onChange={(e) => handleUpdateBlock(block.id, { title: e.target.value })}
+                          className="flex-1 min-w-0 px-2.5 py-1 rounded-lg border border-slate-300 font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-500"
+                          placeholder="Bloco (Ex: Aquecimento)"
+                        />
+                        <input
+                          type="text"
+                          value={block.exercises[0]?.repsOrDuration || ''}
+                          onChange={(e) => handleUpdateBlock(block.id, { value: e.target.value })}
+                          className="w-28 sm:w-36 px-2.5 py-1 rounded-lg border border-slate-300 font-mono font-semibold text-slate-800 focus:ring-1 focus:ring-indigo-500"
+                          placeholder="Ex: 20m"
+                        />
+                        <div className="flex flex-col shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleMoveBlock(bIdx, -1)}
+                            disabled={bIdx === 0}
+                            title="Mover para cima"
+                            className="p-0.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed cursor-pointer"
+                          >
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleMoveBlock(bIdx, 1)}
+                            disabled={bIdx === blocks.length - 1}
+                            title="Mover para baixo"
+                            className="p-0.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed cursor-pointer"
+                          >
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveBlock(block.id)}
+                          title="Eliminar este bloco"
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer shrink-0"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
 

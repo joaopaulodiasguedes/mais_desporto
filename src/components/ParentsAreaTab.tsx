@@ -33,7 +33,13 @@ import {
 import { Athlete, ParentAuthorization, CarpoolOffer } from '../types';
 import { ParentAthleteDataForm } from './ParentAthleteDataForm';
 
-type ParentsSubTab = 'visao_geral' | 'ficha' | 'boleias';
+// Primeiro e último nome, sem sufixos entre parênteses (ex.: "(Pai de Tomás)")
+const firstAndLastName = (fullName?: string): string => {
+  const parts = (fullName || '').replace(/\s*\([^)]*\)\s*/g, ' ').trim().split(/\s+/).filter(Boolean);
+  return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1]}` : parts[0] || '';
+};
+
+type ParentsSubTab ='visao_geral' | 'ficha' | 'boleias';
 
 interface ParentsAreaTabProps {
   onOpenPdf?: (title: string, url: string) => void;
@@ -49,6 +55,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
     addCarpoolOffer,
     deleteCarpoolOffer,
     claimCarpoolSeat,
+    releaseCarpoolSeat,
     currentUser,
     hasPermission,
     showToast,
@@ -813,7 +820,7 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <span className="text-[11px] font-bold text-teal-700 uppercase tracking-wider block">
-                        Organizado por: {carp.parentName} {carp.athleteName ? `(Educando: ${carp.athleteName})` : ''}
+                        Organizado por: {firstAndLastName(carp.parentName)}
                       </span>
                       <h4 className="font-extrabold text-slate-900 text-sm sm:text-base mt-0.5">
                         {carp.eventTitle}
@@ -870,10 +877,20 @@ export const ParentsAreaTab: React.FC<ParentsAreaTabProps> = ({ onOpenPdf }) => 
                             className="inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-lg border border-teal-200 text-[11px] font-semibold text-slate-800"
                           >
                             <User className="w-3 h-3 text-teal-600" />
-                            <span>{c.athleteName} ({c.parentName})</span>
+                            <span>{firstAndLastName(c.parentName)}</span>
                             <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-1 py-0.2 rounded">
                               {c.seats} lug.
                             </span>
+                            {(isOwner || c.parentName === currentUser.name) && (
+                              <button
+                                type="button"
+                                onClick={() => releaseCarpoolSeat(carp.id, idx)}
+                                title="Libertar este lugar"
+                                className="ml-0.5 p-0.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md cursor-pointer"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            )}
                           </span>
                         ))}
                       </div>
