@@ -91,12 +91,21 @@ export default async function handler(req: any, res: any) {
   }
 
   if (action === 'request') {
-    const { data: profile } = await db
+    const { data: profile, error: profileError } = await db
       .from('profiles')
       .select('id, name, email')
       .ilike('email', email)
       .limit(1)
       .maybeSingle();
+
+    // Um erro de consulta (chave/URL errados, tabela inexistente) não pode passar por "conta não encontrada"
+    if (profileError) {
+      console.error('Erro ao consultar profiles:', profileError.code, profileError.message);
+      return res.status(500).json({
+        success: false,
+        message: `Erro ao consultar a base de dados (${profileError.code || 'sem código'}: ${profileError.message}). Verifique SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY no Vercel.`
+      });
+    }
 
     if (!profile) {
       return res.status(404).json({ success: false, message: 'Não foi encontrada nenhuma conta associada a este endereço de correio eletrónico.' });
