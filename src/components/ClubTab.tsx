@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useApp } from '../context/AppContext';
+import { useApp, isCalendarEventVisibleForUser } from '../context/AppContext';
 import {
   Building2,
   MapPin,
@@ -57,6 +57,12 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
     supabaseStatus,
     showToast
   } = useApp();
+  // Resultados = publicados na aba Resultados + eventos do calendário com link de resultados (mesmas regras de visibilidade da aba)
+  const resultsCount =
+    results.length +
+    calendarEvents.filter(
+      (evt) => !!evt.resultsUrl?.trim() && isCalendarEventVisibleForUser(evt, currentUser, athletes)
+    ).length;
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<ClubInfo>(clubInfo);
 
@@ -396,7 +402,7 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Resultados</span>
             <Award className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
           </div>
-          <p className="text-3xl font-black text-slate-900 text-center py-2">{results.length}</p>
+          <p className="text-3xl font-black text-slate-900 text-center py-2">{resultsCount}</p>
         </div>
       </div>
 
