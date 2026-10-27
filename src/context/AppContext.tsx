@@ -12,6 +12,9 @@ import {
   NotificationItem,
   ParentAuthorization,
   CarpoolOffer,
+  FeedbackItem,
+  FeedbackType,
+  FeedbackStatus,
   RolePermissions,
   AgeCategory
 } from '../types';
@@ -58,6 +61,7 @@ import {
   deleteAgeCategoryInSupabase,
   upsertParentAuthorizationInSupabase,
   upsertCarpoolOfferInSupabase,
+  upsertFeedbackInSupabase,
   deleteCarpoolOfferInSupabase,
   upsertUserProfileInSupabase,
   deleteUserProfileInSupabase,
@@ -242,6 +246,11 @@ interface AppContextType {
   deleteCarpoolOffer: (carpoolId: string) => void;
   claimCarpoolSeat: (carpoolId: string, parentName: string, athleteName: string, seats: number) => void;
   releaseCarpoolSeat: (carpoolId: string, claimIndex: number) => void;
+
+  // Feedback (sugestões e erros)
+  feedbacks: FeedbackItem[];
+  addFeedback: (data: { type: FeedbackType; title: string; description: string }) => void;
+  updateFeedbackStatus: (id: string, status: FeedbackStatus) => void;
 
   // Age Categories (Escalões por Data de Nascimento)
   ageCategories: AgeCategory[];
@@ -740,6 +749,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_CARPOOLS;
   });
 
+  const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>(() => {
+    try {
+      const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_feedbacks`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [ageCategories, setAgeCategories] = useState<AgeCategory[]>(() => {
     const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_age_categories`);
     return saved ? JSON.parse(saved) : INITIAL_AGE_CATEGORIES;
@@ -804,6 +822,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(data.ageCategories)) setAgeCategories(data.ageCategories);
         if (Array.isArray(data.authorizations)) setAuthorizations(data.authorizations);
         if (Array.isArray(data.carpools)) setCarpools(data.carpools);
+        if (Array.isArray(data.feedbacks)) setFeedbacks(data.feedbacks);
         if (Array.isArray(data.profiles)) {
           // Keep current administrator João Paulo Dias Guedes so login/admin permission is preserved
           const hasGuedes = data.profiles.some(p => p.email?.toLowerCase() === 'joaopaulodiasguedes@gmail.com');
@@ -975,6 +994,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_carpools`, JSON.stringify(carpools));
   }, [carpools]);
+
+
+  useEffect(() => {
+    localStorage.setItem(`${LOCAL_STORAGE_KEY}_feedbacks`, JSON.stringify(feedbacks));
+  }, [feedbacks]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_age_categories`, JSON.stringify(ageCategories));
@@ -2703,6 +2727,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Lugar libertado com sucesso!');
   };
 
+  // Feedback: qualquer utilizador submete; apenas o administrador altera o estado
+  const addFeedback = (data: { type: FeedbackType; title: string; description: string }) => {
+    const newFeedback: FeedbackItem = {
+      id: `fb-${Date.now()}`,
+      type: data.type,
+      title: data.title.trim(),
+      description: data.description.trim(),
+      status: 'novo',
+      authorId: currentUser.id,
+      authorName: currentUser.name,
+      authorRole: currentUser.role,
+      createdAt: new Date().toISOString()
+    };
+    setFeedbacks(prev => [newFeedback, ...prev]);
+    upsertFeedbackInSupabase(newFeedback);
+    showToast('Obrigado! O teu feedback foi enviado à administração.');
+  };
+
+  const updateFeedbackStatus = (id: string, status: FeedbackStatus) => {
+    if (!isCurrentUserAdmin) {
+      showToast('Apenas administradores podem alterar o estado do feedback.', 'error');
+      return;
+    }
+    const current = feedbacks.find(f => f.id === id);
+    if (!current) return;
+
+    const now = new Date().toISOString();
+    const updated: FeedbackItem = {
+      ...current,
+      status,
+      seenAt: status === 'novo' ? undefined : current.seenAt || now,
+      resolvedAt: status === 'resolvido' ? now : undefined
+    };
+    setFeedbacks(prev => prev.map(f => (f.id === id ? updated : f)));
+    upsertFeedbackInSupabase(updated);
+  };
+
   const deleteCarpoolOffer = (carpoolId: string) => {
     const carpool = carpools.find(c => c.id === carpoolId);
     if (!carpool) return;
@@ -2866,6 +2927,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         deleteCarpoolOffer,
         claimCarpoolSeat,
         releaseCarpoolSeat,
+        feedbacks,
+        addFeedback,
+        updateFeedbackStatus,
         supabaseStatus,
         isSupabaseConfigured: getSupabaseConfig().isConfigured,
         syncWithSupabase,

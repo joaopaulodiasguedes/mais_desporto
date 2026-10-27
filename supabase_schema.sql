@@ -715,5 +715,25 @@ VALUES
 ('cat-7', 'Masters', 'MAS', '1900-01-01', '1994-12-31', '2025-09-01', '2026-08-31', 'todos', 'bg-amber-600', 'Competição veterana e manutenção da condição física.')
 ON CONFLICT (id) DO NOTHING;
 
+-- ==============================================================================
+-- 10. FEEDBACK (sugestões de novas funcionalidades e erros reportados)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.feedback (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL DEFAULT 'nova_funcionalidade' CHECK (type IN ('nova_funcionalidade', 'erro')),
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'novo' CHECK (status IN ('novo', 'visto', 'resolvido')),
+    author_id TEXT,
+    author_name TEXT,
+    author_role TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW()),
+    seen_at TIMESTAMPTZ,
+    resolved_at TIMESTAMPTZ
+);
+ALTER TABLE public.feedback ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Acesso total a feedback" ON public.feedback;
+CREATE POLICY "Acesso total a feedback" ON public.feedback FOR ALL USING (true);
+
 -- Concluído com sucesso
 SELECT 'Base de dados Supabase configurada com sucesso!' AS status;

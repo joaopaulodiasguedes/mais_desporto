@@ -299,3 +299,20 @@ export interface AgeCategory {
   notes?: string;
   color?: string;
 }
+
+export type FeedbackType = 'nova_funcionalidade' | 'erro';
+export type FeedbackStatus = 'novo' | 'visto' | 'resolvido';
+
+export interface FeedbackItem {
+  id: string;
+  type: FeedbackType;
+  title: string;
+  description: string;
+  status: FeedbackStatus;
+  authorId: string;
+  authorName: string;
+  authorRole: UserRole;
+  createdAt: string; // ISO
+  seenAt?: string; // ISO
+  resolvedAt?: string; // ISO
+}

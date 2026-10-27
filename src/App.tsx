@@ -5,6 +5,7 @@ import { Header } from './components/Header';
 import { Navigation, DesktopTabBar } from './components/Navigation';
 import { ClubTab } from './components/ClubTab';
 import { AdminTab } from './components/AdminTab';
+import { FeedbackTab } from './components/FeedbackTab';
 import { AthletesTab } from './components/AthletesTab';
 import { CoachesTab } from './components/CoachesTab';
 import { TrainingPlansTab } from './components/TrainingPlansTab';
@@ -101,6 +102,8 @@ const AppContent: React.FC = () => {
         return <GuardiansTab onOpenPdf={handleOpenPdf} />;
       case 'pais':
         return <ParentsAreaTab onOpenPdf={handleOpenPdf} />;
+      case 'feedback':
+        return <FeedbackTab />;
       default:
         return <ClubTab onOpenPdf={handleOpenPdf} />;
     }

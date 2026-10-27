@@ -540,5 +540,25 @@ CREATE TABLE IF NOT EXISTS public.password_reset_codes (
 );
 ALTER TABLE public.password_reset_codes ENABLE ROW LEVEL SECURITY;
 
+-- ==============================================================================
+-- 10. FEEDBACK (sugestões de novas funcionalidades e erros reportados)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.feedback (
+    id TEXT PRIMARY KEY,
+    type TEXT NOT NULL DEFAULT 'nova_funcionalidade' CHECK (type IN ('nova_funcionalidade', 'erro')),
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'novo' CHECK (status IN ('novo', 'visto', 'resolvido')),
+    author_id TEXT,
+    author_name TEXT,
+    author_role TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW()),
+    seen_at TIMESTAMPTZ,
+    resolved_at TIMESTAMPTZ
+);
+ALTER TABLE public.feedback ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Acesso total a feedback" ON public.feedback;
+CREATE POLICY "Acesso total a feedback" ON public.feedback FOR ALL USING (true);
+
 -- FIM DO SCRIPT DE ATUALIZAÇÃO
 SELECT 'Base de Dados Atualizada com Sucesso! Todas as 11 tabelas, colunas, RLS, Storage e Realtime verificados e sincronizados.' AS status;

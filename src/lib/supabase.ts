@@ -12,7 +12,8 @@ import {
   UserRole,
   ParentAuthorization,
   CarpoolOffer,
-  AgeCategory
+  AgeCategory,
+  FeedbackItem
 } from '../types';
 import { calculateMedicalStatus } from '../utils/athleteRules';
 
@@ -153,7 +154,8 @@ export async function testSupabaseConnection(): Promise<SupabaseTestResult> {
     { name: 'notifications', label: 'Notificações & Avisos' },
     { name: 'profiles', label: 'Perfis de Utilizador' },
     { name: 'parent_authorizations', label: 'Autorizações Parentais' },
-    { name: 'carpool_offers', label: 'Bolsa de Boleias Partilhadas' }
+    { name: 'carpool_offers', label: 'Bolsa de Boleias Partilhadas' },
+    { name: 'feedback', label: 'Feedback (Sugestões & Erros)' }
   ];
 
   try {
@@ -692,6 +694,38 @@ export async function mapCarpoolOfferToDb(carpool: CarpoolOffer): Promise<any> {
   };
 }
 
+export function mapFeedbackFromDb(row: any): FeedbackItem {
+  return {
+    id: String(row.id || `fb-${Date.now()}`),
+    type: row.type === 'erro' ? 'erro' : 'nova_funcionalidade',
+    title: row.title || '',
+    description: row.description || '',
+    status: row.status === 'resolvido' ? 'resolvido' : row.status === 'visto' ? 'visto' : 'novo',
+    authorId: String(row.author_id || ''),
+    authorName: row.author_name || 'Utilizador',
+    authorRole: normalizeUserRole(row.author_role),
+    createdAt: row.created_at || new Date().toISOString(),
+    seenAt: row.seen_at || undefined,
+    resolvedAt: row.resolved_at || undefined
+  };
+}
+
+export function mapFeedbackToDb(fb: FeedbackItem): any {
+  return {
+    id: fb.id,
+    type: fb.type,
+    title: fb.title,
+    description: fb.description,
+    status: fb.status,
+    author_id: fb.authorId,
+    author_name: fb.authorName,
+    author_role: fb.authorRole,
+    created_at: fb.createdAt,
+    seen_at: fb.seenAt || null,
+    resolved_at: fb.resolvedAt || null
+  };
+}
+
 export function normalizeUserRole(rawRole: any): UserRole {
   if (!rawRole) return 'atleta';
   const r = String(rawRole).toLowerCase().trim();
@@ -814,6 +848,7 @@ export async function fetchAllFromSupabase(): Promise<{
   ageCategories?: AgeCategory[];
   authorizations?: ParentAuthorization[];
   carpools?: CarpoolOffer[];
+  feedbacks?: FeedbackItem[];
   profiles?: UserProfile[];
 } | null> {
   const client = getSupabase();
@@ -830,6 +865,7 @@ export async function fetchAllFromSupabase(): Promise<{
     ageCategories?: AgeCategory[];
     authorizations?: ParentAuthorization[];
     carpools?: CarpoolOffer[];
+    feedbacks?: FeedbackItem[];
     profiles?: UserProfile[];
   } = {};
 
@@ -1240,6 +1276,16 @@ export async function fetchAllFromSupabase(): Promise<{
     console.warn('Erro ao carregar carpool_offers do Supabase:', e);
   }
 
+  // 12. Fetch feedback (sugestões e erros reportados pelos utilizadores)
+  try {
+    const { data: fbData, error: fbErr } = await client.from('feedback').select('*').order('created_at', { ascending: false });
+    if (!fbErr && Array.isArray(fbData)) {
+      result.feedbacks = fbData.map(mapFeedbackFromDb);
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar feedback do Supabase:', e);
+  }
+
   return result;
 }
 
@@ -1616,6 +1662,18 @@ export async function deleteCarpoolOfferInSupabase(id: string): Promise<boolean>
     const { error } = await client.from('carpool_offers').delete().eq('id', id);
     if (error) await client.from('boleias').delete().eq('id', id);
     return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function upsertFeedbackInSupabase(fb: FeedbackItem): Promise<boolean> {
+  const client = getSupabase();
+  if (!client) return false;
+  try {
+    const { error } = await client.from('feedback').upsert(mapFeedbackToDb(fb));
+    if (error) console.warn('Erro ao guardar feedback:', error.message);
+    return !error;
   } catch {
     return false;
   }

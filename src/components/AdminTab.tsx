@@ -9,9 +9,11 @@ import {
   RefreshCw,
   Server,
   CheckCircle2,
-  HardDrive
+  HardDrive,
+  MessageSquareWarning
 } from 'lucide-react';
 import { RulesManagement } from './RulesManagement';
+import { FeedbackManagement } from './FeedbackManagement';
 import { SupabaseManagement } from './SupabaseManagement';
 
 export const AdminTab: React.FC = () => {
@@ -22,9 +24,11 @@ export const AdminTab: React.FC = () => {
     syncWithSupabase,
     resetAllData,
     setIsSupabaseModalOpen,
-    showToast
+    showToast,
+    feedbacks
   } = useApp();
-  const [activeSubTab, setActiveSubTab] = useState<'rules' | 'supabase'>('rules');
+  const [activeSubTab, setActiveSubTab] = useState<'rules' | 'feedback' | 'supabase'>('rules');
+  const newFeedbackCount = feedbacks.filter((f) => f.status === 'novo').length;
   const [isSyncing, setIsSyncing] = useState(false);
 
   const handleSyncNow = async () => {
@@ -181,6 +185,22 @@ export const AdminTab: React.FC = () => {
           </button>
 
           <button
+            id="admin-subtab-feedback"
+            onClick={() => setActiveSubTab('feedback')}
+            className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'feedback'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <MessageSquareWarning className="w-4 h-4 text-indigo-600" />
+            <span>Feedback</span>
+            {newFeedbackCount > 0 && (
+              <span className="px-1.5 rounded-full bg-red-500 text-white text-[10px] font-black">{newFeedbackCount}</span>
+            )}
+          </button>
+
+          <button
             id="admin-subtab-supabase"
             onClick={() => setActiveSubTab('supabase')}
             className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
@@ -216,6 +236,7 @@ export const AdminTab: React.FC = () => {
       {/* Sub-Tab View Rendering */}
       <div>
         {activeSubTab === 'rules' && <RulesManagement />}
+        {activeSubTab === 'feedback' && <FeedbackManagement />}
         {activeSubTab === 'supabase' && <SupabaseManagement />}
       </div>
     </div>

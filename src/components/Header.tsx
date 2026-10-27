@@ -17,7 +17,8 @@ import {
   Users,
   UserCog,
   Sun,
-  Moon
+  Moon,
+  MessageSquarePlus
 } from 'lucide-react';
 import { EditProfileModal } from './EditProfileModal';
 import { formatShortName } from '../utils/athleteRules';
@@ -262,6 +263,16 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <UserCog className="w-4 h-4" />
                     <span>Editar Perfil</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsUserMenuOpen(false);
+                      setActiveTab('feedback');
+                    }}
+                    className="w-full text-left px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl flex items-center gap-2 cursor-pointer transition-colors"
+                  >
+                    <MessageSquarePlus className="w-4 h-4" />
+                    <span>Feedback</span>
                   </button>
                   <button
                     onClick={() => {
