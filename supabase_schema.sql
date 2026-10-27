@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS public.athletes (
     email TEXT,
     photo_url TEXT,
     federation_number TEXT,
+    dorsal TEXT,
     category TEXT NOT NULL, -- Ex: Benjamins, Infantis, Iniciados, Juvenis, Juniores, Seniores, Masters
     guardian_name TEXT,
     guardian_phone TEXT,

@@ -177,6 +177,7 @@ export const AthletesTab: React.FC = () => {
     email: '',
     photoUrl: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400&auto=format&fit=crop&q=80',
     federationNumber: 'FPN-',
+    dorsal: '',
     category: 'Juvenis (Sub-16)',
     guardianName: '',
     guardianPhone: '',
@@ -339,6 +340,7 @@ export const AthletesTab: React.FC = () => {
       email: athlete.email || '',
       photoUrl: athlete.photoUrl || '',
       federationNumber: athlete.federationNumber || '',
+      dorsal: athlete.dorsal || '',
       category: computedCategory,
       guardianName: athlete.guardianName || '',
       guardianPhone: athlete.guardianPhone || '',
@@ -492,12 +494,26 @@ export const AthletesTab: React.FC = () => {
                     {formatShortName(myAthleteProfile.name)}
                   </h3>
                   <p className="text-xs text-blue-200/80 font-mono">
-                    Nº Federado: {myAthleteProfile.federationNumber} • Assiduidade: <span className="font-bold text-emerald-300">{myAthleteProfile.attendanceRate}%</span>
+                    Dorsal: {myAthleteProfile.dorsal || '—'} • Assiduidade: <span className="font-bold text-emerald-300">{myAthleteProfile.attendanceRate}%</span>
                   </p>
-                  <p className="text-xs text-blue-100/90 pt-1 flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-blue-300 shrink-0" />
-                    <span>{myAthleteProfile.address || 'Não indicada'}</span>
-                  </p>
+                  {(myAthleteProfile.technicalSpecs || []).length > 0 && (
+                    <div className="pt-1.5 space-y-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-blue-200/70 block">
+                        Especificações Técnicas
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {(myAthleteProfile.technicalSpecs || []).map((spec) => (
+                          <span
+                            key={spec.id}
+                            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-white/10 border border-white/10 text-[11px]"
+                          >
+                            <span className="font-semibold text-blue-50">{spec.event || '—'}</span>
+                            <span className="font-mono font-bold text-emerald-300">{spec.mark || '—'}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -990,6 +1006,17 @@ export const AthletesTab: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, federationNumber: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 font-medium"
                     placeholder="Ex: FPN-84920"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">Dorsal</label>
+                  <input
+                    type="text"
+                    value={formData.dorsal || ''}
+                    onChange={(e) => setFormData({ ...formData, dorsal: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 font-medium"
+                    placeholder="Ex: 12"
                   />
                 </div>
 

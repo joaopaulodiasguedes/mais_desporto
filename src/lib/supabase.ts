@@ -321,6 +321,7 @@ export async function mapAthleteFromDb(row: any): Promise<Athlete> {
     email: decryptedEmail || row.email || row.email_atleta || '',
     photoUrl: row.photo_url || row.photoUrl || row.foto || row.foto_url || row.avatar || row.avatar_url || '',
     federationNumber: row.federation_number || row.federationNumber || row.licenca || row.numero_licenca || row.numero_federacao || row.num_federado || row.fpn || '',
+    dorsal: row.dorsal ? String(row.dorsal) : undefined,
     category: rawCat || 'Em Análise',
     guardianName: decryptedGuardianName || row.guardian_name || row.guardianName || row.encarregado_nome || row.encarregado || row.encarregado_educacao || row.nome_encarregado || '',
     guardianPhone: decryptedGuardianPhone || row.guardian_phone || row.guardianPhone || row.encarregado_telefone || row.contacto_encarregado || '',
@@ -372,6 +373,7 @@ export async function mapAthleteToDb(ath: Athlete): Promise<any> {
     email: encryptedEmail || null,
     photo_url: ath.photoUrl || null,
     federation_number: ath.federationNumber || null,
+    dorsal: ath.dorsal || null,
     category: ath.category,
     guardian_name: encryptedGuardianName || null,
     guardian_phone: encryptedGuardianPhone || null,
@@ -1425,6 +1427,7 @@ export async function upsertAthleteInSupabase(ath: Athlete): Promise<boolean> {
       delete row.nif;
       delete row.gender;
       delete row.technical_specs;
+      delete row.dorsal;
       const retry = await client.from('athletes').upsert(row);
       if (retry.error) {
         // Fallback to table 'atletas'

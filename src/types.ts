@@ -78,6 +78,7 @@ export interface Athlete {
   email: string;
   photoUrl: string;
   federationNumber: string;
+  dorsal?: string; // Nº de dorsal do atleta
   category: string; // Escalão: ex. Benjamins, Infantis, Iniciados, Juvenis, Juniores, Seniores, Masters
   guardianName: string;
   guardianPhone: string;
