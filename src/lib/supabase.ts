@@ -155,7 +155,8 @@ export async function testSupabaseConnection(): Promise<SupabaseTestResult> {
     { name: 'profiles', label: 'Perfis de Utilizador' },
     { name: 'parent_authorizations', label: 'Autorizações Parentais' },
     { name: 'carpool_offers', label: 'Bolsa de Boleias Partilhadas' },
-    { name: 'feedback', label: 'Feedback (Sugestões & Erros)' }
+    { name: 'feedback', label: 'Feedback (Sugestões & Erros)' },
+    { name: 'notification_reads', label: 'Leituras de Notificações' }
   ];
 
   try {
@@ -851,6 +852,7 @@ export async function fetchAllFromSupabase(): Promise<{
   authorizations?: ParentAuthorization[];
   carpools?: CarpoolOffer[];
   feedbacks?: FeedbackItem[];
+  notificationReads?: { notificationId: string; userId: string }[];
   profiles?: UserProfile[];
 } | null> {
   const client = getSupabase();
@@ -868,6 +870,7 @@ export async function fetchAllFromSupabase(): Promise<{
     authorizations?: ParentAuthorization[];
     carpools?: CarpoolOffer[];
     feedbacks?: FeedbackItem[];
+    notificationReads?: { notificationId: string; userId: string }[];
     profiles?: UserProfile[];
   } = {};
 
@@ -1286,6 +1289,19 @@ export async function fetchAllFromSupabase(): Promise<{
     }
   } catch (e) {
     console.warn('Erro ao carregar feedback do Supabase:', e);
+  }
+
+  // 13. Fetch leituras de notificações (estado "lida" por utilizador)
+  try {
+    const { data: readData, error: readErr } = await client.from('notification_reads').select('notification_id, user_id');
+    if (!readErr && Array.isArray(readData)) {
+      result.notificationReads = readData.map((r: any) => ({
+        notificationId: String(r.notification_id),
+        userId: String(r.user_id)
+      }));
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar notification_reads do Supabase:', e);
   }
 
   return result;
@@ -1723,6 +1739,19 @@ export async function deleteUserProfileInSupabase(id: string): Promise<boolean> 
     const { error } = await client.from('profiles').delete().eq('id', id);
     if (error) await client.from('perfis').delete().eq('id', id);
     return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function markNotificationsReadInSupabase(notificationIds: string[], userId: string): Promise<boolean> {
+  const client = getSupabase();
+  if (!client || notificationIds.length === 0) return false;
+  try {
+    const rows = notificationIds.map((id) => ({ notification_id: id, user_id: userId }));
+    const { error } = await client.from('notification_reads').upsert(rows, { onConflict: 'notification_id,user_id' });
+    if (error) console.warn('Erro ao guardar leitura de notificação:', error.message);
+    return !error;
   } catch {
     return false;
   }

@@ -561,5 +561,18 @@ ALTER TABLE public.feedback ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Acesso total a feedback" ON public.feedback;
 CREATE POLICY "Acesso total a feedback" ON public.feedback FOR ALL USING (true);
 
+-- ==============================================================================
+-- 11. LEITURAS DE NOTIFICAÇÕES (estado "lida" por utilizador)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.notification_reads (
+    notification_id TEXT NOT NULL REFERENCES public.notifications(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL,
+    read_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW()),
+    PRIMARY KEY (notification_id, user_id)
+);
+ALTER TABLE public.notification_reads ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Acesso total a leituras de notificacoes" ON public.notification_reads;
+CREATE POLICY "Acesso total a leituras de notificacoes" ON public.notification_reads FOR ALL USING (true);
+
 -- FIM DO SCRIPT DE ATUALIZAÇÃO
 SELECT 'Base de Dados Atualizada com Sucesso! Todas as 11 tabelas, colunas, RLS, Storage e Realtime verificados e sincronizados.' AS status;

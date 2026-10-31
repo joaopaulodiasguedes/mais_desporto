@@ -50,6 +50,7 @@ import {
   deleteResultInSupabase,
   upsertNotificationInSupabase,
   deleteNotificationInSupabase,
+  markNotificationsReadInSupabase,
   upsertAthleteInSupabase,
   deleteAthleteInSupabase,
   upsertCoachInSupabase,
@@ -466,6 +467,17 @@ const LOCAL_STORAGE_KEY = 'plus_desporto_app_state_v1';
 const SESSION_AUTH_KEY = 'plus_desporto_session_auth';
 const SESSION_USER_KEY = 'plus_desporto_session_user';
 
+// Com o Supabase configurado a base de dados é a única fonte de dados: nada é lido nem guardado em cache no browser.
+const DATA_CACHE_KEYS = ['_users_list', '_athletes', '_coaches', '_plans', '_calendar', '_events', '_results', '_notifs', '_auths', '_carpools', '_feedbacks', '_age_categories', '_club', '_user'];
+const isDbOnlyMode = () => getSupabaseConfig().isConfigured;
+const readLocal = (suffix: string): string | null => (isDbOnlyMode() ? null : localStorage.getItem(`${LOCAL_STORAGE_KEY}${suffix}`));
+const writeLocal = (suffix: string, value: string): void => {
+  if (!isDbOnlyMode()) localStorage.setItem(`${LOCAL_STORAGE_KEY}${suffix}`, value);
+};
+const clearLocalDataCaches = (): void => {
+  DATA_CACHE_KEYS.forEach((k) => localStorage.removeItem(`${LOCAL_STORAGE_KEY}${k}`));
+};
+
 export const getTabForRole = (role?: UserRole): string => {
   switch (role) {
     case 'treinador':
@@ -528,7 +540,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [availableUsers, setAvailableUsers] = useState<UserProfile[]>(() => {
     const config = getSupabaseConfig();
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_users_list`);
+    const saved = readLocal('_users_list');
     if (saved) {
       try {
         const parsed: UserProfile[] = JSON.parse(saved);
@@ -576,13 +588,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isMobileDeviceView, setIsMobileDeviceView] = useState<boolean>(false);
 
   const [clubInfo, setClubInfo] = useState<ClubInfo>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_club`);
+    const saved = readLocal('_club');
     return saved ? JSON.parse(saved) : INITIAL_CLUB_INFO;
   });
 
   const [athletes, setAthletes] = useState<Athlete[]>(() => {
     const config = getSupabaseConfig();
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_athletes`);
+    const saved = readLocal('_athletes');
     if (config.isConfigured) {
       if (saved) {
         try {
@@ -610,7 +622,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [coaches, setCoaches] = useState<Coach[]>(() => {
     const config = getSupabaseConfig();
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_coaches`);
+    const saved = readLocal('_coaches');
     if (saved) {
       try {
         const parsed: Coach[] = JSON.parse(saved);
@@ -638,7 +650,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [trainingPlans, setTrainingPlans] = useState<TrainingPlan[]>(() => {
     const config = getSupabaseConfig();
     if (config.isConfigured) {
-      const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_plans`);
+      const saved = readLocal('_plans');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -650,14 +662,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [];
     }
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_plans`);
+    const saved = readLocal('_plans');
     return saved ? JSON.parse(saved) : INITIAL_TRAINING_PLANS;
   });
 
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>(() => {
     const config = getSupabaseConfig();
     if (config.isConfigured) {
-      const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_calendar`);
+      const saved = readLocal('_calendar');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -669,14 +681,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [];
     }
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_calendar`);
+    const saved = readLocal('_calendar');
     return saved ? JSON.parse(saved) : INITIAL_CALENDAR_EVENTS;
   });
 
   const [results, setResults] = useState<CompetitionResult[]>(() => {
     const config = getSupabaseConfig();
     if (config.isConfigured) {
-      const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_results`);
+      const saved = readLocal('_results');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -688,14 +700,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [];
     }
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_results`);
+    const saved = readLocal('_results');
     return saved ? JSON.parse(saved) : INITIAL_RESULTS;
   });
 
-  const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
+  const [rawNotifications, setNotifications] = useState<NotificationItem[]>(() => {
     const config = getSupabaseConfig();
     if (config.isConfigured) {
-      const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_notifs`);
+      const saved = readLocal('_notifs');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -707,14 +719,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [];
     }
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_notifs`);
+    const saved = readLocal('_notifs');
     return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
   });
+
+
+  // Leituras por utilizador (tabela notification_reads); chave "idNotificacao::idUtilizador"
+  const [notificationReads, setNotificationReads] = useState<Set<string>>(() => new Set());
+  const readKey = (notificationId: string, userId: string) => `${notificationId}::${userId}`;
+
+  // Com a base de dados ligada, "lida" é por utilizador; em modo local mantém-se o campo da própria notificação
+  const notifications = React.useMemo(
+    () =>
+      isDbOnlyMode()
+        ? rawNotifications.map((n) => ({ ...n, isRead: notificationReads.has(readKey(n.id, currentUser.id)) }))
+        : rawNotifications,
+    [rawNotifications, notificationReads, currentUser.id]
+  );
 
   const [authorizations, setAuthorizations] = useState<ParentAuthorization[]>(() => {
     const config = getSupabaseConfig();
     if (config.isConfigured) {
-      const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_auths`);
+      const saved = readLocal('_auths');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -726,14 +752,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [];
     }
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_auths`);
+    const saved = readLocal('_auths');
     return saved ? JSON.parse(saved) : INITIAL_PARENT_AUTHORIZATIONS;
   });
 
   const [carpools, setCarpools] = useState<CarpoolOffer[]>(() => {
     const config = getSupabaseConfig();
     if (config.isConfigured) {
-      const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_carpools`);
+      const saved = readLocal('_carpools');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
@@ -745,13 +771,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return [];
     }
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_carpools`);
+    const saved = readLocal('_carpools');
     return saved ? JSON.parse(saved) : INITIAL_CARPOOLS;
   });
 
   const [feedbacks, setFeedbacks] = useState<FeedbackItem[]>(() => {
     try {
-      const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_feedbacks`);
+      const saved = readLocal('_feedbacks');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -759,7 +785,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [ageCategories, setAgeCategories] = useState<AgeCategory[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_age_categories`);
+    const saved = readLocal('_age_categories');
     return saved ? JSON.parse(saved) : INITIAL_AGE_CATEGORIES;
   });
 
@@ -802,33 +828,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (data) {
         if (Array.isArray(data.events)) {
           setCalendarEvents(data.events);
-          localStorage.setItem(`${LOCAL_STORAGE_KEY}_events`, JSON.stringify(data.events));
+          writeLocal('_events', JSON.stringify(data.events));
         }
         if (Array.isArray(data.athletes)) {
           setAthletes(data.athletes);
-          localStorage.setItem(`${LOCAL_STORAGE_KEY}_athletes`, JSON.stringify(data.athletes));
+          writeLocal('_athletes', JSON.stringify(data.athletes));
         }
         if (Array.isArray(data.coaches)) {
           setCoaches(data.coaches);
-          localStorage.setItem(`${LOCAL_STORAGE_KEY}_coaches`, JSON.stringify(data.coaches));
+          writeLocal('_coaches', JSON.stringify(data.coaches));
         }
         if (Array.isArray(data.trainingPlans)) setTrainingPlans(data.trainingPlans);
         if (Array.isArray(data.results)) setResults(data.results);
         if (Array.isArray(data.notifications)) setNotifications(data.notifications);
         if (data.clubInfo) {
           setClubInfo(data.clubInfo);
-          localStorage.setItem(`${LOCAL_STORAGE_KEY}_club`, JSON.stringify(data.clubInfo));
+          writeLocal('_club', JSON.stringify(data.clubInfo));
         }
         if (Array.isArray(data.ageCategories)) setAgeCategories(data.ageCategories);
         if (Array.isArray(data.authorizations)) setAuthorizations(data.authorizations);
         if (Array.isArray(data.carpools)) setCarpools(data.carpools);
         if (Array.isArray(data.feedbacks)) setFeedbacks(data.feedbacks);
+        if (Array.isArray(data.notificationReads)) {
+          setNotificationReads(new Set(data.notificationReads.map(r => readKey(r.notificationId, r.userId))));
+        }
         if (Array.isArray(data.profiles)) {
           // Keep current administrator João Paulo Dias Guedes so login/admin permission is preserved
           const hasGuedes = data.profiles.some(p => p.email?.toLowerCase() === 'joaopaulodiasguedes@gmail.com');
           const mergedProfiles = (!hasGuedes && currentUser) ? [currentUser, ...data.profiles] : data.profiles;
           setAvailableUsers(mergedProfiles);
-          localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(mergedProfiles));
+          writeLocal('_users_list', JSON.stringify(mergedProfiles));
+          // O utilizador com sessão iniciada passa a refletir o que está na base de dados (estado, perfil, ligações)
+          const fresh = data.profiles.find(
+            p => p.id === currentUser.id || (p.email && currentUser.email && p.email.toLowerCase() === currentUser.email.toLowerCase())
+          );
+          if (fresh && isAuthenticated) {
+            setCurrentUser({ ...fresh, isAdmin: fresh.isAdmin || currentUser.isAdmin });
+            if (typeof window !== 'undefined') sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(fresh));
+          }
         }
         setSupabaseStatus('connected');
       } else {
@@ -844,6 +881,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const config = getSupabaseConfig();
     if (config.isConfigured) {
+      clearLocalDataCaches();
       syncWithSupabase();
 
       const client = getSupabase();
@@ -885,7 +923,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Sync with localStorage
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(currentUser));
+    writeLocal('_user', JSON.stringify(currentUser));
   }, [currentUser]);
 
   useEffect(() => {
@@ -893,7 +931,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [isAuthenticated]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(availableUsers));
+    writeLocal('_users_list', JSON.stringify(availableUsers));
   }, [availableUsers]);
 
   useEffect(() => {
@@ -901,12 +939,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [rolePermissions]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_club`, JSON.stringify(clubInfo));
+    writeLocal('_club', JSON.stringify(clubInfo));
     applyClubTheme(clubInfo.primaryColor);
   }, [clubInfo]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_athletes`, JSON.stringify(athletes));
+    writeLocal('_athletes', JSON.stringify(athletes));
   }, [athletes]);
 
   // Sincronização automática contínua da foto do currentUser com a respetiva ficha (Treinadores, Atletas, Enc. Educação)
@@ -968,40 +1006,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [athletes]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_coaches`, JSON.stringify(coaches));
+    writeLocal('_coaches', JSON.stringify(coaches));
   }, [coaches]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_plans`, JSON.stringify(trainingPlans));
+    writeLocal('_plans', JSON.stringify(trainingPlans));
   }, [trainingPlans]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_calendar`, JSON.stringify(calendarEvents));
+    writeLocal('_calendar', JSON.stringify(calendarEvents));
   }, [calendarEvents]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_results`, JSON.stringify(results));
+    writeLocal('_results', JSON.stringify(results));
   }, [results]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_notifs`, JSON.stringify(notifications));
+    writeLocal('_notifs', JSON.stringify(notifications));
   }, [notifications]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_auths`, JSON.stringify(authorizations));
+    writeLocal('_auths', JSON.stringify(authorizations));
   }, [authorizations]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_carpools`, JSON.stringify(carpools));
+    writeLocal('_carpools', JSON.stringify(carpools));
   }, [carpools]);
 
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_feedbacks`, JSON.stringify(feedbacks));
+    writeLocal('_feedbacks', JSON.stringify(feedbacks));
   }, [feedbacks]);
 
   useEffect(() => {
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_age_categories`, JSON.stringify(ageCategories));
+    writeLocal('_age_categories', JSON.stringify(ageCategories));
   }, [ageCategories]);
 
   const showToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
@@ -1304,7 +1342,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     setAvailableUsers(updatedList);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(updatedList));
+    writeLocal('_users_list', JSON.stringify(updatedList));
     upsertUserProfileInSupabase(updatedUser);
 
     showToast('Palavra-passe atualizada com segurança! Pode agora iniciar sessão.', 'success');
@@ -1341,7 +1379,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     setAvailableUsers(updatedList);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(updatedList));
+    writeLocal('_users_list', JSON.stringify(updatedList));
     upsertUserProfileInSupabase(updatedUser);
 
     showToast('Palavra-passe redefinida com sucesso! Pode agora iniciar sessão.', 'success');
@@ -1398,7 +1436,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const updatedList = [newProfile, ...availableUsers];
     setAvailableUsers(updatedList);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(updatedList));
+    writeLocal('_users_list', JSON.stringify(updatedList));
     upsertUserProfileInSupabase(newProfile);
 
     setCurrentUser(newProfile);
@@ -1423,6 +1461,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       authorName: 'Portal de Inscrições'
     };
     setNotifications(prev => [notif, ...prev]);
+    upsertNotificationInSupabase(notif);
 
     showToast('Registo submetido com sucesso! Aguarda validação pelo treinador.', 'info');
     return { success: true, user: newProfile };
@@ -1570,7 +1609,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     setAvailableUsers(updatedList);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(updatedList));
+    writeLocal('_users_list', JSON.stringify(updatedList));
 
     // If current logged-in user is the one approved
     if (currentUser.id === userId) {
@@ -1584,7 +1623,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         rejectionReason: undefined
       };
       setCurrentUser(updatedCurrent);
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(updatedCurrent));
+      writeLocal('_user', JSON.stringify(updatedCurrent));
     }
 
     // Congratulatory Notification
@@ -1599,6 +1638,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       authorName: coachName
     };
     setNotifications(prev => [approvalNotif, ...prev]);
+    upsertNotificationInSupabase(approvalNotif);
 
     showToast(`Perfil de "${userToApprove.name}" aprovado com sucesso!`, 'success');
   };
@@ -1622,7 +1662,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     });
 
     setAvailableUsers(updatedList);
-    localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(updatedList));
+    writeLocal('_users_list', JSON.stringify(updatedList));
 
     if (currentUser.id === userId) {
       const updatedCurrent = {
@@ -1631,7 +1671,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         rejectionReason: finalReason
       };
       setCurrentUser(updatedCurrent);
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(updatedCurrent));
+      writeLocal('_user', JSON.stringify(updatedCurrent));
     }
 
     showToast(`Registo de "${userToReject.name}" recusado.`, 'info');
@@ -1650,14 +1690,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return u;
       });
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(nextList));
+      writeLocal('_users_list', JSON.stringify(nextList));
       return nextList;
     });
 
     if (currentUser.id === userId) {
       setCurrentUser(prev => {
         const item = { ...prev, ...updated };
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(item));
+        writeLocal('_user', JSON.stringify(item));
         return item;
       });
     }
@@ -1799,7 +1839,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return u;
       });
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+      writeLocal('_users_list', JSON.stringify(next));
       return next;
     });
 
@@ -1819,7 +1859,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...(newName ? { name: newName } : {}),
           ...(newEmail ? { email: newEmail } : {})
         };
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(next));
+        writeLocal('_user', JSON.stringify(next));
         return next;
       }
       return curr;
@@ -1928,7 +1968,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         upsertUserProfileInSupabase(created);
         next = [created, ...prev];
       }
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+      writeLocal('_users_list', JSON.stringify(next));
       return next;
     });
   };
@@ -2001,7 +2041,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
         return u;
       });
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+      writeLocal('_users_list', JSON.stringify(next));
       return next;
     });
 
@@ -2022,7 +2062,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           ...(newEmail ? { email: newEmail } : {}),
           ...(updated.isAdmin !== undefined ? { isAdmin: updated.isAdmin } : {})
         };
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(next));
+        writeLocal('_user', JSON.stringify(next));
         return next;
       }
       return curr;
@@ -2087,7 +2127,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setAvailableUsers(prev => {
       const next = [newGuardianUser, ...prev];
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+      writeLocal('_users_list', JSON.stringify(next));
       return next;
     });
     upsertUserProfileInSupabase(newGuardianUser);
@@ -2222,7 +2262,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         upsertUserProfileInSupabase(created);
         next = [created, ...prev];
       }
-      localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+      writeLocal('_users_list', JSON.stringify(next));
       return next;
     });
 
@@ -2282,7 +2322,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           phone: data.phone.trim(),
           avatarUrl: data.avatarUrl || curr.avatarUrl
         };
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_user`, JSON.stringify(next));
+        writeLocal('_user', JSON.stringify(next));
         return next;
       }
       return curr;
@@ -2306,7 +2346,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const updatedUser: UserProfile = { ...guardianUser, isAlsoGuardian: false, relatedAthleteIds: [] };
       setAvailableUsers(prev => {
         const next = prev.map(u => (u.id === guardianUser.id ? updatedUser : u));
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+        writeLocal('_users_list', JSON.stringify(next));
         return next;
       });
       upsertUserProfileInSupabase(updatedUser);
@@ -2327,7 +2367,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       setAvailableUsers(prev => {
         const next = prev.filter(u => u.id !== id && (targetEmail ? u.email?.toLowerCase() !== targetEmail : true));
-        localStorage.setItem(`${LOCAL_STORAGE_KEY}_users_list`, JSON.stringify(next));
+        writeLocal('_users_list', JSON.stringify(next));
         return next;
       });
     }
@@ -2653,12 +2693,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const markNotificationsRead = (ids: string[]) => {
+    if (ids.length === 0) return;
+    if (isDbOnlyMode()) {
+      setNotificationReads(prev => {
+        const next = new Set(prev);
+        ids.forEach(id => next.add(readKey(id, currentUser.id)));
+        return next;
+      });
+      markNotificationsReadInSupabase(ids, currentUser.id);
+    } else {
+      const idSet = new Set(ids);
+      setNotifications(prev => prev.map(n => (idSet.has(n.id) ? { ...n, isRead: true } : n)));
+    }
+  };
+
   const markNotificationAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    markNotificationsRead([id]);
   };
 
   const markAllNotificationsAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    markNotificationsRead(notifications.filter(n => !n.isRead).map(n => n.id));
     showToast('Todas as notificações marcadas como lidas.');
   };
 
