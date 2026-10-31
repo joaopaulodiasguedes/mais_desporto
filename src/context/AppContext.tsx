@@ -1440,6 +1440,65 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Sessão terminada.', 'info');
   };
 
+  // Ficha de atleta criada a partir da conta de utilizador (aprovação ou reconciliação)
+  const buildAthleteFromUser = (user: UserProfile): Athlete => {
+    const medicalExamExpiry = (user as any).medicalExamExpiry || '';
+    const computedCategory = user.birthDate ? determineAgeCategory(user.birthDate, ageCategories) : '';
+    return {
+      id: `ath-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      name: user.name,
+      birthDate: user.birthDate || '',
+      address: user.address || '',
+      phone: user.phone || '',
+      email: user.email,
+      photoUrl: user.avatarUrl,
+      federationNumber: user.federationNumber || '',
+      category: computedCategory && computedCategory !== 'Em Análise' ? computedCategory : user.requestedCategory || '',
+      guardianName: 'Encarregado de Educação',
+      guardianPhone: user.phone || '',
+      guardianEmail: user.email,
+      medicalExamExpiry,
+      medicalStatus: medicalExamExpiry ? calculateMedicalStatus(medicalExamExpiry).status : 'expirado',
+      emergencyContact: user.phone || '',
+      attendanceRate: 100,
+      notes: user.notes || ''
+    };
+  };
+
+  // Reconciliação: contas de atleta já aprovadas sem ficha na tabela de atletas (ex.: aprovadas antes da correção)
+  useEffect(() => {
+    if (!isAuthenticated || currentUser.role !== 'treinador') return;
+    if (getSupabaseConfig().isConfigured && supabaseStatus !== 'connected') return;
+    // Sem atletas carregados não dá para distinguir "em falta" de "ainda a carregar"
+    if (athletes.length === 0) return;
+
+    const missing = availableUsers.filter(
+      (u) =>
+        u.role === 'atleta' &&
+        u.status === 'aprovado' &&
+        !athletes.some(
+          (a) =>
+            a.id === u.athleteProfileId ||
+            (a.email && a.email.toLowerCase() === u.email.toLowerCase()) ||
+            a.name.toLowerCase() === u.name.toLowerCase()
+        )
+    );
+    if (missing.length === 0) return;
+
+    const created = missing.map((u, i) => {
+      const ath = buildAthleteFromUser(u);
+      return { ...ath, id: `${ath.id}-${i}` };
+    });
+    setAthletes((prev) => [...created, ...prev]);
+    created.forEach((ath, i) => {
+      upsertAthleteInSupabase(ath);
+      if (missing[i].athleteProfileId !== ath.id) {
+        updateUserProfile(missing[i].id, { athleteProfileId: ath.id });
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableUsers, athletes, isAuthenticated, supabaseStatus, currentUser.role]);
+
   // Coach Approval Handler
   const approveUser = (userId: string) => {
     const userToApprove = availableUsers.find(u => u.id === userId);
@@ -1460,26 +1519,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (existingAth) {
         athleteId = existingAth.id;
       } else {
-        const newAth: Athlete = {
-          id: `ath-${Date.now()}`,
-          name: userToApprove.name,
-          birthDate: userToApprove.birthDate || '',
-          address: userToApprove.address || '',
-          phone: userToApprove.phone || '',
-          email: userToApprove.email,
-          photoUrl: userToApprove.avatarUrl,
-          federationNumber: userToApprove.federationNumber || '',
-          category: userToApprove.requestedCategory || '',
-          guardianName: 'Encarregado de Educação',
-          guardianPhone: userToApprove.phone || '',
-          guardianEmail: userToApprove.email,
-          medicalExamExpiry: (userToApprove as any).medicalExamExpiry || '',
-          medicalStatus: (userToApprove as any).medicalExamExpiry ? calculateMedicalStatus((userToApprove as any).medicalExamExpiry).status : 'expirado',
-          emergencyContact: userToApprove.phone || '',
-          attendanceRate: undefined,
-          notes: userToApprove.notes || ''
-        };
+        const newAth = buildAthleteFromUser(userToApprove);
         setAthletes(prev => [newAth, ...prev]);
+        upsertAthleteInSupabase(newAth);
         athleteId = newAth.id;
       }
     } else if (userToApprove.role === 'treinador' && !coachId) {
@@ -1505,6 +1547,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           bio: userToApprove.notes || 'Treinador aprovado pela coordenação desportiva.'
         };
         setCoaches(prev => [newCoach, ...prev]);
+        upsertCoachInSupabase(newCoach);
         coachId = newCoach.id;
       }
     }
