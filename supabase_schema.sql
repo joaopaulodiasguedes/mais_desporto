@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     diploma_type TEXT CHECK (diploma_type IS NULL OR diploma_type IN ('pdf', 'image', 'doc', 'other')),
     requested_category TEXT, -- Escalão pretendido
     federation_number TEXT,
+    theme_mode TEXT CHECK (theme_mode IS NULL OR theme_mode IN ('light', 'dark')),
     notes TEXT,
     approved_at TIMESTAMPTZ,
     approved_by_coach_name TEXT,

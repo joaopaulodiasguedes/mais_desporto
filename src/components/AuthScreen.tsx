@@ -68,7 +68,6 @@ export const AuthScreen: React.FC = () => {
   const [regFedNumber, setRegFedNumber] = useState('');
   const [regCoachGrade, setRegCoachGrade] = useState('');
   const [regNotes, setRegNotes] = useState('');
-  const [regGuardianName, setRegGuardianName] = useState('');
   const [regError, setRegError] = useState('');
 
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -214,7 +213,6 @@ export const AuthScreen: React.FC = () => {
       federationNumber: regFedNumber,
       coachGrade: regRole === 'treinador' ? regCoachGrade.trim() || undefined : undefined,
       notes: regRole !== 'treinador' ? regNotes : undefined,
-      relatedAthleteName: regRole === 'encarregado' ? regGuardianName : undefined
     });
 
     if (!res.success) {
@@ -527,22 +525,6 @@ export const AuthScreen: React.FC = () => {
                         value={regFedNumber}
                         onChange={e => setRegFedNumber(e.target.value)}
                         placeholder="Ex: FPN-12345"
-                        className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium"
-                      />
-                    </div>
-                  )}
-
-                  {/* Campos específicos para ENCARREGADO */}
-                  {regRole === 'encarregado' && (
-                    <div>
-                      <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">
-                        Nome do(a) Atleta / Educando
-                      </label>
-                      <input
-                        type="text"
-                        value={regGuardianName}
-                        onChange={e => setRegGuardianName(e.target.value)}
-                        placeholder="Ex: Marta Santos"
                         className="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-medium"
                       />
                     </div>

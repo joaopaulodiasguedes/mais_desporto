@@ -46,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
     clubInfo,
     isCurrentUserAdmin,
     requestProfileEdit,
+    updateUserProfile,
     isEditProfileOpen,
     setIsEditProfileOpen
   } = useApp();
@@ -167,7 +168,12 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Dark Mode Toggle */}
         <button
           id="header-theme-toggle-btn"
-          onClick={() => setThemeMode(themeMode === 'dark' ? 'light' : 'dark')}
+          onClick={() => {
+            const next = themeMode === 'dark' ? 'light' : 'dark';
+            setThemeMode(next);
+            // Guarda a escolha no perfil (base de dados) para a repor no próximo acesso
+            updateUserProfile(currentUser.id, { themeMode: next }, { silent: true });
+          }}
           className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-slate-200 flex items-center justify-center bg-white hover:bg-slate-50 transition-colors shadow-2xs cursor-pointer shrink-0"
           title={themeMode === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}
           aria-label={themeMode === 'dark' ? 'Mudar para modo claro' : 'Mudar para modo escuro'}

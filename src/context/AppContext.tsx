@@ -34,7 +34,7 @@ import {
   INITIAL_AGE_CATEGORIES
 } from '../data/initialData';
 import { mergeEventLabels, isBuiltInLabel } from '../utils/eventLabels';
-import { applyClubTheme } from '../utils/theme';
+import { applyClubTheme, setThemeMode } from '../utils/theme';
 import { generateInitialsAvatar } from '../utils/avatarUtils';
 import {
   calculateMedicalStatus,
@@ -126,7 +126,7 @@ interface AppContextType {
   // Coach Approvals
   approveUser: (userId: string) => void;
   rejectUser: (userId: string, reason?: string) => void;
-  updateUserProfile: (userId: string, updated: Partial<UserProfile>) => void;
+  updateUserProfile: (userId: string, updated: Partial<UserProfile>, options?: { silent?: boolean }) => void;
   pendingUsers: UserProfile[];
   pendingApprovalsCount: number;
   isApprovalsModalOpen: boolean;
@@ -943,6 +943,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
+  // Aplica o modo claro/escuro guardado na base de dados para este utilizador
+  useEffect(() => {
+    if (isAuthenticated && currentUser.themeMode) {
+      setThemeMode(currentUser.themeMode);
+    }
+  }, [isAuthenticated, currentUser.id, currentUser.themeMode]);
+
   // Sync with localStorage
   useEffect(() => {
     writeLocal('_user', JSON.stringify(currentUser));
@@ -1703,7 +1710,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(`Registo de "${userToReject.name}" recusado.`, 'info');
   };
 
-  const updateUserProfile = (userId: string, updated: Partial<UserProfile>) => {
+  const updateUserProfile = (userId: string, updated: Partial<UserProfile>, options?: { silent?: boolean }) => {
     let updatedProfile: UserProfile | undefined;
 
     setAvailableUsers(prev => {
@@ -1728,7 +1735,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     }
 
-    showToast('Dados do utilizador atualizados com sucesso!', 'success');
+    if (!options?.silent) showToast('Dados do utilizador atualizados com sucesso!', 'success');
   };
 
   const requestProfileEdit = () => {

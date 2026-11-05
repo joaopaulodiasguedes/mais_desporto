@@ -318,6 +318,7 @@ ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS profession TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS alt_phone TEXT;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_also_athlete BOOLEAN DEFAULT FALSE;
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_also_guardian BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS theme_mode TEXT CHECK (theme_mode IS NULL OR theme_mode IN ('light', 'dark'));
 ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS registered_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW());
 
 -- 3.3 coaches: Administrador, cédula TPTD, graus, diplomas e turmas atribuídas

@@ -3,6 +3,7 @@ export type UserStatus = 'aprovado' | 'pendente_aprovacao' | 'rejeitado';
 
 export interface UserProfile {
   id: string;
+  themeMode?: 'light' | 'dark'; // Preferência de aspeto guardada na base de dados
   name: string;
   email: string;
   role: UserRole;

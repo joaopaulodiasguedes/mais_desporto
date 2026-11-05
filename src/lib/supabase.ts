@@ -797,7 +797,8 @@ export async function mapUserProfileFromDb(row: any): Promise<UserProfile> {
     coachProfileId: row.coach_profile_id ? String(row.coach_profile_id) : (row.coachProfileId ? String(row.coachProfileId) : (row.treinador_id ? String(row.treinador_id) : undefined)),
     isAdmin: Boolean(row.is_admin || row.isAdmin || row.admin || row.email?.toLowerCase() === 'joaopaulodiasguedes@gmail.com'),
     isAlsoAthlete: Boolean(row.is_also_athlete || row.isAlsoAthlete),
-    isAlsoGuardian: Boolean(row.is_also_guardian || row.isAlsoGuardian)
+    isAlsoGuardian: Boolean(row.is_also_guardian || row.isAlsoGuardian),
+    themeMode: row.theme_mode === 'dark' ? 'dark' : row.theme_mode === 'light' ? 'light' : undefined
   };
 }
 
@@ -838,6 +839,7 @@ export async function mapUserProfileToDb(user: UserProfile): Promise<any> {
     coach_profile_id: user.coachProfileId || null,
     is_admin: user.isAdmin ?? false,
     is_also_athlete: user.isAlsoAthlete ?? false,
+    theme_mode: user.themeMode || null,
     is_also_guardian: user.isAlsoGuardian ?? false,
     updated_at: new Date().toISOString()
   };
@@ -1531,6 +1533,7 @@ export async function upsertCoachInSupabase(coach: Coach): Promise<boolean> {
       // Colunas novas ainda não criadas na base de dados (executar o script SQL de atualização)
       delete row.is_also_athlete;
       delete row.is_also_guardian;
+      delete row.theme_mode;
       const retryCols = await client.from('coaches').upsert(row);
       error = retryCols.error;
     }
@@ -1758,6 +1761,7 @@ export async function upsertUserProfileInSupabase(user: UserProfile): Promise<bo
       error = retryCols.error;
     }
     if (error && (error.code === 'PGRST204' || error.message?.includes('relation') || error.message?.includes('nif') || error.message?.includes('profession') || error.message?.includes('alt_phone'))) {
+      delete row.theme_mode;
       delete row.relation;
       delete row.nif;
       delete row.profession;
