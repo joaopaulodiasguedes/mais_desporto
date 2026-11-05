@@ -377,6 +377,7 @@ ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS description TEXT;
 ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS registration_link TEXT;
 ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS results_url TEXT;
 ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS photos_url TEXT;
+ALTER TABLE public.calendar_events ADD COLUMN IF NOT EXISTS competition_level TEXT CHECK (competition_level IS NULL OR competition_level IN ('regional', 'nacional'));
 
 -- 3.7 competition_results: Evento associado, PDF de classificações, pódios, recordes e fotos
 ALTER TABLE public.competition_results ADD COLUMN IF NOT EXISTS event_id TEXT;

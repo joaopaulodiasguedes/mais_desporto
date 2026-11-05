@@ -182,6 +182,7 @@ export interface CalendarEvent {
   officialPdfUrl?: string;
   registrationLink?: string; // Link de inscrição para o evento / prova
   resultsUrl?: string; // Link / documento PDF com resultados oficiais da prova/evento
+  competitionLevel?: 'regional' | 'nacional'; // Nível da prova (apenas para type "prova")
   photosUrl?: string; // Link do álbum ou galeria de fotos do evento
   createdByRole: UserRole;
   creatorName: string;

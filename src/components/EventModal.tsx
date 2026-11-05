@@ -51,6 +51,7 @@ export const EventModal: React.FC<EventModalProps> = ({
   const [resultsUrl, setResultsUrl] = useState('');
   const [photosUrl, setPhotosUrl] = useState('');
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
+  const [competitionLevel, setCompetitionLevel] = useState<'' | 'regional' | 'nacional'>('');
 
   useEffect(() => {
     if (eventToEdit) {
@@ -67,6 +68,7 @@ export const EventModal: React.FC<EventModalProps> = ({
       setResultsUrl(eventToEdit.resultsUrl || '');
       setPhotosUrl(eventToEdit.photosUrl || '');
       setIsCompleted(eventToEdit.isCompleted || false);
+      setCompetitionLevel(eventToEdit.competitionLevel || '');
     } else {
       setTitle('');
       setType(defaultType || (currentUser.role === 'treinador' ? 'treino_oficial' : 'tarefa'));
@@ -81,6 +83,7 @@ export const EventModal: React.FC<EventModalProps> = ({
       setResultsUrl('');
       setPhotosUrl('');
       setIsCompleted(false);
+      setCompetitionLevel('');
     }
   }, [eventToEdit, defaultDate, defaultType, currentUser.role, isOpen]);
 
@@ -104,6 +107,7 @@ export const EventModal: React.FC<EventModalProps> = ({
         registrationLink: registrationLink.trim() || undefined,
         resultsUrl: resultsUrl.trim() || undefined,
         photosUrl: photosUrl.trim() || undefined,
+        competitionLevel: type === 'prova' && competitionLevel ? competitionLevel : undefined,
         isCompleted: type === 'tarefa' ? isCompleted : undefined
       });
     } else {
@@ -120,6 +124,7 @@ export const EventModal: React.FC<EventModalProps> = ({
         registrationLink: registrationLink.trim() || undefined,
         resultsUrl: resultsUrl.trim() || undefined,
         photosUrl: photosUrl.trim() || undefined,
+        competitionLevel: type === 'prova' && competitionLevel ? competitionLevel : undefined,
         createdByRole: currentUser.role,
         creatorName: currentUser.name,
         creatorId: currentUser.id,
@@ -314,6 +319,32 @@ export const EventModal: React.FC<EventModalProps> = ({
               }
             />
           </div>
+
+          {type === 'prova' && (
+            <div>
+              <span className="text-xs font-bold text-slate-700 block mb-1">Nível da Prova</span>
+              <div className="grid grid-cols-3 gap-2">
+                {([
+                  { value: '', label: 'Não indicado' },
+                  { value: 'regional', label: 'Regional' },
+                  { value: 'nacional', label: 'Nacional' }
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setCompetitionLevel(opt.value)}
+                    className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      competitionLevel === opt.value
+                        ? 'border-amber-400 bg-amber-50 text-amber-900 ring-2 ring-amber-200'
+                        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {type === 'tarefa' && (
             <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-200">
