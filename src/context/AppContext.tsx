@@ -15,6 +15,7 @@ import {
   FeedbackItem,
   FeedbackType,
   FeedbackStatus,
+  EventLabel,
   RolePermissions,
   AgeCategory
 } from '../types';
@@ -32,6 +33,7 @@ import {
   INITIAL_CARPOOLS,
   INITIAL_AGE_CATEGORIES
 } from '../data/initialData';
+import { mergeEventLabels } from '../utils/eventLabels';
 import { applyClubTheme } from '../utils/theme';
 import { generateInitialsAvatar } from '../utils/avatarUtils';
 import {
@@ -63,6 +65,7 @@ import {
   upsertParentAuthorizationInSupabase,
   upsertCarpoolOfferInSupabase,
   upsertFeedbackInSupabase,
+  upsertEventLabelsInSupabase,
   deleteCarpoolOfferInSupabase,
   upsertUserProfileInSupabase,
   deleteUserProfileInSupabase,
@@ -252,6 +255,12 @@ interface AppContextType {
   feedbacks: FeedbackItem[];
   addFeedback: (data: { type: FeedbackType; title: string; description: string }) => void;
   updateFeedbackStatus: (id: string, status: FeedbackStatus) => void;
+
+  // Etiquetas de eventos (nome, ícone, cor, sequência)
+  eventLabels: EventLabel[];
+  updateEventLabel: (id: EventLabel["id"], changes: Partial<Pick<EventLabel, "name" | "icon" | "color">>) => void;
+  moveEventLabel: (id: EventLabel["id"], direction: -1 | 1) => void;
+  resetEventLabels: () => void;
 
   // Age Categories (Escalões por Data de Nascimento)
   ageCategories: AgeCategory[];
@@ -468,7 +477,7 @@ const SESSION_AUTH_KEY = 'plus_desporto_session_auth';
 const SESSION_USER_KEY = 'plus_desporto_session_user';
 
 // Com o Supabase configurado a base de dados é a única fonte de dados: nada é lido nem guardado em cache no browser.
-const DATA_CACHE_KEYS = ['_users_list', '_athletes', '_coaches', '_plans', '_calendar', '_events', '_results', '_notifs', '_auths', '_carpools', '_feedbacks', '_age_categories', '_club', '_user'];
+const DATA_CACHE_KEYS = ['_event_labels', '_users_list', '_athletes', '_coaches', '_plans', '_calendar', '_events', '_results', '_notifs', '_auths', '_carpools', '_feedbacks', '_age_categories', '_club', '_user'];
 const isDbOnlyMode = () => getSupabaseConfig().isConfigured;
 const readLocal = (suffix: string): string | null => (isDbOnlyMode() ? null : localStorage.getItem(`${LOCAL_STORAGE_KEY}${suffix}`));
 const writeLocal = (suffix: string, value: string): void => {
@@ -784,6 +793,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   });
 
+  const [eventLabels, setEventLabels] = useState<EventLabel[]>(() => {
+    try {
+      const saved = readLocal('_event_labels');
+      return mergeEventLabels(saved ? JSON.parse(saved) : null);
+    } catch {
+      return mergeEventLabels(null);
+    }
+  });
+
   const [ageCategories, setAgeCategories] = useState<AgeCategory[]>(() => {
     const saved = readLocal('_age_categories');
     return saved ? JSON.parse(saved) : INITIAL_AGE_CATEGORIES;
@@ -849,6 +867,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(data.authorizations)) setAuthorizations(data.authorizations);
         if (Array.isArray(data.carpools)) setCarpools(data.carpools);
         if (Array.isArray(data.feedbacks)) setFeedbacks(data.feedbacks);
+        if (Array.isArray(data.eventLabels)) setEventLabels(mergeEventLabels(data.eventLabels));
         if (Array.isArray(data.notificationReads)) {
           setNotificationReads(new Set(data.notificationReads.map(r => readKey(r.notificationId, r.userId))));
         }
@@ -1037,6 +1056,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     writeLocal('_feedbacks', JSON.stringify(feedbacks));
   }, [feedbacks]);
+
+  useEffect(() => {
+    writeLocal('_event_labels', JSON.stringify(eventLabels));
+  }, [eventLabels]);
 
   useEffect(() => {
     writeLocal('_age_categories', JSON.stringify(ageCategories));
@@ -2825,6 +2848,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Lugar libertado com sucesso!');
   };
 
+  // Etiquetas de eventos (Gestão do Dia): apenas o administrador as altera
+  const persistEventLabels = (next: EventLabel[]) => {
+    const sorted = [...next].sort((a, b) => a.order - b.order);
+    setEventLabels(sorted);
+    upsertEventLabelsInSupabase(sorted);
+  };
+
+  const updateEventLabel = (id: EventLabel['id'], changes: Partial<Pick<EventLabel, 'name' | 'icon' | 'color'>>) => {
+    if (!isCurrentUserAdmin) {
+      showToast('Apenas administradores podem gerir as etiquetas.', 'error');
+      return;
+    }
+    persistEventLabels(eventLabels.map(l => (l.id === id ? { ...l, ...changes } : l)));
+  };
+
+  const moveEventLabel = (id: EventLabel['id'], direction: -1 | 1) => {
+    if (!isCurrentUserAdmin) return;
+    const idx = eventLabels.findIndex(l => l.id === id);
+    const target = idx + direction;
+    if (idx < 0 || target < 0 || target >= eventLabels.length) return;
+    const next = [...eventLabels];
+    [next[idx], next[target]] = [next[target], next[idx]];
+    persistEventLabels(next.map((l, i) => ({ ...l, order: i })));
+  };
+
+  const resetEventLabels = () => {
+    if (!isCurrentUserAdmin) return;
+    persistEventLabels(mergeEventLabels(null));
+    showToast('Etiquetas repostas para as predefinições.', 'info');
+  };
+
   // Feedback: qualquer utilizador submete; apenas o administrador altera o estado
   const addFeedback = (data: { type: FeedbackType; title: string; description: string }) => {
     const newFeedback: FeedbackItem = {
@@ -3028,6 +3082,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         feedbacks,
         addFeedback,
         updateFeedbackStatus,
+        eventLabels,
+        updateEventLabel,
+        moveEventLabel,
+        resetEventLabels,
         supabaseStatus,
         isSupabaseConfigured: getSupabaseConfig().isConfigured,
         syncWithSupabase,

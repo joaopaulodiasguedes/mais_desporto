@@ -575,5 +575,20 @@ ALTER TABLE public.notification_reads ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Acesso total a leituras de notificacoes" ON public.notification_reads;
 CREATE POLICY "Acesso total a leituras de notificacoes" ON public.notification_reads FOR ALL USING (true);
 
+-- ==============================================================================
+-- 12. ETIQUETAS DE EVENTOS (nome, ícone, cor e sequência usados na Gestão do Dia)
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.event_labels (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    icon TEXT NOT NULL DEFAULT 'Bookmark',
+    color TEXT NOT NULL DEFAULT 'blue',
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT TIMEZONE('utc', NOW())
+);
+ALTER TABLE public.event_labels ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Acesso total a etiquetas de eventos" ON public.event_labels;
+CREATE POLICY "Acesso total a etiquetas de eventos" ON public.event_labels FOR ALL USING (true);
+
 -- FIM DO SCRIPT DE ATUALIZAÇÃO
 SELECT 'Base de Dados Atualizada com Sucesso! Todas as 11 tabelas, colunas, RLS, Storage e Realtime verificados e sincronizados.' AS status;

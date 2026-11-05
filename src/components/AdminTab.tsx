@@ -10,10 +10,12 @@ import {
   Server,
   CheckCircle2,
   HardDrive,
-  MessageSquareWarning
+  MessageSquareWarning,
+  Tags
 } from 'lucide-react';
 import { RulesManagement } from './RulesManagement';
 import { FeedbackManagement } from './FeedbackManagement';
+import { EventLabelsManagement } from './EventLabelsManagement';
 import { SupabaseManagement } from './SupabaseManagement';
 
 export const AdminTab: React.FC = () => {
@@ -27,7 +29,7 @@ export const AdminTab: React.FC = () => {
     showToast,
     feedbacks
   } = useApp();
-  const [activeSubTab, setActiveSubTab] = useState<'rules' | 'feedback' | 'supabase'>('rules');
+  const [activeSubTab, setActiveSubTab] = useState<'rules' | 'feedback' | 'labels' | 'supabase'>('rules');
   const newFeedbackCount = feedbacks.filter((f) => f.status === 'novo').length;
   const [isSyncing, setIsSyncing] = useState(false);
 
@@ -201,6 +203,19 @@ export const AdminTab: React.FC = () => {
           </button>
 
           <button
+            id="admin-subtab-labels"
+            onClick={() => setActiveSubTab('labels')}
+            className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
+              activeSubTab === 'labels'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <Tags className="w-4 h-4 text-orange-600" />
+            <span>Etiquetas</span>
+          </button>
+
+          <button
             id="admin-subtab-supabase"
             onClick={() => setActiveSubTab('supabase')}
             className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${
@@ -237,6 +252,7 @@ export const AdminTab: React.FC = () => {
       <div>
         {activeSubTab === 'rules' && <RulesManagement />}
         {activeSubTab === 'feedback' && <FeedbackManagement />}
+        {activeSubTab === 'labels' && <EventLabelsManagement />}
         {activeSubTab === 'supabase' && <SupabaseManagement />}
       </div>
     </div>

@@ -30,6 +30,7 @@ import {
   Camera
 } from 'lucide-react';
 import { CalendarEvent } from '../types';
+import { getColorOption, getIconComponent } from '../utils/eventLabels';
 import { DayManagerModal } from './DayManagerModal';
 import { EventModal } from './EventModal';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
@@ -54,7 +55,8 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
     currentUser,
     hasPermission,
     athletes,
-    toggleEventCompletion
+    toggleEventCompletion,
+    eventLabels
   } = useApp();
 
   // Current view: Month and Year — defaults to today
@@ -227,7 +229,8 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
 
     // 1) Eventos a partir da data de referência
     const future = visibleEvents
-      .filter((evt) => evt.date >= selectedDateStr)
+      // Com um dia selecionado, os eventos desse dia já aparecem em "Atividades no Dia": os próximos começam no dia seguinte
+      .filter((evt) => (selectedDay === null ? evt.date >= selectedDateStr : evt.date > selectedDateStr))
       .sort((a, b) => {
         const timeA = a.time || '00:00';
         const timeB = b.time || '00:00';
@@ -240,6 +243,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
 
     // 2) Fallback: se não houver eventos futuros, mostra os mais recentes antes da data
     return visibleEvents
+      .filter((evt) => selectedDay === null || evt.date !== selectedDateStr)
       .sort((a, b) => {
         const timeA = a.time || '00:00';
         const timeB = b.time || '00:00';
@@ -247,7 +251,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
       })
       .slice(0, 4)
       .reverse();
-  }, [calendarEvents, currentUser, athletes, filterType, selectedDateStr]);
+  }, [calendarEvents, currentUser, athletes, filterType, selectedDateStr, selectedDay]);
 
   // Eventos específicos do dia selecionado no mês em visualização
   const selectedDayEvents = useMemo(() => {
@@ -324,6 +328,13 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
               {comp && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500 text-white font-extrabold text-[11px] shadow-2xs">
                   <Trophy className="w-3 h-3" /> COMPETIÇÃO
+                </span>
+              )}
+              {comp && evt.competitionLevel && (
+                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-extrabold text-[11px] shadow-2xs ${
+                  evt.competitionLevel === 'nacional' ? 'bg-red-600 text-white' : 'bg-green-500 text-white'
+                }`}>
+                  {evt.competitionLevel === 'nacional' ? 'NACIONAL' : 'REGIONAL'}
                 </span>
               )}
               {train && (
@@ -770,28 +781,23 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
           <div className="flex items-center gap-2">
             {canManage && (
               <>
-                <button
-                  onClick={() => handleOpenCreateEvent('tarefa')}
-                  className="px-2.5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1 transition-all cursor-pointer"
-                  title="Criar tarefa pública para a equipa"
-                >
-                  <CheckSquare className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Tarefa Equipa</span>
-                </button>
-                <button
-                  onClick={() => handleOpenCreateEvent('treino_oficial')}
-                  className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1 transition-all cursor-pointer"
-                >
-                  <Dumbbell className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Treino</span>
-                </button>
-                <button
-                  onClick={() => handleOpenCreateEvent('prova')}
-                  className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-black shadow-xs flex items-center gap-1 transition-all cursor-pointer"
-                >
-                  <Trophy className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Competição</span>
-                </button>
+                {eventLabels
+                  .filter((l) => ['treino_oficial', 'prova', 'tarefa', 'estagio', 'reuniao'].includes(l.id))
+                  .slice(0, 3)
+                  .map((l) => {
+                    const Icon = getIconComponent(l.icon);
+                    return (
+                      <button
+                        key={l.id}
+                        onClick={() => handleOpenCreateEvent(l.id as 'treino_oficial' | 'prova' | 'tarefa' | 'estagio' | 'reuniao')}
+                        className={`px-2.5 py-1.5 ${getColorOption(l.color).button} rounded-xl text-xs font-extrabold shadow-xs flex items-center gap-1 transition-all cursor-pointer`}
+                        title={l.id === 'tarefa' ? 'Criar tarefa pública para a equipa' : `Adicionar ${l.name.toLowerCase()}`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{l.id === 'tarefa' ? `${l.name} Equipa` : l.name}</span>
+                      </button>
+                    );
+                  })}
               </>
             )}
             {currentUser.role === 'atleta' && (
@@ -915,16 +921,30 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                   {/* Event Pills inside Day Cell */}
                   <div className="space-y-1 mt-1">
                     {hasComp && (
-                      <div className="px-1.5 py-0.5 rounded-md bg-amber-100 border border-amber-300 text-amber-900 text-[10px] font-extrabold flex items-center gap-1 truncate shadow-2xs">
-                        <Trophy className="w-2.5 h-2.5 text-amber-700 shrink-0" />
-                        <span className="truncate">Competição</span>
+                      <div className="flex flex-wrap items-center gap-1">
+                        {dayEvents.filter(isCompetition).map((evt) => {
+                          const tone =
+                            evt.competitionLevel === 'nacional'
+                              ? 'bg-red-100 border-red-400 text-red-700'
+                              : evt.competitionLevel === 'regional'
+                                ? 'bg-green-100 border-green-400 text-green-700'
+                                : 'bg-amber-100 border-amber-300 text-amber-700';
+                          return (
+                            <div
+                              key={evt.id}
+                              className={`inline-flex w-fit p-1 rounded-md border shadow-2xs ${tone}`}
+                              title={`${evt.title}${evt.competitionLevel ? ` — prova ${evt.competitionLevel}` : ''}`}
+                            >
+                              <Trophy className="w-2.5 h-2.5 shrink-0" />
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
                     {hasTrain && (
                       <div className="px-1.5 py-0.5 rounded-md bg-blue-100 border border-blue-300 text-blue-900 text-[10px] font-extrabold flex items-center gap-1 truncate shadow-2xs">
                         <Dumbbell className="w-2.5 h-2.5 text-blue-700 shrink-0" />
-                        <span className="truncate">Treino</span>
                       </div>
                     )}
 
@@ -937,7 +957,6 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                           >
                             <div className="flex items-center gap-1 truncate">
                               <CheckSquare className="w-2.5 h-2.5 text-emerald-800 shrink-0" />
-                              <span className="truncate">Tarefa</span>
                             </div>
                             <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-emerald-600 text-white font-black text-[9px] shrink-0 shadow-2xs">
                               ✓
@@ -950,7 +969,6 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                           >
                             <div className="flex items-center gap-1 truncate">
                               <CheckSquare className="w-2.5 h-2.5 text-red-800 shrink-0" />
-                              <span className="truncate">Tarefa</span>
                             </div>
                             <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-red-600 text-white font-black text-[9px] shrink-0 shadow-2xs">
                               ✕
@@ -963,7 +981,6 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                           >
                             <div className="flex items-center gap-1 truncate">
                               <CheckSquare className="w-2.5 h-2.5 text-slate-700 shrink-0" />
-                              <span className="truncate">Tarefa</span>
                             </div>
                             <div className="flex items-center gap-0.5 shrink-0">
                               <span className="inline-flex items-center justify-center w-3 h-3 rounded-full bg-emerald-600 text-white font-black text-[8px]" title="Confirmado">✓</span>
@@ -977,7 +994,6 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                           >
                             <div className="flex items-center gap-1 truncate">
                               <CheckSquare className="w-2.5 h-2.5 text-teal-700 shrink-0" />
-                              <span className="truncate">Tarefa</span>
                             </div>
                             <span className="text-[9px] font-bold text-teal-700">Pendente</span>
                           </div>
@@ -985,7 +1001,6 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                       ) : (
                         <div className="px-1.5 py-0.5 rounded-md bg-teal-100 border border-teal-300 text-teal-950 text-[10px] font-extrabold flex items-center gap-1 truncate shadow-2xs">
                           <CheckSquare className="w-2.5 h-2.5 text-teal-700 shrink-0" />
-                          <span className="truncate">Tarefa</span>
                         </div>
                       )
                     )}
@@ -993,14 +1008,12 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                     {hasEstagio && (
                       <div className="px-1.5 py-0.5 rounded-md bg-emerald-100 border border-emerald-300 text-emerald-900 text-[10px] font-extrabold flex items-center gap-1 truncate shadow-2xs">
                         <Compass className="w-2.5 h-2.5 text-emerald-700 shrink-0" />
-                        <span className="truncate">Estágio</span>
                       </div>
                     )}
 
                     {hasReuniao && (
                       <div className="px-1.5 py-0.5 rounded-md bg-purple-100 border border-purple-300 text-purple-900 text-[10px] font-extrabold flex items-center gap-1 truncate shadow-2xs">
                         <Briefcase className="w-2.5 h-2.5 text-purple-700 shrink-0" />
-                        <span className="truncate">Reunião</span>
                       </div>
                     )}
                   </div>
@@ -1065,7 +1078,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 </h3>
                 <p className="text-[11px] text-slate-400 font-medium">
                   {selectedDay
-                    ? `A partir de ${selectedDay} de ${MONTH_NAMES[currentMonth]}`
+                    ? `Depois de ${selectedDay} de ${MONTH_NAMES[currentMonth]}`
                     : 'A partir de hoje'}
                 </p>
               </div>

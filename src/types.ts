@@ -318,3 +318,21 @@ export interface FeedbackItem {
   seenAt?: string; // ISO
   resolvedAt?: string; // ISO
 }
+
+export type EventLabelId =
+  | 'treino_oficial'
+  | 'treino_individual'
+  | 'prova'
+  | 'tarefa'
+  | 'estagio'
+  | 'reuniao'
+  | 'nivel_regional'
+  | 'nivel_nacional';
+
+export interface EventLabel {
+  id: EventLabelId;
+  name: string;
+  icon: string; // chave do ícone (ver utils/eventLabels)
+  color: string; // chave da cor (ver utils/eventLabels)
+  order: number;
+}

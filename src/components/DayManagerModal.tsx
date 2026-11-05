@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp, isCalendarEventVisibleForUser } from '../context/AppContext';
 import { CalendarEvent } from '../types';
+import { getColorOption, getIconComponent, getLabelIdsForEvent } from '../utils/eventLabels';
 import {
   X,
   Plus,
@@ -63,7 +64,8 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
     showToast,
     athletes,
     toggleEventCompletion,
-    setEventRsvp
+    setEventRsvp,
+    eventLabels
   } = useApp();
 
   // Child event modal state (for Create & Edit)
@@ -172,45 +174,21 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
                 </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                <button
-                  onClick={() => handleOpenAddEvent('treino_oficial')}
-                  className="px-2.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                >
-                  <Dumbbell className="w-3.5 h-3.5" />
-                  <span>Treino</span>
-                </button>
-
-                <button
-                  onClick={() => handleOpenAddEvent('prova')}
-                  className="px-2.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-extrabold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                >
-                  <Trophy className="w-3.5 h-3.5" />
-                  <span>Prova</span>
-                </button>
-
-                <button
-                  onClick={() => handleOpenAddEvent('tarefa')}
-                  className="px-2.5 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                >
-                  <CheckSquare className="w-3.5 h-3.5" />
-                  <span>Tarefa</span>
-                </button>
-
-                <button
-                  onClick={() => handleOpenAddEvent('estagio')}
-                  className="px-2.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                >
-                  <Compass className="w-3.5 h-3.5" />
-                  <span>Estágio</span>
-                </button>
-
-                <button
-                  onClick={() => handleOpenAddEvent('reuniao')}
-                  className="px-2.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                >
-                  <Briefcase className="w-3.5 h-3.5" />
-                  <span>Reunião</span>
-                </button>
+                {eventLabels
+                  .filter((l) => ['treino_oficial', 'prova', 'tarefa', 'estagio', 'reuniao'].includes(l.id))
+                  .map((l) => {
+                    const Icon = getIconComponent(l.icon);
+                    return (
+                      <button
+                        key={l.id}
+                        onClick={() => handleOpenAddEvent(l.id as 'treino_oficial' | 'prova' | 'tarefa' | 'estagio' | 'reuniao')}
+                        className={`px-2.5 py-2 ${getColorOption(l.color).button} rounded-xl text-xs font-extrabold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span>{l.name}</span>
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           )}
@@ -228,21 +206,21 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleOpenAddEvent('tarefa')}
-                  className="px-3 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                >
-                  <CheckSquare className="w-3.5 h-3.5" />
-                  <span>Adicionar uma tarefa pessoal</span>
-                </button>
-
-                <button
-                  onClick={() => handleOpenAddEvent('treino_individual')}
-                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer"
-                >
-                  <Dumbbell className="w-3.5 h-3.5" />
-                  <span>Treino individual</span>
-                </button>
+                {eventLabels
+                  .filter((l) => l.id === 'tarefa' || l.id === 'treino_individual')
+                  .map((l) => {
+                    const Icon = getIconComponent(l.icon);
+                    return (
+                      <button
+                        key={l.id}
+                        onClick={() => handleOpenAddEvent(l.id as 'tarefa' | 'treino_individual')}
+                        className={`px-3 py-2 ${getColorOption(l.color).button} rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer`}
+                      >
+                        <Icon className="w-3.5 h-3.5" />
+                        <span>{l.id === 'tarefa' ? `${l.name} pessoal` : l.name}</span>
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           )}
@@ -289,16 +267,22 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        {comp && (
-                          <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-extrabold text-[10px] flex items-center gap-1">
-                            <Trophy className="w-3 h-3" /> COMPETIÇÃO
-                          </span>
-                        )}
-                        {train && (
-                          <span className="px-2 py-0.5 rounded-full bg-blue-600 text-white font-extrabold text-[10px] flex items-center gap-1">
-                            <Dumbbell className="w-3 h-3" /> {evt.type === 'treino_individual' ? 'TREINO INDIVIDUAL' : 'TREINO OFICIAL'}
-                          </span>
-                        )}
+                        {getLabelIdsForEvent(evt)
+                          .filter((id) => id !== 'tarefa')
+                          .map((id) => eventLabels.find((l) => l.id === id))
+                          .filter((l): l is NonNullable<typeof l> => !!l)
+                          .sort((a, b) => a.order - b.order)
+                          .map((l) => {
+                            const Icon = getIconComponent(l.icon);
+                            return (
+                              <span
+                                key={l.id}
+                                className={`px-2 py-0.5 rounded-full ${getColorOption(l.color).badge} font-extrabold text-[10px] uppercase flex items-center gap-1`}
+                              >
+                                <Icon className="w-3 h-3" /> {l.name}
+                              </span>
+                            );
+                          })}
                         {isTask && (
                           evt.createdByRole === 'treinador' ? (
                             <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-200 text-[10px] font-bold flex items-center gap-1">
@@ -318,17 +302,6 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
                             {evt.isCompleted ? '✓ Concluída' : '○ Pendente'}
                           </span>
                         )}
-                        {evt.type === 'estagio' && (
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-extrabold text-[10px] flex items-center gap-1">
-                            <Compass className="w-3 h-3" /> ESTÁGIO
-                          </span>
-                        )}
-                        {evt.type === 'reuniao' && (
-                          <span className="px-2 py-0.5 rounded-full bg-purple-600 text-white font-extrabold text-[10px] flex items-center gap-1">
-                            <Briefcase className="w-3 h-3" /> REUNIÃO
-                          </span>
-                        )}
-
                         <span className="text-xs font-bold text-slate-700 flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-slate-200 shadow-2xs">
                           <Clock className="w-3 h-3 text-slate-500" />
                           {evt.time} {evt.endTime ? `às ${evt.endTime}` : ''}

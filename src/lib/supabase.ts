@@ -13,7 +13,9 @@ import {
   ParentAuthorization,
   CarpoolOffer,
   AgeCategory,
-  FeedbackItem
+  FeedbackItem,
+  EventLabel,
+  EventLabelId
 } from '../types';
 import { calculateMedicalStatus } from '../utils/athleteRules';
 
@@ -156,7 +158,8 @@ export async function testSupabaseConnection(): Promise<SupabaseTestResult> {
     { name: 'parent_authorizations', label: 'Autorizações Parentais' },
     { name: 'carpool_offers', label: 'Bolsa de Boleias Partilhadas' },
     { name: 'feedback', label: 'Feedback (Sugestões & Erros)' },
-    { name: 'notification_reads', label: 'Leituras de Notificações' }
+    { name: 'notification_reads', label: 'Leituras de Notificações' },
+    { name: 'event_labels', label: 'Etiquetas de Eventos' }
   ];
 
   try {
@@ -855,6 +858,7 @@ export async function fetchAllFromSupabase(): Promise<{
   carpools?: CarpoolOffer[];
   feedbacks?: FeedbackItem[];
   notificationReads?: { notificationId: string; userId: string }[];
+  eventLabels?: EventLabel[];
   profiles?: UserProfile[];
 } | null> {
   const client = getSupabase();
@@ -873,6 +877,7 @@ export async function fetchAllFromSupabase(): Promise<{
     carpools?: CarpoolOffer[];
     feedbacks?: FeedbackItem[];
     notificationReads?: { notificationId: string; userId: string }[];
+    eventLabels?: EventLabel[];
     profiles?: UserProfile[];
   } = {};
 
@@ -1304,6 +1309,22 @@ export async function fetchAllFromSupabase(): Promise<{
     }
   } catch (e) {
     console.warn('Erro ao carregar notification_reads do Supabase:', e);
+  }
+
+  // 14. Fetch etiquetas de eventos (nome, ícone, cor e sequência)
+  try {
+    const { data: labelData, error: labelErr } = await client.from('event_labels').select('*');
+    if (!labelErr && Array.isArray(labelData) && labelData.length > 0) {
+      result.eventLabels = labelData.map((r: any) => ({
+        id: r.id as EventLabelId,
+        name: r.name || '',
+        icon: r.icon || 'Bookmark',
+        color: r.color || 'blue',
+        order: Number(r.sort_order ?? 0)
+      }));
+    }
+  } catch (e) {
+    console.warn('Erro ao carregar event_labels do Supabase:', e);
   }
 
   return result;
@@ -1742,6 +1763,26 @@ export async function deleteUserProfileInSupabase(id: string): Promise<boolean> 
     const { error } = await client.from('profiles').delete().eq('id', id);
     if (error) await client.from('perfis').delete().eq('id', id);
     return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function upsertEventLabelsInSupabase(labels: EventLabel[]): Promise<boolean> {
+  const client = getSupabase();
+  if (!client || labels.length === 0) return false;
+  try {
+    const rows = labels.map((l) => ({
+      id: l.id,
+      name: l.name,
+      icon: l.icon,
+      color: l.color,
+      sort_order: l.order,
+      updated_at: new Date().toISOString()
+    }));
+    const { error } = await client.from('event_labels').upsert(rows);
+    if (error) console.warn('Erro ao guardar etiquetas:', error.message);
+    return !error;
   } catch {
     return false;
   }
