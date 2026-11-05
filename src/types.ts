@@ -183,6 +183,7 @@ export interface CalendarEvent {
   registrationLink?: string; // Link de inscrição para o evento / prova
   resultsUrl?: string; // Link / documento PDF com resultados oficiais da prova/evento
   competitionLevel?: 'regional' | 'nacional'; // Nível da prova (apenas para type "prova")
+  labelIds?: string[]; // Etiquetas personalizadas aplicadas ao evento (ver Administração > Etiquetas)
   photosUrl?: string; // Link do álbum ou galeria de fotos do evento
   createdByRole: UserRole;
   creatorName: string;
@@ -319,15 +320,8 @@ export interface FeedbackItem {
   resolvedAt?: string; // ISO
 }
 
-export type EventLabelId =
-  | 'treino_oficial'
-  | 'treino_individual'
-  | 'prova'
-  | 'tarefa'
-  | 'estagio'
-  | 'reuniao'
-  | 'nivel_regional'
-  | 'nivel_nacional';
+// Etiquetas predefinidas (ligadas aos tipos de evento e níveis de prova); as personalizadas usam ids "custom-..."
+export type EventLabelId = string;
 
 export interface EventLabel {
   id: EventLabelId;

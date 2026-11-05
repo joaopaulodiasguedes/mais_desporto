@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { CalendarEvent } from '../types';
+import { getColorOption, getIconComponent, isBuiltInLabel } from '../utils/eventLabels';
 import {
   X,
   Check,
@@ -34,7 +35,9 @@ export const EventModal: React.FC<EventModalProps> = ({
   defaultDate,
   defaultType
 }) => {
-  const { addCalendarEvent, updateCalendarEvent, currentUser } = useApp();
+  const { addCalendarEvent, updateCalendarEvent, currentUser,
+    eventLabels
+  } = useApp();
 
   const isEditing = !!eventToEdit;
 
@@ -52,6 +55,7 @@ export const EventModal: React.FC<EventModalProps> = ({
   const [photosUrl, setPhotosUrl] = useState('');
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [competitionLevel, setCompetitionLevel] = useState<'' | 'regional' | 'nacional'>('');
+  const [labelIds, setLabelIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (eventToEdit) {
@@ -69,6 +73,7 @@ export const EventModal: React.FC<EventModalProps> = ({
       setPhotosUrl(eventToEdit.photosUrl || '');
       setIsCompleted(eventToEdit.isCompleted || false);
       setCompetitionLevel(eventToEdit.competitionLevel || '');
+      setLabelIds(eventToEdit.labelIds || []);
     } else {
       setTitle('');
       setType(defaultType || (currentUser.role === 'treinador' ? 'treino_oficial' : 'tarefa'));
@@ -84,6 +89,7 @@ export const EventModal: React.FC<EventModalProps> = ({
       setPhotosUrl('');
       setIsCompleted(false);
       setCompetitionLevel('');
+      setLabelIds([]);
     }
   }, [eventToEdit, defaultDate, defaultType, currentUser.role, isOpen]);
 
@@ -108,6 +114,7 @@ export const EventModal: React.FC<EventModalProps> = ({
         resultsUrl: resultsUrl.trim() || undefined,
         photosUrl: photosUrl.trim() || undefined,
         competitionLevel: type === 'prova' && competitionLevel ? competitionLevel : undefined,
+        labelIds: labelIds.length > 0 ? labelIds : undefined,
         isCompleted: type === 'tarefa' ? isCompleted : undefined
       });
     } else {
@@ -125,6 +132,7 @@ export const EventModal: React.FC<EventModalProps> = ({
         resultsUrl: resultsUrl.trim() || undefined,
         photosUrl: photosUrl.trim() || undefined,
         competitionLevel: type === 'prova' && competitionLevel ? competitionLevel : undefined,
+        labelIds: labelIds.length > 0 ? labelIds : undefined,
         createdByRole: currentUser.role,
         creatorName: currentUser.name,
         creatorId: currentUser.id,
@@ -342,6 +350,32 @@ export const EventModal: React.FC<EventModalProps> = ({
                     {opt.label}
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {eventLabels.some((l) => !isBuiltInLabel(l.id)) && (
+            <div>
+              <span className="text-xs font-bold text-slate-700 block mb-1">Etiquetas</span>
+              <div className="flex flex-wrap gap-1.5">
+                {eventLabels
+                  .filter((l) => !isBuiltInLabel(l.id))
+                  .map((l) => {
+                    const Icon = getIconComponent(l.icon);
+                    const active = labelIds.includes(l.id);
+                    return (
+                      <button
+                        key={l.id}
+                        type="button"
+                        onClick={() => setLabelIds((prev) => (active ? prev.filter((x) => x !== l.id) : [...prev, l.id]))}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase border transition-all cursor-pointer ${
+                          active ? `${getColorOption(l.color).badge} border-transparent shadow-xs` : 'bg-white text-slate-500 border-slate-300 hover:border-slate-400'
+                        }`}
+                      >
+                        <Icon className="w-3 h-3" /> {l.name}
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           )}

@@ -33,7 +33,7 @@ import {
   INITIAL_CARPOOLS,
   INITIAL_AGE_CATEGORIES
 } from '../data/initialData';
-import { mergeEventLabels } from '../utils/eventLabels';
+import { mergeEventLabels, isBuiltInLabel } from '../utils/eventLabels';
 import { applyClubTheme } from '../utils/theme';
 import { generateInitialsAvatar } from '../utils/avatarUtils';
 import {
@@ -66,6 +66,7 @@ import {
   upsertCarpoolOfferInSupabase,
   upsertFeedbackInSupabase,
   upsertEventLabelsInSupabase,
+  deleteEventLabelInSupabase,
   deleteCarpoolOfferInSupabase,
   upsertUserProfileInSupabase,
   deleteUserProfileInSupabase,
@@ -260,6 +261,8 @@ interface AppContextType {
   eventLabels: EventLabel[];
   updateEventLabel: (id: EventLabel["id"], changes: Partial<Pick<EventLabel, "name" | "icon" | "color">>) => void;
   moveEventLabel: (id: EventLabel["id"], direction: -1 | 1) => void;
+  addEventLabel: (data: Pick<EventLabel, "name" | "icon" | "color">) => void;
+  deleteEventLabel: (id: EventLabel["id"]) => void;
   resetEventLabels: () => void;
 
   // Age Categories (Escalões por Data de Nascimento)
@@ -2594,6 +2597,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Calendar
+  // Grava o evento e avisa se a base de dados não guardou tudo (colunas por criar) ou falhou
+  const saveCalendarEvent = async (evt: CalendarEvent) => {
+    const ok = await upsertCalendarEventInSupabase(evt, (cols) =>
+      showToast(
+        `Evento gravado, mas faltam colunas no Supabase (${cols.join(', ')}): estes dados não ficam guardados. Execute o SQL de atualização.`,
+        'error'
+      )
+    );
+    if (!ok && getSupabaseConfig().isConfigured) {
+      showToast('Não foi possível gravar o evento na base de dados.', 'error');
+    }
+  };
+
   const addCalendarEvent = (eventData: Omit<CalendarEvent, 'id' | 'rsvps'>) => {
     const newEvent: CalendarEvent = {
       ...eventData,
@@ -2601,7 +2617,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       rsvps: {}
     };
     setCalendarEvents(prev => [newEvent, ...prev]);
-    upsertCalendarEventInSupabase(newEvent);
+    saveCalendarEvent(newEvent);
     showToast(`Evento "${newEvent.title}" adicionado ao calendário!`);
   };
 
@@ -2609,7 +2625,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCalendarEvents(prev => prev.map(e => {
       if (e.id === id) {
         const item = { ...e, ...updated };
-        upsertCalendarEventInSupabase(item);
+        saveCalendarEvent(item);
         return item;
       }
       return e;
@@ -2629,7 +2645,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const nextState = !e.isCompleted;
         showToast(nextState ? 'Tarefa marcada como concluída!' : 'Tarefa marcada como pendente.');
         const item = { ...e, isCompleted: nextState };
-        upsertCalendarEventInSupabase(item);
+        saveCalendarEvent(item);
         return item;
       }
       return e;
@@ -2873,8 +2889,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     persistEventLabels(next.map((l, i) => ({ ...l, order: i })));
   };
 
+  const addEventLabel = (data: Pick<EventLabel, 'name' | 'icon' | 'color'>) => {
+    if (!isCurrentUserAdmin) return;
+    const nextOrder = eventLabels.reduce((max, l) => Math.max(max, l.order), -1) + 1;
+    persistEventLabels([...eventLabels, { id: `custom-${Date.now()}`, ...data, order: nextOrder }]);
+  };
+
+  // Só as etiquetas personalizadas se eliminam; as predefinidas estão ligadas aos tipos de evento
+  const deleteEventLabel = (id: EventLabel['id']) => {
+    if (!isCurrentUserAdmin || isBuiltInLabel(id)) return;
+    const remaining = eventLabels.filter(l => l.id !== id).map((l, i) => ({ ...l, order: i }));
+    setEventLabels(remaining);
+    deleteEventLabelInSupabase(id);
+    upsertEventLabelsInSupabase(remaining);
+    showToast('Etiqueta eliminada.', 'info');
+  };
+
   const resetEventLabels = () => {
     if (!isCurrentUserAdmin) return;
+    eventLabels.filter(l => !isBuiltInLabel(l.id)).forEach(l => deleteEventLabelInSupabase(l.id));
     persistEventLabels(mergeEventLabels(null));
     showToast('Etiquetas repostas para as predefinições.', 'info');
   };
@@ -3085,6 +3118,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         eventLabels,
         updateEventLabel,
         moveEventLabel,
+        addEventLabel,
+        deleteEventLabel,
         resetEventLabels,
         supabaseStatus,
         isSupabaseConfigured: getSupabaseConfig().isConfigured,

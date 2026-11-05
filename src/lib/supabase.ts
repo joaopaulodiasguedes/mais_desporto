@@ -255,6 +255,7 @@ export function mapCalendarEventFromDb(row: any): CalendarEvent {
     registrationLink: row.registration_link || row.registrationLink || row.link_inscricao || undefined,
     resultsUrl: row.results_url || row.resultsUrl || row.link_resultados || undefined,
     photosUrl: row.photos_url || row.photosUrl || row.link_fotos || undefined,
+    labelIds: Array.isArray(row.label_ids) && row.label_ids.length > 0 ? row.label_ids.map(String) : undefined,
     competitionLevel: row.competition_level === 'nacional' ? 'nacional' : row.competition_level === 'regional' ? 'regional' : undefined,
     createdByRole: row.created_by_role || 'treinador',
     creatorName: row.creator_name || 'Treinador',
@@ -281,6 +282,7 @@ export function mapCalendarEventToDb(evt: CalendarEvent): any {
     results_url: evt.resultsUrl || null,
     photos_url: evt.photosUrl || null,
     competition_level: evt.competitionLevel || null,
+    label_ids: evt.labelIds || [],
     created_by_role: evt.createdByRole,
     creator_name: evt.creatorName,
     creator_id: evt.creatorId,
@@ -1334,25 +1336,45 @@ export async function fetchAllFromSupabase(): Promise<{
 // ASYNC MUTATIONS (SYNC ACTIONS)
 // ==============================================================================
 
-export async function upsertCalendarEventInSupabase(evt: CalendarEvent): Promise<boolean> {
+// Colunas opcionais de calendar_events que podem ainda não existir na base de dados
+const OPTIONAL_CALENDAR_COLUMNS = ['label_ids', 'competition_level', 'registration_link', 'results_url', 'photos_url'];
+
+/**
+ * Grava o evento. Se a tabela ainda não tiver alguma coluna opcional, remove só essa coluna e repete,
+ * para não perder os restantes campos (ex.: o nível da prova). As colunas em falta são comunicadas em onMissingColumns.
+ */
+export async function upsertCalendarEventInSupabase(
+  evt: CalendarEvent,
+  onMissingColumns?: (columns: string[]) => void
+): Promise<boolean> {
   const client = getSupabase();
   if (!client) return false;
   try {
     const row = mapCalendarEventToDb(evt);
-    let { error } = await client.from('calendar_events').upsert(row);
-    if (error) {
-      delete row.registration_link;
-      delete row.results_url;
-      delete row.photos_url;
-      delete row.competition_level;
-      const retry = await client.from('calendar_events').upsert(row);
-      if (!retry.error) {
-        error = null;
-      }
+    const missing: string[] = [];
+    let error: { message?: string } | null = null;
+
+    for (let attempt = 0; attempt <= OPTIONAL_CALENDAR_COLUMNS.length; attempt++) {
+      const res = await client.from('calendar_events').upsert(row);
+      error = res.error;
+      if (!error) break;
+
+      const message = error.message || '';
+      // Coluna indicada na mensagem; se não for reconhecível, tenta a próxima opcional pela ordem
+      const named = OPTIONAL_CALENDAR_COLUMNS.find((c) => c in row && message.includes(c));
+      const next = named || OPTIONAL_CALENDAR_COLUMNS.find((c) => c in row);
+      if (!next) break;
+      delete row[next];
+      missing.push(next);
     }
+
     if (error) {
       console.warn('Erro ao sincronizar evento com Supabase:', error.message);
       return false;
+    }
+    if (missing.length > 0) {
+      console.warn('Colunas em falta em calendar_events (execute o SQL de atualização):', missing.join(', '));
+      onMissingColumns?.(missing);
     }
     return true;
   } catch (err) {
@@ -1782,6 +1804,17 @@ export async function upsertEventLabelsInSupabase(labels: EventLabel[]): Promise
     }));
     const { error } = await client.from('event_labels').upsert(rows);
     if (error) console.warn('Erro ao guardar etiquetas:', error.message);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+export async function deleteEventLabelInSupabase(id: string): Promise<boolean> {
+  const client = getSupabase();
+  if (!client) return false;
+  try {
+    const { error } = await client.from('event_labels').delete().eq('id', id);
     return !error;
   } catch {
     return false;

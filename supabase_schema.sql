@@ -156,6 +156,7 @@ CREATE TABLE IF NOT EXISTS public.calendar_events (
     results_url TEXT,
     photos_url TEXT,
     competition_level TEXT CHECK (competition_level IS NULL OR competition_level IN ('regional', 'nacional')),
+    label_ids TEXT[] DEFAULT '{}',
     created_by_role TEXT NOT NULL CHECK (created_by_role IN ('treinador', 'atleta', 'encarregado')),
     creator_name TEXT NOT NULL,
     creator_id TEXT NOT NULL,

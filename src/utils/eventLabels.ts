@@ -2,6 +2,7 @@
  * Etiquetas de eventos (usadas na Gestão do Dia): nome, ícone, cor e sequência editáveis pelo administrador.
  * Os ids são fixos (ligados aos tipos de evento e aos níveis de prova); só a apresentação é configurável.
  */
+import React from 'react';
 import {
   Trophy,
   Dumbbell,
@@ -16,16 +17,26 @@ import {
   Flame,
   MapPin,
   Heart,
-  Target,
-  Zap,
   Award,
-  Bell,
-  Bookmark,
   type LucideIcon
 } from 'lucide-react';
 import { CalendarEvent, EventLabel, EventLabelId } from '../types';
 
-export const ICON_OPTIONS: Record<string, LucideIcon> = {
+export type LabelIcon = React.ComponentType<{ className?: string }>;
+
+/** Bandeira de Portugal (o lucide não a inclui). */
+export const PortugalFlagIcon: LabelIcon = ({ className }) =>
+  React.createElement(
+    'svg',
+    { viewBox: '0 0 30 20', className, role: 'img', 'aria-label': 'Bandeira de Portugal' },
+    React.createElement('rect', { width: 30, height: 20, rx: 2, fill: '#FF0000' }),
+    React.createElement('path', { d: 'M2 0h10v20H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2z', fill: '#006600' }),
+    React.createElement('circle', { cx: 12, cy: 10, r: 4.2, fill: '#FFCC00' }),
+    React.createElement('circle', { cx: 12, cy: 10, r: 2.4, fill: '#FF0000' }),
+    React.createElement('circle', { cx: 12, cy: 10, r: 1.2, fill: '#FFFFFF' })
+  );
+
+export const ICON_OPTIONS: Record<string, LabelIcon> = {
   Trophy,
   Dumbbell,
   CheckSquare,
@@ -40,10 +51,7 @@ export const ICON_OPTIONS: Record<string, LucideIcon> = {
   Flame,
   MapPin,
   Heart,
-  Target,
-  Zap,
-  Bell,
-  Bookmark
+  PortugalFlag: PortugalFlagIcon
 };
 
 export interface ColorOption {
@@ -76,7 +84,7 @@ export const COLOR_OPTIONS: ColorOption[] = [
 export const getColorOption = (key: string): ColorOption =>
   COLOR_OPTIONS.find((c) => c.key === key) || COLOR_OPTIONS[0];
 
-export const getIconComponent = (key: string): LucideIcon => ICON_OPTIONS[key] || Bookmark;
+export const getIconComponent = (key: string): LabelIcon => ICON_OPTIONS[key] || Flag;
 
 export const DEFAULT_EVENT_LABELS: EventLabel[] = [
   { id: 'treino_oficial', name: 'Treino', icon: 'Dumbbell', color: 'blue', order: 0 },
@@ -89,7 +97,7 @@ export const DEFAULT_EVENT_LABELS: EventLabel[] = [
   { id: 'nivel_nacional', name: 'Nacional', icon: 'Flag', color: 'red', order: 7 }
 ];
 
-export const EVENT_LABEL_HINTS: Record<EventLabelId, string> = {
+export const EVENT_LABEL_HINTS: Record<string, string> = {
   treino_oficial: 'Treinos da equipa',
   treino_individual: 'Treinos individuais do atleta',
   prova: 'Provas e competições',
@@ -100,17 +108,134 @@ export const EVENT_LABEL_HINTS: Record<EventLabelId, string> = {
   nivel_nacional: 'Nível da prova: nacional'
 };
 
-/** Junta as etiquetas guardadas com as predefinidas (ids em falta usam o valor por omissão) e ordena-as. */
+export const BUILT_IN_LABEL_IDS = DEFAULT_EVENT_LABELS.map((l) => l.id);
+export const isBuiltInLabel = (id: string): boolean => BUILT_IN_LABEL_IDS.includes(id);
+
+/** Junta as etiquetas guardadas com as predefinidas (ids em falta usam o valor por omissão), mantém as personalizadas e ordena. */
 export function mergeEventLabels(saved: EventLabel[] | undefined | null): EventLabel[] {
-  const byId = new Map((saved || []).map((l) => [l.id, l]));
-  return DEFAULT_EVENT_LABELS.map((def) => ({ ...def, ...(byId.get(def.id) || {}) })).sort((a, b) => a.order - b.order);
+  const savedList = saved || [];
+  const byId = new Map(savedList.map((l) => [l.id, l]));
+  const builtIn = DEFAULT_EVENT_LABELS.map((def) => ({ ...def, ...(byId.get(def.id) || {}) }));
+  const custom = savedList.filter((l) => !isBuiltInLabel(l.id));
+  return [...builtIn, ...custom].sort((a, b) => a.order - b.order);
 }
 
-/** Etiquetas de um evento (tipo + nível da prova), pela ordem definida pelo administrador. */
+/** Etiquetas de um evento (tipo + nível da prova + personalizadas), pela ordem definida pelo administrador. */
 export function getLabelIdsForEvent(evt: CalendarEvent): EventLabelId[] {
   const ids: EventLabelId[] = [evt.type];
   if (evt.type === 'prova' && evt.competitionLevel) {
     ids.push(evt.competitionLevel === 'nacional' ? 'nivel_nacional' : 'nivel_regional');
   }
+  if (evt.labelIds) ids.push(...evt.labelIds);
   return ids;
 }
+
+export interface ColorTone {
+  card: string;
+  date: string;
+  pill: string;
+  pillIcon: string;
+  chipHover: string;
+}
+
+// Tons claros por cor (cartões, datas e pílulas do calendário); classes por extenso para o Tailwind as detetar
+export const COLOR_TONES: Record<string, ColorTone> = {
+  blue: {
+    card: 'border-blue-200 hover:border-blue-400 bg-gradient-to-r from-blue-50/20 to-white',
+    date: 'bg-blue-100/90 text-blue-950 border-blue-300',
+    pill: 'bg-blue-100 border-blue-300 text-blue-800',
+    pillIcon: 'text-blue-700',
+    chipHover: 'hover:text-blue-700'
+  },
+  indigo: {
+    card: 'border-indigo-200 hover:border-indigo-400 bg-gradient-to-r from-indigo-50/20 to-white',
+    date: 'bg-indigo-100/90 text-indigo-950 border-indigo-300',
+    pill: 'bg-indigo-100 border-indigo-300 text-indigo-800',
+    pillIcon: 'text-indigo-700',
+    chipHover: 'hover:text-indigo-700'
+  },
+  purple: {
+    card: 'border-purple-200 hover:border-purple-400 bg-gradient-to-r from-purple-50/20 to-white',
+    date: 'bg-purple-100/90 text-purple-950 border-purple-300',
+    pill: 'bg-purple-100 border-purple-300 text-purple-800',
+    pillIcon: 'text-purple-700',
+    chipHover: 'hover:text-purple-700'
+  },
+  pink: {
+    card: 'border-pink-200 hover:border-pink-400 bg-gradient-to-r from-pink-50/20 to-white',
+    date: 'bg-pink-100/90 text-pink-950 border-pink-300',
+    pill: 'bg-pink-100 border-pink-300 text-pink-800',
+    pillIcon: 'text-pink-700',
+    chipHover: 'hover:text-pink-700'
+  },
+  red: {
+    card: 'border-red-200 hover:border-red-400 bg-gradient-to-r from-red-50/20 to-white',
+    date: 'bg-red-100/90 text-red-950 border-red-300',
+    pill: 'bg-red-100 border-red-300 text-red-800',
+    pillIcon: 'text-red-700',
+    chipHover: 'hover:text-red-700'
+  },
+  orange: {
+    card: 'border-orange-200 hover:border-orange-400 bg-gradient-to-r from-orange-50/20 to-white',
+    date: 'bg-orange-100/90 text-orange-950 border-orange-300',
+    pill: 'bg-orange-100 border-orange-300 text-orange-800',
+    pillIcon: 'text-orange-700',
+    chipHover: 'hover:text-orange-700'
+  },
+  amber: {
+    card: 'border-amber-200 hover:border-amber-400 bg-gradient-to-r from-amber-50/20 to-white',
+    date: 'bg-amber-100/90 text-amber-950 border-amber-300',
+    pill: 'bg-amber-100 border-amber-300 text-amber-800',
+    pillIcon: 'text-amber-700',
+    chipHover: 'hover:text-amber-700'
+  },
+  green: {
+    card: 'border-green-200 hover:border-green-400 bg-gradient-to-r from-green-50/20 to-white',
+    date: 'bg-green-100/90 text-green-950 border-green-300',
+    pill: 'bg-green-100 border-green-300 text-green-800',
+    pillIcon: 'text-green-700',
+    chipHover: 'hover:text-green-700'
+  },
+  emerald: {
+    card: 'border-emerald-200 hover:border-emerald-400 bg-gradient-to-r from-emerald-50/20 to-white',
+    date: 'bg-emerald-100/90 text-emerald-950 border-emerald-300',
+    pill: 'bg-emerald-100 border-emerald-300 text-emerald-800',
+    pillIcon: 'text-emerald-700',
+    chipHover: 'hover:text-emerald-700'
+  },
+  teal: {
+    card: 'border-teal-200 hover:border-teal-400 bg-gradient-to-r from-teal-50/20 to-white',
+    date: 'bg-teal-100/90 text-teal-950 border-teal-300',
+    pill: 'bg-teal-100 border-teal-300 text-teal-800',
+    pillIcon: 'text-teal-700',
+    chipHover: 'hover:text-teal-700'
+  },
+  cyan: {
+    card: 'border-cyan-200 hover:border-cyan-400 bg-gradient-to-r from-cyan-50/20 to-white',
+    date: 'bg-cyan-100/90 text-cyan-950 border-cyan-300',
+    pill: 'bg-cyan-100 border-cyan-300 text-cyan-800',
+    pillIcon: 'text-cyan-700',
+    chipHover: 'hover:text-cyan-700'
+  },
+  slate: {
+    card: 'border-slate-200 hover:border-slate-400 bg-gradient-to-r from-slate-50/20 to-white',
+    date: 'bg-slate-100/90 text-slate-950 border-slate-300',
+    pill: 'bg-slate-100 border-slate-300 text-slate-800',
+    pillIcon: 'text-slate-700',
+    chipHover: 'hover:text-slate-700'
+  }
+};
+
+export const getColorTone = (key: string): ColorTone => COLOR_TONES[key] || COLOR_TONES.blue;
+
+/** Etiqueta pelo id, com a predefinição como alternativa. */
+export const findLabel = (labels: EventLabel[], id: string): EventLabel =>
+  labels.find((l) => l.id === id) || DEFAULT_EVENT_LABELS.find((l) => l.id === id) || DEFAULT_EVENT_LABELS[0];
+
+/** Etiqueta que dá a cor/ícone de destaque ao evento: o nível da prova (se existir) ou o tipo. */
+export const getAccentLabel = (labels: EventLabel[], evt: CalendarEvent): EventLabel => {
+  if (evt.type === 'prova' && evt.competitionLevel) {
+    return findLabel(labels, evt.competitionLevel === 'nacional' ? 'nivel_nacional' : 'nivel_regional');
+  }
+  return findLabel(labels, evt.type);
+};
