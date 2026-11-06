@@ -23,9 +23,11 @@ import {
   TrendingUp,
   Activity,
   Edit2,
-  Trash2
+  Trash2,
+  Trophy,
+  MapPin
 } from 'lucide-react';
-import { TrainingPlan, TrainingPlanCompletion, Athlete } from '../types';
+import { TrainingPlan, TrainingPlanCompletion, Athlete, CalendarEvent } from '../types';
 import { formatShortName } from '../utils/athleteRules';
 
 interface AthleteTrainingCalendarViewProps {
@@ -56,6 +58,7 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
     currentUser,
     completeTrainingPlan,
     removeTrainingPlanCompletion,
+    calendarEvents,
     logIndividualTraining,
     updateIndividualTraining,
     deleteTrainingPlan
@@ -152,6 +155,19 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
   const athletePlans = useMemo(() => {
     return plans.filter(isPlanAssignedToThisAthlete);
   }, [plans, athlete.id]);
+
+  // Provas do calendário do clube em que o atleta confirmou presença (aceites)
+  const acceptedProvasByDate = useMemo(() => {
+    const ownUserId = currentUser.role === 'atleta' ? currentUser.id : undefined;
+    const map: Record<string, CalendarEvent[]> = {};
+    calendarEvents.forEach((evt) => {
+      if (evt.type !== 'prova') return;
+      const rsvp = evt.rsvps?.[athlete.id] || (ownUserId ? evt.rsvps?.[ownUserId] : undefined);
+      if (rsvp?.status !== 'confirmado') return;
+      (map[evt.date] = map[evt.date] || []).push(evt);
+    });
+    return map;
+  }, [calendarEvents, athlete.id, currentUser.id, currentUser.role]);
 
   // Check which plans are scheduled for a specific date
   const getPlansForDate = (dateStr: string): TrainingPlan[] => {
@@ -543,6 +559,7 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
               const isToday = cell.dateStr === todayStr;
               const isSelected = cell.dateStr === selectedDate;
               const hasPlans = cell.plans.length > 0;
+              const cellProvas = acceptedProvasByDate[cell.dateStr] || [];
 
               // Check status of first plan on this day
               let statusBadge: 'cumpriu' | 'nao_cumpriu' | 'parcial' | 'agendado' | null = null;
@@ -646,8 +663,23 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
                         );
                       })}
                     </div>
-                  ) : (
+                  ) : cellProvas.length === 0 ? (
                     <div className="h-7 sm:h-8" />
+                  ) : null}
+
+                  {/* Provas aceites (confirmadas) pelo atleta */}
+                  {cellProvas.length > 0 && (
+                    <div className="w-full mt-1 flex items-center justify-center gap-1 flex-wrap">
+                      {cellProvas.map((prova) => (
+                        <div
+                          key={prova.id}
+                          className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-2xs transition-transform hover:scale-110"
+                          title={`Prova confirmada: ${prova.title}`}
+                        >
+                          <Trophy className="w-3.5 h-3.5" />
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </button>
               );
@@ -700,6 +732,32 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
               {formattedSelectedDate}
             </h3>
           </div>
+
+          {/* Provas aceites para este dia */}
+          {(acceptedProvasByDate[selectedDate] || []).map((prova) => (
+            <div key={prova.id} className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <div className="min-w-0 space-y-0.5">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-700">Prova confirmada</span>
+                <h4 className="text-sm font-extrabold text-slate-900 leading-snug">{prova.title}</h4>
+                <div className="flex items-center gap-3 flex-wrap text-xs text-slate-600 font-semibold">
+                  {prova.time && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-slate-400" /> {prova.time}
+                      {prova.endTime ? `–${prova.endTime}` : ''}
+                    </span>
+                  )}
+                  {prova.location && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-slate-400" /> {prova.location}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
 
           {/* Case A: A workout plan exists for this day */}
           {activePlan ? (

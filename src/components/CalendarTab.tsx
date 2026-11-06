@@ -900,14 +900,16 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                   {/* Event Pills inside Day Cell */}
                   <div className="space-y-1 mt-1">
                     {hasComp && (
-                      <div className="flex flex-col items-start gap-1">
+                      <div className="flex flex-col items-center gap-1">
                         {dayEvents.filter(isCompetition).map((evt) => {
                           const labels = getLabelIdsForEvent(evt)
                             .filter((id) => id !== 'tarefa')
                             .map((id) => findLabel(eventLabels, id))
                             .sort(compareLabelsForDisplay);
                           // A cor da pílula é a do nível (regional/nacional), se existir
-                          const levelLabel = labels.find((l) => l.id === 'nivel_regional' || l.id === 'nivel_nacional');
+                          const levelLabel = labels.find((l) => getLabelCategory(l.id) === 'nivel');
+                          // Na célula só cabem a Ação e o Nível; o Tipo fica na dica e nos cartões
+                          const cellLabels = labels.filter((l) => getLabelCategory(l.id) !== 'tipo');
                           const tone = getColorTone((levelLabel || labels[0]).color);
                           return (
                             <span
@@ -915,7 +917,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                               className={`inline-flex items-center gap-0.5 p-1 rounded-md border shadow-2xs ${tone.pill}`}
                               title={`${evt.title} · ${labels.map((l) => l.name).join(' · ')}`}
                             >
-                              {labels.map((label) => {
+                              {cellLabels.map((label) => {
                                 const Icon = getIconComponent(label.icon);
                                 return <Icon key={label.id} className={`w-2.5 h-2.5 shrink-0 ${tone.pillIcon}`} />;
                               })}
