@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { CalendarEvent } from '../types';
-import { getColorOption, getIconComponent, isBuiltInLabel } from '../utils/eventLabels';
+import { getColorOption, getIconComponent, isBuiltInLabel, getLabelCategory } from '../utils/eventLabels';
 import {
   X,
   Check,
@@ -330,38 +330,78 @@ export const EventModal: React.FC<EventModalProps> = ({
             />
           </div>
 
-          {type === 'prova' && (
-            <div>
-              <span className="text-xs font-bold text-slate-700 block mb-1">Nível da Prova</span>
-              <div className="grid grid-cols-3 gap-2">
-                {([
-                  { value: '', label: 'Não indicado' },
-                  { value: 'regional', label: 'Regional' },
-                  { value: 'nacional', label: 'Nacional' }
-                ] as const).map((opt) => (
+          {type === 'prova' && (() => {
+            // Nível da Prova: etiquetas do grupo "Nível da Prova" definidas em Administração → Etiquetas
+            const levelLabels = eventLabels.filter((l) => getLabelCategory(l.id) === 'nivel');
+            const levelIdOf = (l: { id: string }) =>
+              l.id === 'nivel_regional' ? 'regional' : l.id === 'nivel_nacional' ? 'nacional' : null;
+            const customLevelIds = levelLabels.filter((l) => !levelIdOf(l)).map((l) => l.id);
+            const isActive = (l: { id: string }) => {
+              const lv = levelIdOf(l);
+              return lv ? competitionLevel === lv : labelIds.includes(l.id);
+            };
+            const selectLevel = (l: { id: string } | null) => {
+              // Só um nível de cada vez
+              setLabelIds((prev) => prev.filter((x) => !customLevelIds.includes(x)));
+              if (!l) {
+                setCompetitionLevel('');
+                return;
+              }
+              const lv = levelIdOf(l);
+              if (lv) {
+                setCompetitionLevel(lv);
+              } else {
+                setCompetitionLevel('');
+                setLabelIds((prev) => [...prev, l.id]);
+              }
+            };
+            const noneActive = !levelLabels.some(isActive);
+            return (
+              <div>
+                <span className="text-xs font-bold text-slate-700 block mb-1">Nível da Prova</span>
+                <div className="flex flex-wrap gap-2">
                   <button
-                    key={opt.value}
                     type="button"
-                    onClick={() => setCompetitionLevel(opt.value)}
-                    className={`px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                      competitionLevel === opt.value
-                        ? 'border-amber-400 bg-amber-50 text-amber-900 ring-2 ring-amber-200'
+                    onClick={() => selectLevel(null)}
+                    className={`flex-1 min-w-[7rem] px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
+                      noneActive
+                        ? 'border-slate-400 bg-slate-100 text-slate-900 ring-2 ring-slate-200'
                         : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                     }`}
                   >
-                    {opt.label}
+                    Não indicado
                   </button>
-                ))}
+                  {levelLabels.map((l) => {
+                    const Icon = getIconComponent(l.icon);
+                    const active = isActive(l);
+                    return (
+                      <button
+                        key={l.id}
+                        type="button"
+                        onClick={() => selectLevel(l)}
+                        className={`flex-1 min-w-[7rem] px-3 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer inline-flex items-center justify-center gap-1.5 ${
+                          active
+                            ? `${getColorOption(l.color).badge} border-transparent ring-2 ring-slate-300 shadow-xs`
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        <Icon className="w-3.5 h-3.5" /> {l.name}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
-          {eventLabels.some((l) => !isBuiltInLabel(l.id)) && (
+          {eventLabels.some((l) => getLabelCategory(l.id) === 'tipo' && l.id !== type) && (
             <div>
-              <span className="text-xs font-bold text-slate-700 block mb-1">Etiquetas</span>
+              <span className="text-xs font-bold text-slate-700 block mb-1">
+                {type === 'prova' ? 'Tipo de Prova' : 'Etiquetas'}
+              </span>
               <div className="flex flex-wrap gap-1.5">
                 {eventLabels
-                  .filter((l) => !isBuiltInLabel(l.id))
+                  .filter((l) => getLabelCategory(l.id) === 'tipo' && l.id !== type)
                   .map((l) => {
                     const Icon = getIconComponent(l.icon);
                     const active = labelIds.includes(l.id);
