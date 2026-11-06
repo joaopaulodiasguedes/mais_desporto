@@ -86,6 +86,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
   const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
   const [defaultEventType, setDefaultEventType] = useState<'treino_oficial' | 'prova' | 'estagio' | 'reuniao' | 'treino_individual' | 'tarefa'>('treino_oficial');
   const [defaultEventDate, setDefaultEventDate] = useState<string>('');
+  const [defaultEventLabelIds, setDefaultEventLabelIds] = useState<string[]>([]);
 
   // RSVP Form Modal
   const [isRsvpModalOpen, setIsRsvpModalOpen] = useState(false);
@@ -179,12 +180,14 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
 
   const handleOpenCreateEvent = (
     type: 'treino_oficial' | 'prova' | 'estagio' | 'reuniao' | 'treino_individual' | 'tarefa',
-    targetDay?: number
+    targetDay?: number,
+    labelIds: string[] = []
   ) => {
     const day = targetDay || selectedDay || 15;
     const dateFormatted = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     setEventToEdit(null);
     setDefaultEventType(type);
+    setDefaultEventLabelIds(labelIds);
     setDefaultEventDate(dateFormatted);
     setIsEventModalOpen(true);
   };
@@ -752,19 +755,24 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             {canManage && (
               <>
                 {eventLabels
-                  .filter((l) => ['treino_oficial', 'prova', 'tarefa', 'estagio', 'reuniao'].includes(l.id))
+                  .filter((l) => l.id !== 'nivel_regional' && l.id !== 'nivel_nacional')
                   .slice(0, 3)
                   .map((l) => {
                     const Icon = getIconComponent(l.icon);
+                    const builtInTypes = ['treino_oficial', 'treino_individual', 'prova', 'tarefa', 'estagio', 'reuniao'];
                     return (
                       <button
                         key={l.id}
-                        onClick={() => handleOpenCreateEvent(l.id as 'treino_oficial' | 'prova' | 'tarefa' | 'estagio' | 'reuniao')}
+                        onClick={() =>
+                          builtInTypes.includes(l.id)
+                            ? handleOpenCreateEvent(l.id as 'treino_oficial' | 'prova' | 'tarefa' | 'estagio' | 'reuniao' | 'treino_individual')
+                            : handleOpenCreateEvent('reuniao', undefined, [l.id])
+                        }
                         className={`px-2.5 py-1.5 ${getColorOption(l.color).button} rounded-xl text-xs font-extrabold shadow-xs flex items-center gap-1 transition-all cursor-pointer`}
                         title={l.id === 'tarefa' ? 'Criar tarefa pública para a equipa' : `Adicionar ${l.name.toLowerCase()}`}
                       >
                         <Icon className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{l.id === 'tarefa' ? `${l.name} Equipa` : l.name}</span>
+                        <span className="hidden sm:inline">{l.name}</span>
                       </button>
                     );
                   })}
@@ -775,6 +783,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 onClick={() => {
                   setEventToEdit(null);
                   setDefaultEventType('tarefa');
+                  setDefaultEventLabelIds([]);
                   setDefaultEventDate(new Date().toISOString().split('T')[0]);
                   setIsEventModalOpen(true);
                 }}
@@ -1170,6 +1179,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
         eventToEdit={eventToEdit}
         defaultDate={defaultEventDate}
         defaultType={defaultEventType}
+        defaultLabelIds={defaultEventLabelIds}
       />
 
       {/* Confirmation Modal for Deleting Calendar Event */}

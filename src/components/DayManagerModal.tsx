@@ -73,6 +73,7 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
   const [eventToDelete, setEventToDelete] = useState<CalendarEvent | null>(null);
   const [defaultEventType, setDefaultEventType] = useState<'treino_oficial' | 'prova' | 'estagio' | 'reuniao' | 'treino_individual' | 'tarefa'>('treino_oficial');
+  const [defaultEventLabelIds, setDefaultEventLabelIds] = useState<string[]>([]);
   const [expandedRsvpEventId, setExpandedRsvpEventId] = useState<string | null>(null);
 
   if (!isOpen || dayNumber === null) return null;
@@ -94,9 +95,10 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
   const isCoach = currentUser.role === 'treinador';
   const canManage = isCoach || hasPermission('canAddCompetitions');
 
-  const handleOpenAddEvent = (type: 'treino_oficial' | 'prova' | 'estagio' | 'reuniao' | 'treino_individual' | 'tarefa') => {
+  const handleOpenAddEvent = (type: 'treino_oficial' | 'prova' | 'estagio' | 'reuniao' | 'treino_individual' | 'tarefa', labelIds: string[] = []) => {
     setEventToEdit(null);
     setDefaultEventType(type);
+    setDefaultEventLabelIds(labelIds);
     setIsEventModalOpen(true);
   };
 
@@ -175,13 +177,19 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 {eventLabels
-                  .filter((l) => ['treino_oficial', 'prova', 'tarefa', 'estagio', 'reuniao'].includes(l.id))
+                  .filter((l) => l.id !== 'nivel_regional' && l.id !== 'nivel_nacional')
+                  .slice(0, 6)
                   .map((l) => {
                     const Icon = getIconComponent(l.icon);
+                    const builtInTypes = ['treino_oficial', 'treino_individual', 'prova', 'tarefa', 'estagio', 'reuniao'];
                     return (
                       <button
                         key={l.id}
-                        onClick={() => handleOpenAddEvent(l.id as 'treino_oficial' | 'prova' | 'tarefa' | 'estagio' | 'reuniao')}
+                        onClick={() =>
+                          builtInTypes.includes(l.id)
+                            ? handleOpenAddEvent(l.id as 'treino_oficial' | 'prova' | 'tarefa' | 'estagio' | 'reuniao' | 'treino_individual')
+                            : handleOpenAddEvent('reuniao', [l.id])
+                        }
                         className={`px-2.5 py-2 ${getColorOption(l.color).button} rounded-xl text-xs font-extrabold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer`}
                       >
                         <Icon className="w-3.5 h-3.5" />
@@ -621,6 +629,7 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
         eventToEdit={eventToEdit}
         defaultDate={dateString}
         defaultType={defaultEventType}
+        defaultLabelIds={defaultEventLabelIds}
       />
 
       {/* Confirmation Modal for Deleting Event in Day Manager */}

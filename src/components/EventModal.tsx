@@ -26,6 +26,7 @@ interface EventModalProps {
   eventToEdit?: CalendarEvent | null;
   defaultDate?: string;
   defaultType?: 'treino_oficial' | 'prova' | 'estagio' | 'reuniao' | 'treino_individual' | 'tarefa';
+  defaultLabelIds?: string[];
 }
 
 export const EventModal: React.FC<EventModalProps> = ({
@@ -33,7 +34,8 @@ export const EventModal: React.FC<EventModalProps> = ({
   onClose,
   eventToEdit,
   defaultDate,
-  defaultType
+  defaultType,
+  defaultLabelIds
 }) => {
   const { addCalendarEvent, updateCalendarEvent, currentUser,
     eventLabels
@@ -89,9 +91,9 @@ export const EventModal: React.FC<EventModalProps> = ({
       setPhotosUrl('');
       setIsCompleted(false);
       setCompetitionLevel('');
-      setLabelIds([]);
+      setLabelIds(defaultLabelIds || []);
     }
-  }, [eventToEdit, defaultDate, defaultType, currentUser.role, isOpen]);
+  }, [eventToEdit, defaultDate, defaultType, defaultLabelIds, currentUser.role, isOpen]);
 
   if (!isOpen) return null;
 
