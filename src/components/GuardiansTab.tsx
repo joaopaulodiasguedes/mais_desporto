@@ -207,8 +207,10 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
       });
 
       // Determine relation from name or default
-      let relation = u.relation || 'Pai / Mãe';
-      if (!u.relation) {
+      // 'Encarregado(a)' é só o valor por omissão do perfil, não é um grau de parentesco
+      const storedRelation = u.relation && !/^encarregad/i.test(u.relation.trim()) ? u.relation : '';
+      let relation = storedRelation || 'Pai / Mãe';
+      if (!storedRelation) {
         if (u.name.toLowerCase().includes('(mãe)') || u.name.toLowerCase().includes('mãe')) {
           relation = 'Mãe';
         } else if (u.name.toLowerCase().includes('(pai)') || u.name.toLowerCase().includes('pai')) {
@@ -218,7 +220,7 @@ export const GuardiansTab: React.FC<GuardiansTabProps> = ({ onOpenPdf }) => {
 
       list.push({
         id: u.id,
-        name: u.name.replace(/\s*\((Pai|Mãe|Tutor|Avô|Avó|Outro|Encarregado)\)\s*/gi, '').trim(),
+        name: u.name.replace(/\s*\((Pai|Mãe|Tutor|Avô|Avó|Outro|Encarregado(\(a\))?( de Educação)?)\)\s*/gi, '').trim(),
         email: u.email || '',
         phone: u.phone || '',
         altPhone: u.altPhone || '',

@@ -404,16 +404,19 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
                       <span className="inline-block mt-0.5 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 text-[11px] font-bold border border-teal-200 max-w-full truncate">
                         {coach.licenseGrade}
                       </span>
-                      {(coach.isAlsoAthlete || coach.isAlsoGuardian) && (
+                      {(
                         <div className="flex items-center gap-1 flex-wrap mt-1">
+                          <span className="px-1.5 py-0.5 rounded-md bg-teal-50 text-teal-700 text-[9px] font-black border border-teal-200">
+                            Treinador
+                          </span>
                           {coach.isAlsoAthlete && (
                             <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[9px] font-black border border-blue-200">
-                              Também Atleta
+                              Atleta
                             </span>
                           )}
                           {coach.isAlsoGuardian && (
                             <span className="px-1.5 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[9px] font-black border border-purple-200">
-                              Também Enc. Educação
+                              Enc. Educação
                             </span>
                           )}
                         </div>
