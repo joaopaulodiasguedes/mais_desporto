@@ -3012,7 +3012,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Lugar libertado com sucesso!');
   };
 
-  // Etiquetas de eventos (Gestão do Dia): apenas o administrador as altera
+  // Etiquetas de eventos (Gestão do Dia): geridas pelos treinadores (e administradores)
+  const canManageEventLabels = currentUser.role === 'treinador' || isCurrentUserAdmin;
   const persistEventLabels = (next: EventLabel[]) => {
     const sorted = [...next].sort((a, b) => a.order - b.order);
     setEventLabels(sorted);
@@ -3020,15 +3021,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateEventLabel = (id: EventLabel['id'], changes: Partial<Pick<EventLabel, 'name' | 'icon' | 'color'>>) => {
-    if (!isCurrentUserAdmin) {
-      showToast('Apenas administradores podem gerir as etiquetas.', 'error');
+    if (!canManageEventLabels) {
+      showToast('Apenas treinadores podem gerir as etiquetas.', 'error');
       return;
     }
     persistEventLabels(eventLabels.map(l => (l.id === id ? { ...l, ...changes } : l)));
   };
 
   const moveEventLabel = (id: EventLabel['id'], direction: -1 | 1) => {
-    if (!isCurrentUserAdmin) return;
+    if (!canManageEventLabels) return;
     // Move apenas dentro do mesmo grupo (Ações / Nível da Prova / Tipo)
     const group = getLabelCategory(id);
     const sameGroup = eventLabels.filter(l => getLabelCategory(l.id) === group);
@@ -3041,7 +3042,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addEventLabel = (data: Pick<EventLabel, 'name' | 'icon' | 'color'> & { category?: 'acao' | 'nivel' | 'tipo' }) => {
-    if (!isCurrentUserAdmin) return;
+    if (!canManageEventLabels) return;
     const nextOrder = eventLabels.reduce((max, l) => Math.max(max, l.order), -1) + 1;
     const { category = 'tipo', ...rest } = data;
     persistEventLabels([...eventLabels, { id: `custom-${category}-${Date.now()}`, ...rest, order: nextOrder }]);
@@ -3049,7 +3050,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Só as etiquetas personalizadas se eliminam; as predefinidas estão ligadas aos tipos de evento
   const deleteEventLabel = (id: EventLabel['id']) => {
-    if (!isCurrentUserAdmin || isBuiltInLabel(id)) return;
+    if (!canManageEventLabels || isBuiltInLabel(id)) return;
     const remaining = eventLabels.filter(l => l.id !== id).map((l, i) => ({ ...l, order: i }));
     setEventLabels(remaining);
     deleteEventLabelInSupabase(id);
@@ -3058,7 +3059,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const resetEventLabels = () => {
-    if (!isCurrentUserAdmin) return;
+    if (!canManageEventLabels) return;
     eventLabels.filter(l => !isBuiltInLabel(l.id)).forEach(l => deleteEventLabelInSupabase(l.id));
     persistEventLabels(mergeEventLabels(null));
     showToast('Etiquetas repostas para as predefinições.', 'info');

@@ -25,11 +25,13 @@ import {
   Paperclip,
   Layers,
   Shield,
-  Camera
+  Camera,
+  Tags
 } from 'lucide-react';
 import { Coach } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { CategoriesManagement } from './CategoriesManagement';
+import { EventLabelsManagement } from './EventLabelsManagement';
 import { PendingApprovalsManagement } from './PendingApprovalsManagement';
 import { formatBirthDate, formatShortName } from '../utils/athleteRules';
 import { generateInitialsAvatar, isInitialsAvatar } from '../utils/avatarUtils';
@@ -53,7 +55,7 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
     setIsEditProfileOpen
   } = useApp();
 
-  const [activeSubTab, setActiveSubTab] = useState<'coaches' | 'categories' | 'approvals'>('coaches');
+  const [activeSubTab, setActiveSubTab] = useState<'coaches' | 'categories' | 'labels' | 'approvals'>('coaches');
   const [selectedCoach, setSelectedCoach] = useState<Coach | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingCoach, setEditingCoach] = useState<Coach | null>(null);
@@ -346,6 +348,18 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
             </button>
 
             <button
+              id="subtab-labels"
+              onClick={() => setActiveSubTab('labels')}
+              className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${activeSubTab === 'labels'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+                }`}
+            >
+              <Tags className="w-4 h-4 text-orange-600" />
+              <span>Etiquetas</span>
+            </button>
+
+            <button
               id="subtab-approvals"
               onClick={() => setActiveSubTab('approvals')}
               className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${activeSubTab === 'approvals'
@@ -368,6 +382,8 @@ export const CoachesTab: React.FC<CoachesTabProps> = ({ onOpenPdf }) => {
       {/* View Switch: Grelha de Treinadores vs Escalões vs Aprovações */}
       {currentUser.role === 'treinador' && activeSubTab === 'categories' ? (
         <CategoriesManagement />
+      ) : currentUser.role === 'treinador' && activeSubTab === 'labels' ? (
+        <EventLabelsManagement />
       ) : currentUser.role === 'treinador' && activeSubTab === 'approvals' ? (
         <PendingApprovalsManagement />
       ) : (
