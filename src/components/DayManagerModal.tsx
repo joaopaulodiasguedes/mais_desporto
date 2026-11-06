@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp, isCalendarEventVisibleForUser } from '../context/AppContext';
 import { CalendarEvent } from '../types';
-import { getColorOption, getIconComponent, getLabelIdsForEvent, getLabelCategory } from '../utils/eventLabels';
+import { getColorOption, getIconComponent, getLabelIdsForEvent, getLabelCategory, compareLabelsForDisplay } from '../utils/eventLabels';
 import {
   X,
   Plus,
@@ -279,7 +279,7 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
                           .filter((id) => id !== 'tarefa')
                           .map((id) => eventLabels.find((l) => l.id === id))
                           .filter((l): l is NonNullable<typeof l> => !!l)
-                          .sort((a, b) => a.order - b.order)
+                          .sort(compareLabelsForDisplay)
                           .map((l) => {
                             const Icon = getIconComponent(l.icon);
                             return (

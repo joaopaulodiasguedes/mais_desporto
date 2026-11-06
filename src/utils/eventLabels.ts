@@ -188,6 +188,12 @@ export function mergeEventLabels(saved: EventLabel[] | undefined | null): EventL
   return [...builtIn, ...custom].sort((a, b) => a.order - b.order);
 }
 
+const CATEGORY_RANK: Record<LabelCategory, number> = { acao: 0, tipo: 1, nivel: 2 };
+
+/** Sequência fixa de apresentação: Ação (ex.: Prova), depois Tipo (ex.: Pista) e por fim Nível (ex.: Distrital). Dentro do grupo, a ordem do administrador. */
+export const compareLabelsForDisplay = (a: EventLabel, b: EventLabel): number =>
+  CATEGORY_RANK[getLabelCategory(a.id)] - CATEGORY_RANK[getLabelCategory(b.id)] || a.order - b.order;
+
 /** Etiquetas de um evento (tipo + nível da prova + personalizadas), pela ordem definida pelo administrador. */
 export function getLabelIdsForEvent(evt: CalendarEvent): EventLabelId[] {
   const ids: EventLabelId[] = [evt.type];

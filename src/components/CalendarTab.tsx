@@ -30,7 +30,7 @@ import {
   Camera
 } from 'lucide-react';
 import { CalendarEvent } from '../types';
-import { getColorOption, getColorTone, getIconComponent, getLabelIdsForEvent, findLabel, getAccentLabel, getLabelCategory } from '../utils/eventLabels';
+import { getColorOption, getColorTone, getIconComponent, getLabelIdsForEvent, findLabel, getAccentLabel, getLabelCategory, compareLabelsForDisplay } from '../utils/eventLabels';
 import { DayManagerModal } from './DayManagerModal';
 import { EventModal } from './EventModal';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
@@ -319,7 +319,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                 .filter((id) => id !== 'tarefa')
                 .map((id) => eventLabels.find((l) => l.id === id))
                 .filter((l): l is NonNullable<typeof l> => !!l)
-                .sort((a, b) => a.order - b.order)
+                .sort(compareLabelsForDisplay)
                 .map((l) => {
                   const Icon = getIconComponent(l.icon);
                   return (
@@ -905,7 +905,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                           const labels = getLabelIdsForEvent(evt)
                             .filter((id) => id !== 'tarefa')
                             .map((id) => findLabel(eventLabels, id))
-                            .sort((x, y) => x.order - y.order);
+                            .sort(compareLabelsForDisplay);
                           // A cor da pílula é a do nível (regional/nacional), se existir
                           const levelLabel = labels.find((l) => l.id === 'nivel_regional' || l.id === 'nivel_nacional');
                           const tone = getColorTone((levelLabel || labels[0]).color);
