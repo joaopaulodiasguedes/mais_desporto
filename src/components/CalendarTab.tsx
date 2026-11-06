@@ -30,7 +30,7 @@ import {
   Camera
 } from 'lucide-react';
 import { CalendarEvent } from '../types';
-import { getColorOption, getColorTone, getIconComponent, getLabelIdsForEvent, findLabel, getAccentLabel } from '../utils/eventLabels';
+import { getColorOption, getColorTone, getIconComponent, getLabelIdsForEvent, findLabel, getAccentLabel, getLabelCategory } from '../utils/eventLabels';
 import { DayManagerModal } from './DayManagerModal';
 import { EventModal } from './EventModal';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
@@ -755,7 +755,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
             {canManage && (
               <>
                 {eventLabels
-                  .filter((l) => l.id !== 'nivel_regional' && l.id !== 'nivel_nacional')
+                  .filter((l) => getLabelCategory(l.id) === 'acao')
                   .slice(0, 3)
                   .map((l) => {
                     const Icon = getIconComponent(l.icon);
@@ -901,27 +901,27 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                   <div className="space-y-1 mt-1">
                     {hasComp && (
                       <div className="flex flex-col items-start gap-1">
-                        {dayEvents.filter(isCompetition).map((evt) => (
-                          <div key={evt.id} className="flex items-center gap-0.5" title={evt.title}>
-                            {getLabelIdsForEvent(evt)
-                              .filter((id) => id !== 'tarefa')
-                              .map((id) => findLabel(eventLabels, id))
-                              .sort((x, y) => x.order - y.order)
-                              .map((label) => {
+                        {dayEvents.filter(isCompetition).map((evt) => {
+                          const labels = getLabelIdsForEvent(evt)
+                            .filter((id) => id !== 'tarefa')
+                            .map((id) => findLabel(eventLabels, id))
+                            .sort((x, y) => x.order - y.order);
+                          // A cor da pílula é a do nível (regional/nacional), se existir
+                          const levelLabel = labels.find((l) => l.id === 'nivel_regional' || l.id === 'nivel_nacional');
+                          const tone = getColorTone((levelLabel || labels[0]).color);
+                          return (
+                            <span
+                              key={evt.id}
+                              className={`inline-flex items-center gap-0.5 p-1 rounded-md border shadow-2xs ${tone.pill}`}
+                              title={`${evt.title} · ${labels.map((l) => l.name).join(' · ')}`}
+                            >
+                              {labels.map((label) => {
                                 const Icon = getIconComponent(label.icon);
-                                const tone = getColorTone(label.color);
-                                return (
-                                  <span
-                                    key={label.id}
-                                    className={`inline-flex p-1 rounded-md border shadow-2xs ${tone.pill}`}
-                                    title={label.name}
-                                  >
-                                    <Icon className={`w-2.5 h-2.5 shrink-0 ${tone.pillIcon}`} />
-                                  </span>
-                                );
+                                return <Icon key={label.id} className={`w-2.5 h-2.5 shrink-0 ${tone.pillIcon}`} />;
                               })}
-                          </div>
-                        ))}
+                            </span>
+                          );
+                        })}
                       </div>
                     )}
 

@@ -14,9 +14,6 @@ import {
   Medal,
   Users,
   Calendar,
-  Flame,
-  MapPin,
-  Heart,
   Award,
   type LucideIcon
 } from 'lucide-react';
@@ -36,6 +33,59 @@ export const PortugalFlagIcon: LabelIcon = ({ className }) =>
     React.createElement('circle', { cx: 12, cy: 10, r: 1.2, fill: '#FFFFFF' })
   );
 
+/** Ícones de atletismo desenhados em traço (o lucide não os inclui). */
+const strokeIcon = (label: string, ...children: React.ReactNode[]): LabelIcon => ({ className }) =>
+  React.createElement(
+    'svg',
+    {
+      viewBox: '0 0 24 24',
+      className,
+      fill: 'none',
+      stroke: 'currentColor',
+      strokeWidth: 1.8,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+      role: 'img',
+      'aria-label': label
+    },
+    ...children
+  );
+
+const runner = (transform: string) =>
+  React.createElement(
+    'g',
+    { transform },
+    React.createElement('circle', { cx: 14, cy: 4.5, r: 1.8 }),
+    React.createElement('path', { d: 'M12.5 8.5L10 12l3 2.5.5 4.5M10 12l-3 1M12.5 8.5l3 1.5 2.5-1M13 14.5l3.5 1.5.5 3.5' })
+  );
+
+export const TrackRunnerIcon = strokeIcon(
+  'Corrida em pista',
+  runner('translate(0 -1.5) scale(0.92)'),
+  React.createElement('rect', { x: 2, y: 18.5, width: 20, height: 3.5, rx: 1.75 }),
+  React.createElement('path', { d: 'M2 6h4M3 9h3M2 12h3' })
+);
+
+export const MountainIcon = strokeIcon(
+  'Montanha / Trail',
+  React.createElement('path', { d: 'M2.5 20L10 5l4.5 8 2-3L21.5 20z' }),
+  React.createElement('path', { d: 'M7 12.5l2 1.5 2-2.5' })
+);
+
+export const StadiumTrackIcon = strokeIcon(
+  'Pista de atletismo',
+  React.createElement('rect', { x: 2, y: 5, width: 20, height: 14, rx: 7 }),
+  React.createElement('rect', { x: 6, y: 9, width: 12, height: 6, rx: 3 }),
+  React.createElement('path', { d: 'M10.5 12h3' })
+);
+
+export const ParkRunIcon = strokeIcon(
+  'Corrida ao ar livre',
+  runner('translate(-3 0) scale(0.95)'),
+  React.createElement('circle', { cx: 19, cy: 8, r: 3 }),
+  React.createElement('path', { d: 'M19 11v6M2 20h20' })
+);
+
 export const ICON_OPTIONS: Record<string, LabelIcon> = {
   Trophy,
   Dumbbell,
@@ -48,10 +98,11 @@ export const ICON_OPTIONS: Record<string, LabelIcon> = {
   Award,
   Users,
   Calendar,
-  Flame,
-  MapPin,
-  Heart,
-  PortugalFlag: PortugalFlagIcon
+  PortugalFlag: PortugalFlagIcon,
+  TrackRunner: TrackRunnerIcon,
+  Mountain: MountainIcon,
+  StadiumTrack: StadiumTrackIcon,
+  ParkRun: ParkRunIcon
 };
 
 export interface ColorOption {
@@ -107,6 +158,23 @@ export const EVENT_LABEL_HINTS: Record<string, string> = {
   nivel_regional: 'Nível da prova: regional',
   nivel_nacional: 'Nível da prova: nacional'
 };
+
+export type LabelCategory = 'acao' | 'nivel' | 'tipo';
+
+export const LABEL_CATEGORIES: { key: LabelCategory; title: string; hint: string }[] = [
+  { key: 'acao', title: 'Ações', hint: 'Botões para criar atividades no calendário e na Gestão do Dia (os primeiros aparecem em destaque).' },
+  { key: 'nivel', title: 'Nível da Prova', hint: 'Distinguem o nível das provas (cor e ícone nas células do calendário).' },
+  { key: 'tipo', title: 'Tipo', hint: 'Etiquetas adicionais que se aplicam aos eventos.' }
+];
+
+const ACTION_LABEL_IDS = ['treino_oficial', 'prova', 'tarefa', 'estagio', 'reuniao'];
+
+/** Grupo da etiqueta. As personalizadas guardam o grupo no próprio id (custom-<grupo>-...). */
+export function getLabelCategory(id: string): LabelCategory {
+  if (id.startsWith('nivel_') || id.startsWith('custom-nivel-')) return 'nivel';
+  if (ACTION_LABEL_IDS.includes(id) || id.startsWith('custom-acao-')) return 'acao';
+  return 'tipo';
+}
 
 export const BUILT_IN_LABEL_IDS = DEFAULT_EVENT_LABELS.map((l) => l.id);
 export const isBuiltInLabel = (id: string): boolean => BUILT_IN_LABEL_IDS.includes(id);

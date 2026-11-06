@@ -33,7 +33,7 @@ import {
   INITIAL_CARPOOLS,
   INITIAL_AGE_CATEGORIES
 } from '../data/initialData';
-import { mergeEventLabels, isBuiltInLabel } from '../utils/eventLabels';
+import { mergeEventLabels, isBuiltInLabel, getLabelCategory } from '../utils/eventLabels';
 import { applyClubTheme, setThemeMode } from '../utils/theme';
 import { generateInitialsAvatar } from '../utils/avatarUtils';
 import {
@@ -261,7 +261,7 @@ interface AppContextType {
   eventLabels: EventLabel[];
   updateEventLabel: (id: EventLabel["id"], changes: Partial<Pick<EventLabel, "name" | "icon" | "color">>) => void;
   moveEventLabel: (id: EventLabel["id"], direction: -1 | 1) => void;
-  addEventLabel: (data: Pick<EventLabel, "name" | "icon" | "color">) => void;
+  addEventLabel: (data: Pick<EventLabel, "name" | "icon" | "color"> & { category?: 'acao' | 'nivel' | 'tipo' }) => void;
   deleteEventLabel: (id: EventLabel["id"]) => void;
   resetEventLabels: () => void;
 
@@ -276,6 +276,7 @@ interface AppContextType {
   supabaseStatus: 'connected' | 'connecting' | 'local' | 'error';
   isSupabaseConfigured: boolean;
   syncWithSupabase: () => Promise<void>;
+  isDataLoading: boolean;
   isSupabaseModalOpen: boolean;
   setIsSupabaseModalOpen: (open: boolean) => void;
 
@@ -837,10 +838,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState<boolean>(false);
 
   // Sync data from Supabase
+  // Enquanto a primeira leitura à base de dados não termina, as listas mostram um estado de carregamento
+  const [isDataLoading, setIsDataLoading] = useState<boolean>(() => getSupabaseConfig().isConfigured);
+
   const syncWithSupabase = async () => {
     const config = getSupabaseConfig();
     if (!config.isConfigured) {
       setSupabaseStatus('local');
+      setIsDataLoading(false);
       return;
     }
     setSupabaseStatus('connecting');
@@ -896,8 +901,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (err) {
       console.warn('Erro ao sincronizar com Supabase:', err);
       setSupabaseStatus('error');
+    } finally {
+      setIsDataLoading(false);
     }
   };
+
+  // Segurança: se a base de dados não responder, não deixa a app presa no carregamento
+  useEffect(() => {
+    const t = setTimeout(() => setIsDataLoading(false), 10000);
+    return () => clearTimeout(t);
+  }, []);
 
   // On mount: fetch Supabase data if configured and set up Realtime channel
   useEffect(() => {
@@ -2888,18 +2901,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const moveEventLabel = (id: EventLabel['id'], direction: -1 | 1) => {
     if (!isCurrentUserAdmin) return;
-    const idx = eventLabels.findIndex(l => l.id === id);
-    const target = idx + direction;
-    if (idx < 0 || target < 0 || target >= eventLabels.length) return;
-    const next = [...eventLabels];
-    [next[idx], next[target]] = [next[target], next[idx]];
-    persistEventLabels(next.map((l, i) => ({ ...l, order: i })));
+    // Move apenas dentro do mesmo grupo (Ações / Nível da Prova / Tipo)
+    const group = getLabelCategory(id);
+    const sameGroup = eventLabels.filter(l => getLabelCategory(l.id) === group);
+    const gi = sameGroup.findIndex(l => l.id === id);
+    const gt = gi + direction;
+    if (gi < 0 || gt < 0 || gt >= sameGroup.length) return;
+    const a = sameGroup[gi];
+    const b = sameGroup[gt];
+    persistEventLabels(eventLabels.map(l => (l.id === a.id ? { ...l, order: b.order } : l.id === b.id ? { ...l, order: a.order } : l)));
   };
 
-  const addEventLabel = (data: Pick<EventLabel, 'name' | 'icon' | 'color'>) => {
+  const addEventLabel = (data: Pick<EventLabel, 'name' | 'icon' | 'color'> & { category?: 'acao' | 'nivel' | 'tipo' }) => {
     if (!isCurrentUserAdmin) return;
     const nextOrder = eventLabels.reduce((max, l) => Math.max(max, l.order), -1) + 1;
-    persistEventLabels([...eventLabels, { id: `custom-${Date.now()}`, ...data, order: nextOrder }]);
+    const { category = 'tipo', ...rest } = data;
+    persistEventLabels([...eventLabels, { id: `custom-${category}-${Date.now()}`, ...rest, order: nextOrder }]);
   };
 
   // Só as etiquetas personalizadas se eliminam; as predefinidas estão ligadas aos tipos de evento
@@ -3131,6 +3148,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         supabaseStatus,
         isSupabaseConfigured: getSupabaseConfig().isConfigured,
         syncWithSupabase,
+        isDataLoading,
         isSupabaseModalOpen,
         setIsSupabaseModalOpen,
         resetAllData,

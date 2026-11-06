@@ -9,7 +9,9 @@ import {
   EVENT_LABEL_HINTS,
   getColorOption,
   getIconComponent,
-  isBuiltInLabel
+  isBuiltInLabel,
+  LABEL_CATEGORIES,
+  getLabelCategory
 } from '../utils/eventLabels';
 
 const LabelPreview: React.FC<{ label: EventLabel }> = ({ label }) => {
@@ -171,13 +173,6 @@ export const EventLabelsManagement: React.FC = () => {
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
-            onClick={() => addEventLabel({ name: 'Nova etiqueta', icon: 'Flag', color: 'blue' })}
-            className="px-3 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors shadow-xs"
-          >
-            <Plus className="w-3.5 h-3.5" /> Nova etiqueta
-          </button>
-          <button
-            type="button"
             onClick={resetEventLabels}
             title="Repõe as predefinidas e elimina as etiquetas criadas"
             className="px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl flex items-center justify-center gap-1.5 cursor-pointer transition-colors border border-slate-200"
@@ -187,15 +182,35 @@ export const EventLabelsManagement: React.FC = () => {
         </div>
       </div>
 
-      {eventLabels.map((label, idx) => (
-        <LabelRow
-          key={label.id}
-          label={label}
-          index={idx}
-          total={eventLabels.length}
-          onDelete={isBuiltInLabel(label.id) ? undefined : setLabelToDelete}
-        />
-      ))}
+      {LABEL_CATEGORIES.map((cat) => {
+        const group = eventLabels.filter((l) => getLabelCategory(l.id) === cat.key);
+        return (
+          <section key={cat.key} className="space-y-3">
+            <div className="flex items-center justify-between gap-3 px-1">
+              <div>
+                <h4 className="font-extrabold text-sm text-slate-900">{cat.title}</h4>
+                <p className="text-[11px] text-slate-500 font-medium">{cat.hint}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => addEventLabel({ name: 'Nova etiqueta', icon: 'Flag', color: 'blue', category: cat.key })}
+                className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shadow-xs shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" /> Nova etiqueta
+              </button>
+            </div>
+            {group.map((label, idx) => (
+              <LabelRow
+                key={label.id}
+                label={label}
+                index={idx}
+                total={group.length}
+                onDelete={isBuiltInLabel(label.id) ? undefined : setLabelToDelete}
+              />
+            ))}
+          </section>
+        );
+      })}
 
       <ConfirmDeleteModal
         isOpen={!!labelToDelete}

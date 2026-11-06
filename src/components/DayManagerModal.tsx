@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp, isCalendarEventVisibleForUser } from '../context/AppContext';
 import { CalendarEvent } from '../types';
-import { getColorOption, getIconComponent, getLabelIdsForEvent } from '../utils/eventLabels';
+import { getColorOption, getIconComponent, getLabelIdsForEvent, getLabelCategory } from '../utils/eventLabels';
 import {
   X,
   Plus,
@@ -177,7 +177,7 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 {eventLabels
-                  .filter((l) => l.id !== 'nivel_regional' && l.id !== 'nivel_nacional')
+                  .filter((l) => getLabelCategory(l.id) === 'acao')
                   .slice(0, 6)
                   .map((l) => {
                     const Icon = getIconComponent(l.icon);
