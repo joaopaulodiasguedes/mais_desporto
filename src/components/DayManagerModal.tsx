@@ -93,7 +93,8 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
     .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
 
   const isCoach = currentUser.role === 'treinador';
-  const canManage = isCoach || hasPermission('canAddCompetitions');
+  // O atleta consulta o dia, mas não adiciona ações em Gestão do Dia
+  const canManage = currentUser.role !== 'atleta' && (isCoach || hasPermission('canAddCompetitions'));
 
   const handleOpenAddEvent = (type: 'treino_oficial' | 'prova' | 'estagio' | 'reuniao' | 'treino_individual' | 'tarefa', labelIds: string[] = []) => {
     setEventToEdit(null);
@@ -194,38 +195,6 @@ export const DayManagerModal: React.FC<DayManagerModalProps> = ({
                       >
                         <Icon className="w-3.5 h-3.5" />
                         <span>{l.name}</span>
-                      </button>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* Athlete Quick Actions Toolbar */}
-          {currentUser.role === 'atleta' && (
-            <div className="bg-teal-50/70 p-3 rounded-2xl border border-teal-200 mt-4 mb-3 shrink-0">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-teal-950 flex items-center gap-1.5">
-
-                  As minhas ações para este dia:
-                </span>
-                <span className="text-[10px] text-teal-700 font-medium flex items-center gap-1">
-                  <Lock className="w-3 h-3" /> As tuas tarefas são privadas
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {eventLabels
-                  .filter((l) => l.id === 'tarefa' || l.id === 'treino_individual')
-                  .map((l) => {
-                    const Icon = getIconComponent(l.icon);
-                    return (
-                      <button
-                        key={l.id}
-                        onClick={() => handleOpenAddEvent(l.id as 'tarefa' | 'treino_individual')}
-                        className={`px-3 py-2 ${getColorOption(l.color).button} rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all active:scale-95 cursor-pointer`}
-                      >
-                        <Icon className="w-3.5 h-3.5" />
-                        <span>{l.id === 'tarefa' ? `${l.name} pessoal` : l.name}</span>
                       </button>
                     );
                   })}

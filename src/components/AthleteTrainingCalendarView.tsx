@@ -55,8 +55,47 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
   const {
     currentUser,
     completeTrainingPlan,
-    removeTrainingPlanCompletion
+    removeTrainingPlanCompletion,
+    logIndividualTraining,
+    updateIndividualTraining,
+    deleteTrainingPlan
   } = useApp();
+
+  // Registo de treino individual feito pelo próprio atleta
+  const canLogOwnTraining = currentUser.role === 'atleta' && currentUser.athleteProfileId === athlete.id;
+  const [isLogOpen, setIsLogOpen] = useState(false);
+  const [logForm, setLogForm] = useState({ date: '', title: 'Treino individual', durationMinutes: 60, rpeRating: 6, notes: '' });
+  const [editingLogPlanId, setEditingLogPlanId] = useState<string | null>(null);
+  const isOwnLoggedPlan = (plan: TrainingPlan) =>
+    canLogOwnTraining && plan.tags?.includes('registado pelo atleta') && plan.assignedAthleteIds?.[0] === athlete.id;
+  const openLog = () => {
+    setEditingLogPlanId(null);
+    setLogForm({ date: selectedDate, title: 'Treino individual', durationMinutes: 60, rpeRating: 6, notes: '' });
+    setIsLogOpen(true);
+  };
+  const openEditLog = (plan: TrainingPlan) => {
+    const comp = plan.completedByAthleteIds?.find((c) => c.athleteId === athlete.id);
+    setEditingLogPlanId(plan.id);
+    setLogForm({
+      date: plan.scheduledDate || selectedDate,
+      title: plan.title,
+      durationMinutes: plan.durationMinutes,
+      rpeRating: comp?.rpeRating || 6,
+      notes: comp?.feedback || plan.objective || ''
+    });
+    setIsLogOpen(true);
+  };
+  const submitLog = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!logForm.date || logForm.durationMinutes <= 0) return;
+    if (editingLogPlanId) {
+      updateIndividualTraining(editingLogPlanId, logForm);
+    } else {
+      logIndividualTraining(athlete.id, logForm);
+    }
+    setSelectedDate(logForm.date);
+    setIsLogOpen(false);
+  };
 
   // Selected date defaults to TODAY (YYYY-MM-DD) as requested by user
   const todayStr = useMemo(() => {
@@ -409,6 +448,17 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
                 {formattedSelectedDate.includes(',') ? formattedSelectedDate.slice(formattedSelectedDate.indexOf(',') + 1).trim() : ''}
               </strong>
             </div>
+            {canLogOwnTraining && (
+              <button
+                type="button"
+                onClick={openLog}
+                className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all cursor-pointer self-start sm:self-auto active:scale-95"
+                title="Registar um treino individual feito por ti"
+              >
+                <Dumbbell className="w-4 h-4" />
+                <span>Registar Treino Individual</span>
+              </button>
+            )}
             {canManagePlans && onOpenAddPlan && (
               <button
                 type="button"
@@ -735,6 +785,30 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
                     Prescrito por: <span className="font-bold text-slate-800">{activePlan.createdByCoachName}</span>
                   </span>
                 </div>
+
+                {/* O atleta altera ou elimina os treinos individuais que registou */}
+                {isOwnLoggedPlan(activePlan) && (
+                  <div className="flex items-center justify-end gap-2 pt-2.5 border-t border-slate-200/80">
+                    <button
+                      type="button"
+                      onClick={() => openEditLog(activePlan)}
+                      className="px-3.5 py-1.5 bg-white hover:bg-emerald-50 text-emerald-700 border border-slate-200 hover:border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span>Editar o meu treino</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm('Eliminar este treino individual?')) deleteTrainingPlan(activePlan.id);
+                      }}
+                      className="px-3.5 py-1.5 bg-white hover:bg-rose-50 text-rose-700 border border-slate-200 hover:border-rose-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-95"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Eliminar</span>
+                    </button>
+                  </div>
+                )}
 
                 {/* Actions: Alterar e Eliminar Plano (para treinadores e gestores) */}
                 {canManagePlans && (
@@ -1113,6 +1187,95 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
           )}
         </div>
       </div>
+
+      {isLogOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" onClick={() => setIsLogOpen(false)}>
+          <form
+            onSubmit={submitLog}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-xl p-5 space-y-4"
+          >
+            <div>
+              <h3 className="text-base font-extrabold text-slate-900">{editingLogPlanId ? 'Editar Treino Individual' : 'Registar Treino Individual'}</h3>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Conta nos teus treinos do mês e o treinador recebe uma notificação.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">Data</label>
+                <input
+                  type="date"
+                  required
+                  value={logForm.date}
+                  onChange={(e) => setLogForm({ ...logForm, date: e.target.value })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-700 block mb-1">Duração (min)</label>
+                <input
+                  type="number"
+                  min={1}
+                  required
+                  value={logForm.durationMinutes}
+                  onChange={(e) => setLogForm({ ...logForm, durationMinutes: Number(e.target.value) })}
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">Treino</label>
+              <input
+                type="text"
+                value={logForm.title}
+                onChange={(e) => setLogForm({ ...logForm, title: e.target.value })}
+                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500"
+                placeholder="Ex: Corrida contínua 8 km"
+              />
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="text-xs font-bold text-slate-700">Dificuldade sentida</label>
+                <span className={`px-2 py-0.5 rounded-md text-[11px] font-black border ${getRpeDescription(logForm.rpeRating).color}`}>
+                  {logForm.rpeRating}/10
+                </span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={10}
+                value={logForm.rpeRating}
+                onChange={(e) => setLogForm({ ...logForm, rpeRating: Number(e.target.value) })}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-700 block mb-1">Notas (opcional)</label>
+              <textarea
+                rows={2}
+                value={logForm.notes}
+                onChange={(e) => setLogForm({ ...logForm, notes: e.target.value })}
+                className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500"
+                placeholder="Sensações, local, o que fizeste..."
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-1">
+              <button type="button" onClick={() => setIsLogOpen(false)} className="px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer">
+                Cancelar
+              </button>
+              <button type="submit" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5">
+                <Check className="w-4 h-4" /> {editingLogPlanId ? 'Guardar' : 'Registar'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };

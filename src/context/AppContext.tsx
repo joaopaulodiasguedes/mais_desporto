@@ -208,6 +208,14 @@ interface AppContextType {
   addTrainingPlan: (plan: Omit<TrainingPlan, 'id' | 'createdAt'>) => void;
   updateTrainingPlan: (id: string, plan: Partial<TrainingPlan>) => void;
   deleteTrainingPlan: (id: string) => void;
+  logIndividualTraining: (
+    athleteId: string,
+    data: { date: string; title: string; modality?: string; durationMinutes: number; rpeRating: number; notes?: string }
+  ) => void;
+  updateIndividualTraining: (
+    planId: string,
+    data: { date: string; title: string; durationMinutes: number; rpeRating: number; notes?: string }
+  ) => void;
   completeTrainingPlan: (
     planId: string,
     athleteId: string,
@@ -942,7 +950,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications' }, (payload: any) => {
             if (payload.eventType === 'INSERT') {
               const mapped = mapNotificationFromDb(payload.new);
-              setNotifications(prev => [mapped, ...prev]);
+              // Quem criou a notificação já a tem localmente: só acrescenta se ainda não existir
+              setNotifications(prev => (prev.some(n => n.id === mapped.id) ? prev : [mapped, ...prev]));
             }
           })
           .subscribe();
@@ -2595,6 +2604,95 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  // O atleta regista um treino individual: fica contabilizado nos treinos do mês e o treinador é notificado
+  const logIndividualTraining = (
+    athleteId: string,
+    data: { date: string; title: string; modality?: string; durationMinutes: number; rpeRating: number; notes?: string }
+  ) => {
+    const ath = athletes.find(a => a.id === athleteId);
+    if (!ath) return;
+    const title = data.title.trim() || 'Treino individual';
+    const notes = data.notes?.trim() || undefined;
+    const plan: TrainingPlan = {
+      id: `plan-${Date.now()}`,
+      title,
+      modality: data.modality?.trim() || 'Treino Individual',
+      targetCategory: ath.category || 'Todos',
+      durationMinutes: data.durationMinutes,
+      intensityLevel: Math.min(5, Math.max(1, Math.ceil(data.rpeRating / 2))) as 1 | 2 | 3 | 4 | 5,
+      objective: notes || '',
+      blocks: [],
+      createdByCoachName: ath.name,
+      createdAt: new Date().toISOString().split('T')[0],
+      scheduledDate: data.date,
+      tags: ['treino individual', 'registado pelo atleta'],
+      assignedAthleteIds: [ath.id],
+      completedByAthleteIds: [
+        {
+          athleteId: ath.id,
+          completedAt: new Date().toISOString(),
+          status: 'cumpriu',
+          rpeRating: data.rpeRating,
+          feedback: notes,
+          date: data.date
+        }
+      ]
+    };
+    setTrainingPlans(prev => [plan, ...prev]);
+    upsertTrainingPlanInSupabase(plan);
+
+    const notif: NotificationItem = {
+      id: `notif-ti-${Date.now()}`,
+      title: `Treino individual: ${ath.name}`,
+      message: `${ath.name} fez treino individual ("${title}") em ${data.date} — ${data.durationMinutes} min, dificuldade ${data.rpeRating}/10.${notes ? ` Notas: ${notes}` : ''}`,
+      type: 'aviso_treino',
+      targetAudience: 'treinadores',
+      date: new Date().toISOString().split('T')[0],
+      isRead: false,
+      authorName: ath.name,
+      actionLabel: 'Ver Planos de Treino',
+      actionTab: 'planos_treino'
+    };
+    setNotifications(prev => [notif, ...prev]);
+    upsertNotificationInSupabase(notif);
+    showToast('Treino individual registado e treinador notificado!', 'success');
+  };
+
+  // O atleta edita um treino individual que registou (plano, cumprimento e dificuldade ficam coerentes)
+  const updateIndividualTraining = (
+    planId: string,
+    data: { date: string; title: string; durationMinutes: number; rpeRating: number; notes?: string }
+  ) => {
+    const notes = data.notes?.trim() || undefined;
+    setTrainingPlans(prev => prev.map(p => {
+      if (p.id !== planId) return p;
+      const athleteId = p.assignedAthleteIds?.[0];
+      const old = p.completedByAthleteIds?.find(c => c.athleteId === athleteId);
+      const updated: TrainingPlan = {
+        ...p,
+        title: data.title.trim() || 'Treino individual',
+        durationMinutes: data.durationMinutes,
+        intensityLevel: Math.min(5, Math.max(1, Math.ceil(data.rpeRating / 2))) as 1 | 2 | 3 | 4 | 5,
+        objective: notes || '',
+        scheduledDate: data.date,
+        scheduledDates: undefined,
+        completedByAthleteIds: athleteId
+          ? [{
+              athleteId,
+              completedAt: old?.completedAt || new Date().toISOString(),
+              status: 'cumpriu',
+              rpeRating: data.rpeRating,
+              feedback: notes,
+              date: data.date
+            }]
+          : p.completedByAthleteIds
+      };
+      upsertTrainingPlanInSupabase(updated);
+      return updated;
+    }));
+    showToast('Treino individual atualizado.', 'success');
+  };
+
   const removeTrainingPlanCompletion = (planId: string, athleteId: string, date?: string) => {
     setTrainingPlans(prev => prev.map(p => {
       if (p.id === planId) {
@@ -3112,6 +3210,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateTrainingPlan,
         deleteTrainingPlan,
         completeTrainingPlan,
+        updateIndividualTraining,
+        logIndividualTraining,
         removeTrainingPlanCompletion,
         calendarEvents,
         addCalendarEvent,
