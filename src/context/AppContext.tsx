@@ -512,6 +512,32 @@ export const getTabForRole = (role?: UserRole): string => {
   }
 };
 
+// Com a base de dados configurada nada é pré-preenchido com dados de exemplo: arranca em branco e é preenchido pela leitura ao Supabase
+const EMPTY_PROFILE: UserProfile = {
+  id: '',
+  name: '',
+  email: '',
+  role: 'atleta',
+  avatarUrl: '',
+  phone: '',
+  status: 'pendente_aprovacao'
+};
+
+const EMPTY_CLUB_INFO: ClubInfo = {
+  name: '',
+  modality: '',
+  logoUrl: '',
+  bannerUrl: '',
+  address: '',
+  nif: '',
+  phone: '',
+  email: '',
+  foundationYear: 0,
+  presidentName: '',
+  description: '',
+  facilities: ''
+};
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Proactively clear any legacy persistent login keys in localStorage so accessing the link ALWAYS requires login
   if (typeof window !== 'undefined') {
@@ -539,7 +565,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }
     }
-    return INITIAL_PROFILES[0];
+    return getSupabaseConfig().isConfigured ? EMPTY_PROFILE : INITIAL_PROFILES[0];
   });
 
   // Authentication state: MUST BE FALSE on initial link access, only true if active in sessionStorage
@@ -561,6 +587,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [availableUsers, setAvailableUsers] = useState<UserProfile[]>(() => {
     const config = getSupabaseConfig();
+    if (config.isConfigured) return [];
     const saved = readLocal('_users_list');
     if (saved) {
       try {
@@ -609,6 +636,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isMobileDeviceView, setIsMobileDeviceView] = useState<boolean>(false);
 
   const [clubInfo, setClubInfo] = useState<ClubInfo>(() => {
+    if (getSupabaseConfig().isConfigured) return EMPTY_CLUB_INFO;
     const saved = readLocal('_club');
     return saved ? JSON.parse(saved) : INITIAL_CLUB_INFO;
   });
@@ -643,6 +671,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [coaches, setCoaches] = useState<Coach[]>(() => {
     const config = getSupabaseConfig();
+    if (config.isConfigured) return [];
     const saved = readLocal('_coaches');
     if (saved) {
       try {
@@ -815,6 +844,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [ageCategories, setAgeCategories] = useState<AgeCategory[]>(() => {
+    if (getSupabaseConfig().isConfigured) return [];
     const saved = readLocal('_age_categories');
     return saved ? JSON.parse(saved) : INITIAL_AGE_CATEGORIES;
   });
@@ -890,7 +920,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(data.profiles)) {
           // Keep current administrator João Paulo Dias Guedes so login/admin permission is preserved
           const hasGuedes = data.profiles.some(p => p.email?.toLowerCase() === 'joaopaulodiasguedes@gmail.com');
-          const mergedProfiles = (!hasGuedes && currentUser) ? [currentUser, ...data.profiles] : data.profiles;
+          const mergedProfiles = (!hasGuedes && currentUser.id && isAuthenticated) ? [currentUser, ...data.profiles] : data.profiles;
           setAvailableUsers(mergedProfiles);
           writeLocal('_users_list', JSON.stringify(mergedProfiles));
           // O utilizador com sessão iniciada passa a refletir o que está na base de dados (estado, perfil, ligações)
