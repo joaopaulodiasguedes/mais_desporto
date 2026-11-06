@@ -814,15 +814,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error'; id: number } | null>(null);
 
   // Administrator role check
+  // Um treinador ou um atleta pode ter perfil de administrador (atribuído por um treinador)
   const isCurrentUserAdmin = Boolean(
-    currentUser.role === 'treinador' && (
-      currentUser.isAdmin === true ||
+    currentUser.isAdmin === true ||
+    (currentUser.role === 'treinador' &&
       coaches.some(c =>
         (c.id === currentUser.coachProfileId ||
          (c.email && currentUser.email && c.email.toLowerCase() === currentUser.email.toLowerCase())) &&
         c.isAdmin === true
-      )
-    )
+      ))
   );
 
   useEffect(() => {

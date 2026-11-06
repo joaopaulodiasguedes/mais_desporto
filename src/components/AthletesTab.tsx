@@ -44,6 +44,7 @@ export const AthletesTab: React.FC = () => {
     showToast,
     setActiveTab,
     availableUsers,
+    updateUserProfile,
     profileEditRequested,
     clearProfileEditRequest,
     setIsEditProfileOpen
@@ -327,8 +328,21 @@ export const AthletesTab: React.FC = () => {
     }
   }, [profileEditRequested]);
 
+  // Conta de utilizador ligada ao atleta (para lhe atribuir o perfil de administrador)
+  const findLinkedUser = (athlete?: Athlete | null) =>
+    athlete
+      ? availableUsers.find(
+          (u) =>
+            u.role === 'atleta' &&
+            (u.athleteProfileId === athlete.id ||
+              (!!athlete.email && !!u.email && u.email.toLowerCase() === athlete.email.toLowerCase()))
+        )
+      : undefined;
+  const [athleteIsAdmin, setAthleteIsAdmin] = useState(false);
+
   const handleOpenEdit = (athlete: Athlete) => {
     setEditingAthlete(athlete);
+    setAthleteIsAdmin(!!findLinkedUser(athlete)?.isAdmin);
     const computedStatus = calculateMedicalStatus(athlete.medicalExamExpiry).status;
     const computedCategory = athlete.category || determineAgeCategory(athlete.birthDate, ageCategories);
 
@@ -374,6 +388,12 @@ export const AthletesTab: React.FC = () => {
     e.preventDefault();
     if (editingAthlete) {
       updateAthlete(editingAthlete.id, formData);
+      // Só um treinador atribui / retira o perfil de administrador
+      const linked = findLinkedUser(editingAthlete);
+      if (currentUser.role === 'treinador' && linked && !!linked.isAdmin !== athleteIsAdmin) {
+        updateUserProfile(linked.id, { isAdmin: athleteIsAdmin }, { silent: true });
+        showToast(athleteIsAdmin ? 'Perfil de administrador atribuído ao atleta.' : 'Perfil de administrador retirado ao atleta.', 'success');
+      }
       if (selectedAthlete?.id === editingAthlete.id) {
         setSelectedAthlete({ ...editingAthlete, ...formData });
       }
@@ -1030,6 +1050,28 @@ export const AthletesTab: React.FC = () => {
                     placeholder="+351 912 345 678"
                   />
                 </div>
+
+                {currentUser.role === 'treinador' && editingAthlete && findLinkedUser(editingAthlete) && (
+                  <div className="sm:col-span-2">
+                    <button
+                      type="button"
+                      onClick={() => setAthleteIsAdmin((v) => !v)}
+                      className={`w-full p-3 rounded-xl border text-left flex items-start gap-2.5 cursor-pointer transition-all ${
+                        athleteIsAdmin ? 'border-amber-500 bg-amber-50' : 'border-slate-200 bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <div className={`w-4 h-4 rounded border mt-0.5 flex items-center justify-center shrink-0 ${athleteIsAdmin ? 'border-amber-600 bg-amber-600' : 'border-slate-400 bg-white'}`}>
+                        {athleteIsAdmin && <span className="text-white text-[10px] font-black leading-none">✓</span>}
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold block text-slate-900">Perfil de Administrador</span>
+                        <span className="text-[10px] text-slate-500 leading-tight block mt-0.5">
+                          Dá a este atleta acesso de administração do clube (regras, etiquetas, feedback). Só um treinador o pode atribuir.
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                )}
 
                 <div className="sm:col-span-2">
                   <label className="text-xs font-bold text-slate-700 block mb-1">
