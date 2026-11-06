@@ -60,6 +60,10 @@ export const TrainingPlansTab: React.FC = () => {
   } = useApp();
 
   const [selectedPlan, setSelectedPlan] = useState<TrainingPlan | null>(null);
+  // Linha da lista compacta (perfil de atleta) atualmente expandida
+  const [expandedPlanId, setExpandedPlanId] = useState<string | null>(null);
+  // Separador de mês selecionado na lista do atleta (por omissão, o mais recente)
+  const [selectedMonthKey, setSelectedMonthKey] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<TrainingPlan | null>(null);
   const [planToDelete, setPlanToDelete] = useState<TrainingPlan | null>(null);
@@ -233,6 +237,29 @@ export const TrainingPlansTab: React.FC = () => {
 
     return visiblePlans.filter((p) => p.assignedAthleteIds && p.assignedAthleteIds.includes(selectedAthleteId));
   }, [visiblePlans, selectedAthleteId, currentUser, currentAthleteProfile, guardianAthletes]);
+
+  // Lista Completa do atleta: mais recentes primeiro, agrupados por mês
+  const athletePlanGroupsByMonth = useMemo(() => {
+    if (currentUser.role !== 'atleta') return [];
+    const monthShort = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+    const sorted = [...plansForCurrentFilter].sort(
+      (a, b) => (b.scheduledDate || b.createdAt || '').localeCompare(a.scheduledDate || a.createdAt || '')
+    );
+    const groups: { key: string; label: string; plans: TrainingPlan[] }[] = [];
+    sorted.forEach((plan) => {
+      const dateStr = plan.scheduledDate || plan.createdAt;
+      const parts = dateStr ? dateStr.split('-') : [];
+      const key = parts.length === 3 ? `${parts[0]}-${parts[1]}` : 'sem-data';
+      const label = parts.length === 3 ? `${monthShort[parseInt(parts[1], 10) - 1]} ${parts[0].slice(-2)}` : 'Sem data';
+      let group = groups.find((g) => g.key === key);
+      if (!group) {
+        group = { key, label, plans: [] };
+        groups.push(group);
+      }
+      group.plans.push(plan);
+    });
+    return groups;
+  }, [plansForCurrentFilter, currentUser.role]);
 
   // Grouped plans by athlete when "todos" is selected (only for coaches/staff)
   const groupedPlansByAthlete = useMemo(() => {
@@ -633,6 +660,113 @@ export const TrainingPlansTab: React.FC = () => {
     );
   };
 
+  // Linha compacta (perfil de atleta): uma linha por plano, que expande ao clicar para mostrar a informação
+  const renderPlanRow = (plan: TrainingPlan) => {
+    const completed = isCurrentAthleteCompleted(plan);
+    const isExpanded = expandedPlanId === plan.id;
+
+    return (
+      <div
+        key={plan.id}
+        className={`bg-white rounded-xl border transition-all ${isExpanded ? 'border-indigo-300 shadow-2xs' : 'border-slate-200'}`}
+      >
+        <button
+          type="button"
+          onClick={() => setExpandedPlanId(isExpanded ? null : plan.id)}
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left cursor-pointer"
+        >
+          {completed ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          ) : (
+            <Dumbbell className="w-4 h-4 text-indigo-500 shrink-0" />
+          )}
+
+          <span className="font-bold text-slate-900 text-sm truncate flex-1 min-w-0">
+            {plan.title}
+          </span>
+
+          {plan.scheduledDate && (
+            <span className="hidden sm:inline text-[11px] font-semibold text-slate-500 shrink-0">
+              {formatDatePrettyShort(plan.scheduledDate)}
+            </span>
+          )}
+
+          <span className="shrink-0">{getIntensityBadge(plan.intensityLevel)}</span>
+
+          {isExpanded ? (
+            <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+          )}
+        </button>
+
+        {isExpanded && (
+          <div className="px-3.5 pb-3.5 pt-1 space-y-3 border-t border-slate-100">
+            <div className="flex items-center gap-2 flex-wrap text-xs pt-2">
+              <span className="font-semibold text-slate-400">{plan.modality}</span>
+              {plan.scheduledDate && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-50 border border-blue-200/80 text-blue-700 font-bold">
+                  <CalendarIcon className="w-3 h-3 text-blue-600" />
+                  {formatDatePrettyShort(plan.scheduledDate)}
+                  {plan.scheduledTime && <span className="text-blue-500 font-normal">às {plan.scheduledTime}</span>}
+                  {getRelativeDayLabel(plan.scheduledDate) && (
+                    <span className="text-[10px] uppercase font-black px-1.5 py-0.2 rounded-full bg-blue-200/80 text-blue-900">
+                      {getRelativeDayLabel(plan.scheduledDate)}
+                    </span>
+                  )}
+                </span>
+              )}
+            </div>
+
+            {plan.objective && (
+              <p className="text-xs text-slate-600 leading-relaxed">{plan.objective}</p>
+            )}
+
+            <div className="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+              <div className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-indigo-500" />
+                <span>{plan.durationMinutes} min</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Layers className="w-3.5 h-3.5 text-indigo-500" />
+                <span>{plan.blocks.length} blocos de treino</span>
+              </div>
+              <span className="text-[11px] text-slate-400">Por {plan.createdByCoachName}</span>
+            </div>
+
+            {plan.tags && plan.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {plan.tags.map((tag, idx) => (
+                  <span key={idx} className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-medium">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+              {completed ? (
+                <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  Treino Concluído
+                </span>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                onClick={() => setSelectedPlan(plan)}
+                className="text-xs text-indigo-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                Ver ficha completa &rarr;
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-5 animate-in fade-in duration-200">
       {/* Top Header */}
@@ -843,11 +977,45 @@ export const TrainingPlansTab: React.FC = () => {
                     canManagePlans={canCreate}
                   />
                 ) : plansForCurrentFilter.length > 0 ? (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {plansForCurrentFilter.map((plan) =>
-                      renderPlanCard(plan, targetAthlete || undefined)
-                    )}
-                  </div>
+                  currentUser.role === 'atleta' ? (
+                    (() => {
+                      const activeGroup =
+                        athletePlanGroupsByMonth.find((g) => g.key === selectedMonthKey) || athletePlanGroupsByMonth[0];
+                      return (
+                        <div className="space-y-3">
+                          {/* Meses em separadores, um ao lado do outro */}
+                          <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-xl w-full overflow-x-auto">
+                            {athletePlanGroupsByMonth.map((group) => (
+                              <button
+                                key={group.key}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedMonthKey(group.key);
+                                  setExpandedPlanId(null);
+                                }}
+                                className={`px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap uppercase tracking-wide ${
+                                  activeGroup?.key === group.key
+                                    ? 'bg-white text-slate-900 shadow-xs'
+                                    : 'text-slate-600 hover:text-slate-900'
+                                }`}
+                              >
+                                <span>{group.label}</span>
+                                <span className="text-[10px] font-bold text-slate-400">({group.plans.length})</span>
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="flex flex-col gap-2">
+                            {activeGroup?.plans.map((plan) => renderPlanRow(plan))}
+                          </div>
+                        </div>
+                      );
+                    })()
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {plansForCurrentFilter.map((plan) => renderPlanCard(plan, targetAthlete || undefined))}
+                    </div>
+                  )
                 ) : (
                   <div className="bg-white rounded-2xl p-10 border border-slate-200 text-center space-y-3">
                     <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
