@@ -499,18 +499,8 @@ const clearLocalDataCaches = (): void => {
   DATA_CACHE_KEYS.forEach((k) => localStorage.removeItem(`${LOCAL_STORAGE_KEY}${k}`));
 };
 
-export const getTabForRole = (role?: UserRole): string => {
-  switch (role) {
-    case 'treinador':
-      return 'treinadores';
-    case 'atleta':
-      return 'atletas';
-    case 'encarregado':
-      return 'encarregados';
-    default:
-      return 'clube';
-  }
-};
+// Página inicial após login / troca de perfil: todos os perfis arrancam na página do Clube
+export const getTabForRole = (_role?: UserRole): string => 'clube';
 
 // Com a base de dados configurada nada é pré-preenchido com dados de exemplo: arranca em branco e é preenchido pela leitura ao Supabase
 const EMPTY_PROFILE: UserProfile = {
