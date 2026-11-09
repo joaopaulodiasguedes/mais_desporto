@@ -2,18 +2,19 @@
  * Função serverless (Vercel) para recuperação de palavra-passe por email.
  *
  * POST /api/password-reset
- *   { action: 'request', email }        -> gera código de 6 dígitos, guarda o hash no Supabase e envia-o por email (Resend)
+ *   { action: 'request', email }        -> gera código de 6 dígitos, guarda o hash no Supabase e envia-o por email (Gmail / SMTP)
  *   { action: 'verify', email, code }   -> valida o código (15 min, máx. 5 tentativas) e invalida-o após uso
  *
  * Variáveis de ambiente (Vercel > Project > Settings > Environment Variables):
- *   RESEND_API_KEY            Chave API do Resend
- *   RESEND_FROM               Remetente verificado no Resend, ex: "Mais Desporto <noreply@oseudominio.pt>"
+ *   GMAIL_USER                Conta Gmail que envia os emails, ex: home.guedes.19@gmail.com
+ *   GMAIL_APP_PASSWORD        "Palavra-passe de aplicação" da conta Google (16 letras; requer verificação em 2 passos)
  *   SUPABASE_URL              URL do projeto Supabase (ou VITE_SUPABASE_URL)
  *   SUPABASE_SERVICE_ROLE_KEY Chave service_role do Supabase (nunca expor no frontend)
  *   CLUB_NAME                 (opcional) Nome do clube no email
  */
 import { createClient } from '@supabase/supabase-js';
 import { createHash, randomInt } from 'node:crypto';
+import nodemailer from 'nodemailer';
 
 const CODE_TTL_MINUTES = 15;
 const MAX_ATTEMPTS = 5;
@@ -36,9 +37,9 @@ function escapeHtml(text: string): string {
 }
 
 async function sendResetEmail(to: string, name: string, code: string): Promise<{ ok: boolean; error?: string }> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM;
-  if (!apiKey || !from) return { ok: false, error: 'Serviço de email não configurado (RESEND_API_KEY / RESEND_FROM).' };
+  const user = process.env.GMAIL_USER;
+  const pass = (process.env.GMAIL_APP_PASSWORD || '').replace(/\s+/g, '');
+  if (!user || !pass) return { ok: false, error: 'Serviço de email não configurado (GMAIL_USER / GMAIL_APP_PASSWORD).' };
 
   const clubName = process.env.CLUB_NAME || 'Mais Desporto';
   const safeName = escapeHtml(name || 'utilizador');
@@ -52,33 +53,28 @@ async function sendResetEmail(to: string, name: string, code: string): Promise<{
       <p style="color:#64748b;font-size:12px">Se não pediu esta alteração, ignore este email. A sua palavra-passe mantém-se inalterada.</p>
     </div>`;
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      from,
-      to: [to],
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: { user, pass }
+    });
+    await transporter.sendMail({
+      from: `"${clubName}" <${user}>`,
+      to,
       subject: `Código de recuperação de palavra-passe: ${code}`,
       html,
       text: `Olá ${name || ''},\n\nO seu código de recuperação de palavra-passe é: ${code}\nVálido durante ${CODE_TTL_MINUTES} minutos.\n\nSe não pediu esta alteração, ignore este email.`
-    })
-  });
-
-  if (!response.ok) {
-    const detail = await response.text().catch(() => '');
-    console.error('Erro Resend:', response.status, detail);
-    let reason = '';
-    try {
-      reason = JSON.parse(detail)?.message || '';
-    } catch {
-      reason = detail.slice(0, 200);
-    }
-    return {
-      ok: false,
-      error: `Não foi possível enviar o email (Resend ${response.status}${reason ? `: ${reason}` : ''}).`
-    };
+    });
+    return { ok: true };
+  } catch (err: any) {
+    console.error('Erro SMTP Gmail:', err?.code, err?.responseCode, err?.message);
+    const reason = err?.responseCode === 535 || err?.code === 'EAUTH'
+      ? 'credenciais Gmail recusadas — confirme GMAIL_USER e a palavra-passe de aplicação'
+      : (err?.message || '').slice(0, 160);
+    return { ok: false, error: `Não foi possível enviar o email (${reason || 'erro desconhecido'}).` };
   }
-  return { ok: true };
 }
 
 export default async function handler(req: any, res: any) {
