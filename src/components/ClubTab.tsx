@@ -29,7 +29,8 @@ import {
   AlertCircle,
   Palette,
   UserCheck,
-  Contact
+  Contact,
+  Trophy
 } from 'lucide-react';
 import { ClubInfo, ClubDocument } from '../types';
 import { INITIAL_CLUB_DOCUMENTS } from '../data/initialData';
@@ -223,6 +224,35 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
     setIsEditing(true);
   };
 
+  // Próxima prova (a mais próxima a partir de hoje, visível para o utilizador)
+  const nextProva = useMemo(() => {
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    return (
+      calendarEvents
+        .filter((e) => e.type === 'prova' && e.date >= todayStr && isCalendarEventVisibleForUser(e, currentUser, athletes))
+        .sort((a, b) => (a.date + (a.time || '')).localeCompare(b.date + (b.time || '')))[0] || null
+    );
+  }, [calendarEvents, currentUser, athletes]);
+
+  const nextProvaText = useMemo(() => {
+    if (!nextProva) return 'Sem provas agendadas';
+    const d = new Date(nextProva.date + 'T00:00:00');
+    const dateStr = !isNaN(d.getTime())
+      ? d.toLocaleDateString('pt-PT', { weekday: 'short', day: '2-digit', month: 'long', year: 'numeric' })
+      : nextProva.date;
+    const diff = !isNaN(d.getTime())
+      ? Math.round((d.getTime() - new Date(new Date().toDateString()).getTime()) / 86400000)
+      : null;
+    const when = diff === 0 ? 'Hoje' : diff === 1 ? 'Amanhã' : diff !== null ? `Faltam ${diff} dias` : '';
+    return [
+      nextProva.title,
+      dateStr + (nextProva.time ? ` às ${nextProva.time}` : ''),
+      nextProva.location,
+      when
+    ].filter(Boolean).join('  •  ');
+  }, [nextProva]);
+
   const upcomingEventsCount = calendarEvents.filter(e => new Date(e.date) >= new Date()).length;
 
   const guardiansCount = useMemo(() => {
@@ -340,6 +370,24 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
           <p className="text-sm text-slate-600 leading-relaxed max-w-3xl">
             {clubInfo.description}
           </p>
+        </div>
+      </div>
+
+      {/* Linha da próxima prova (texto em movimento) */}
+      <div
+        onClick={() => setActiveTab('calendario')}
+        className="flex items-stretch rounded-2xl overflow-hidden border border-amber-200 bg-amber-50 shadow-xs cursor-pointer hover:border-amber-300 transition-colors"
+        title="Abrir calendário"
+      >
+        <div className="shrink-0 flex items-center gap-1.5 px-3.5 py-2.5 bg-amber-500 text-slate-950 text-xs font-extrabold uppercase tracking-wider">
+          <Trophy className="w-4 h-4" />
+          <span>Próxima prova</span>
+        </div>
+        <div className="flex-1 min-w-0 overflow-hidden relative flex items-center">
+          <div className="marquee-track text-sm font-bold text-slate-800 py-2.5">
+            <span className="px-8 whitespace-nowrap">{nextProvaText}</span>
+            <span className="px-8 whitespace-nowrap" aria-hidden="true">{nextProvaText}</span>
+          </div>
         </div>
       </div>
 

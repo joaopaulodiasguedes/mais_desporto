@@ -195,3 +195,9 @@
 .dark [class*="bg-green-50/"], .dark [class*="bg-green-100/"] { background-color: color-mix(in srgb, var(--color-green-500) 14%, transparent); }
 .dark [class*="bg-pink-50/"], .dark [class*="bg-pink-100/"] { background-color: color-mix(in srgb, var(--color-pink-500) 14%, transparent); }
 .dark [class*="bg-blue-50/"], .dark [class*="bg-blue-100/"] { background-color: color-mix(in srgb, var(--club-primary, #2563eb) 14%, transparent); }
+
+/* Linha com texto em movimento (próxima prova na página do Clube) */
+.marquee-track { display: flex; width: max-content; animation: marquee-scroll 18s linear infinite; }
+.marquee-track:hover { animation-play-state: paused; }
+@keyframes marquee-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
