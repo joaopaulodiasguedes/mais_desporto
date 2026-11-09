@@ -61,7 +61,7 @@ export const ClubTab: React.FC<ClubTabProps> = ({ onOpenPdf }) => {
   const resultsCount =
     results.length +
     calendarEvents.filter(
-      (evt) => !!evt.resultsUrl?.trim() && isCalendarEventVisibleForUser(evt, currentUser, athletes)
+      (evt) => (!!evt.resultsUrl?.trim() || !!evt.photosUrl?.trim()) && isCalendarEventVisibleForUser(evt, currentUser, athletes)
     ).length;
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState<ClubInfo>(clubInfo);

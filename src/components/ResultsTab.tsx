@@ -13,7 +13,8 @@ import {
   Search,
   Eye,
   FileCheck,
-  ExternalLink
+  ExternalLink,
+  Camera
 } from 'lucide-react';
 import { CompetitionResult, CalendarEvent } from '../types';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
@@ -110,7 +111,7 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
 
   // Eventos do calendário (calendar_events) com results_url preenchido
   const filteredEventResults = calendarEvents
-    .filter((evt) => !!evt.resultsUrl && evt.resultsUrl.trim() !== '')
+    .filter((evt) => !!evt.resultsUrl?.trim() || !!evt.photosUrl?.trim())
     .filter((evt) => isCalendarEventVisibleForUser(evt, currentUser, athletes))
     .filter((evt) =>
       evt.title.toLowerCase().includes(q) ||
@@ -129,7 +130,7 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const openEventResults = (evt: CalendarEvent) => {
-    const resultsUrl = evt.resultsUrl!;
+    const resultsUrl = evt.resultsUrl!.trim();
     if (resultsUrl.toLowerCase().endsWith('.pdf')) {
       openOriginalDocument(resultsUrl, `${evt.title || 'Resultados'}.pdf`);
     } else {
@@ -227,15 +228,29 @@ export const ResultsTab: React.FC<ResultsTabProps> = ({ onOpenPdf }) => {
                 </div>
 
                 <div className="flex items-center justify-between md:justify-end gap-2 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => openEventResults(evt)}
-                    className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-                    title="Ver resultados oficiais do evento"
-                  >
-                    <Trophy className="w-4 h-4" />
-                    <span>Resultados</span>
-                  </button>
+                  {evt.resultsUrl?.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => openEventResults(evt)}
+                      className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                      title="Ver resultados oficiais do evento"
+                    >
+                      <Trophy className="w-4 h-4" />
+                      <span>Resultados</span>
+                    </button>
+                  )}
+                  {evt.photosUrl?.trim() && (
+                    <a
+                      href={evt.photosUrl.trim().startsWith('http') ? evt.photosUrl.trim() : `https://${evt.photosUrl.trim()}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 active:scale-95 text-emerald-800 border border-emerald-200 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                      title="Ver fotos / álbum do evento"
+                    >
+                      <Camera className="w-4 h-4 text-emerald-600" />
+                      <span>Fotos</span>
+                    </a>
+                  )}
                 </div>
               </div>
             );
