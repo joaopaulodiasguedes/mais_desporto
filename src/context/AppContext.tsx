@@ -1214,7 +1214,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
-    if (found.password && password && found.password !== password) {
+    if (found.password && password && found.password.trim().normalize('NFC') !== password.trim().normalize('NFC')) {
       return {
         success: false,
         message: 'Palavra-passe incorreta. Se esqueceu a sua palavra-passe, utilize a opção de recuperação.'

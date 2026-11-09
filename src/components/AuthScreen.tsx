@@ -73,7 +73,11 @@ export const AuthScreen: React.FC = () => {
   const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
-    const res = login(loginEmail, loginPassword);
+    // Lê os valores diretamente do formulário: o preenchimento automático do telemóvel nem sempre dispara o onChange
+    const formEl = e.currentTarget as HTMLFormElement;
+    const emailValue = (formEl.elements.namedItem('login-email') as HTMLInputElement | null)?.value ?? loginEmail;
+    const passwordValue = (formEl.elements.namedItem('login-password') as HTMLInputElement | null)?.value ?? loginPassword;
+    const res = login(emailValue, passwordValue);
     if (!res.success) {
       setLoginError(res.message || 'Erro ao iniciar sessão.');
     }
@@ -295,6 +299,11 @@ export const AuthScreen: React.FC = () => {
                       <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="email"
+                        name="login-email"
+                        autoComplete="username"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck={false}
                         required
                         value={loginEmail}
                         onChange={e => setLoginEmail(e.target.value)}
@@ -321,6 +330,11 @@ export const AuthScreen: React.FC = () => {
                       <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type={showLoginPassword ? 'text' : 'password'}
+                        name="login-password"
+                        autoComplete="current-password"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck={false}
                         required
                         value={loginPassword}
                         onChange={e => setLoginPassword(e.target.value)}
