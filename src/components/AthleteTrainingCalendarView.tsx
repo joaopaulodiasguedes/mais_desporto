@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   Calendar as CalendarIcon,
@@ -45,6 +45,38 @@ const MONTH_NAMES_PT = [
 ];
 
 const WEEKDAYS_PT = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+
+// Título numa só linha: reduz o tamanho da letra até o texto caber no espaço disponível (sem reticências)
+const FitName: React.FC<{ text: string; maxPx?: number; minPx?: number; className?: string }> = ({
+  text,
+  maxPx = 24,
+  minPx = 11,
+  className = ''
+}) => {
+  const ref = useRef<HTMLHeadingElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const parent = el?.parentElement;
+    if (!el || !parent) return;
+    const fit = () => {
+      let size = maxPx;
+      el.style.fontSize = size + 'px';
+      while (el.scrollWidth > parent.clientWidth && size > minPx) {
+        size -= 0.5;
+        el.style.fontSize = size + 'px';
+      }
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(parent);
+    return () => ro.disconnect();
+  }, [text, maxPx, minPx]);
+  return (
+    <h2 ref={ref} className={className} style={{ fontSize: maxPx, whiteSpace: 'nowrap' }}>
+      {text}
+    </h2>
+  );
+};
 
 export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewProps> = ({
   athlete,
@@ -389,7 +421,7 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
       {/* Athlete Header & Monthly Performance Bar */}
       <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-3.5 min-w-0">
             {athlete.photoUrl ? (
               <img
                 src={athlete.photoUrl}
@@ -402,16 +434,17 @@ export const AthleteTrainingCalendarView: React.FC<AthleteTrainingCalendarViewPr
                 <User className="w-7 h-7" />
               </div>
             )}
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
 
                 <span className="text-xs font-bold text-slate-500">
                   {athlete.category}
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight mt-0.5">
-                {formatShortName(athlete.name)}
-              </h2>
+              <FitName
+                text={formatShortName(athlete.name)}
+                className="font-extrabold text-slate-900 tracking-tight mt-0.5"
+              />
 
             </div>
           </div>

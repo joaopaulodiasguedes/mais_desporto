@@ -47,6 +47,12 @@ const createDefaultBlocks = (): ExerciseBlock[] => [
   createBlock('Retorno à Calma e Alongamentos', '20m', 'retorno_calma')
 ];
 
+// Mostra apenas o primeiro e o último nome
+const firstAndLastName = (full: string): string => {
+  const parts = (full || '').trim().split(/\s+/).filter(Boolean);
+  return parts.length <= 2 ? parts.join(' ') : `${parts[0]} ${parts[parts.length - 1]}`;
+};
+
 export const TrainingPlansTab: React.FC = () => {
   const {
     trainingPlans,
@@ -910,7 +916,7 @@ export const TrainingPlansTab: React.FC = () => {
             <option value="todos">Todos os atletas ({athletes.length})</option>
             {availableAthletesForRoster.map((ath) => (
               <option key={ath.id} value={ath.id}>
-                {ath.name} ({plansCountByAthlete.counts[ath.id] || 0})
+                {firstAndLastName(ath.name)} ({plansCountByAthlete.counts[ath.id] || 0})
               </option>
             ))}
             {plansCountByAthlete.generalCount > 0 && (
