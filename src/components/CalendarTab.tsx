@@ -75,6 +75,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
 
   // Pre-select today's day number
   const [selectedDay, setSelectedDay] = useState<number | null>(() => today.getDate());
+  const [expandedListId, setExpandedListId] = useState<string | null>(null);
   const [viewTab, setViewTab] = useState<'calendario' | 'lista'>('calendario');
   const [filterType, setFilterType] = useState<'todos' | 'treino' | 'competicao' | 'tarefas'>('todos');
 
@@ -849,7 +850,33 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
                   <CalendarDays className="w-3.5 h-3.5 text-orange-600" />
                   <span>{title} ({g.events.length})</span>
                 </h3>
-                <div className="space-y-3">{g.events.map((evt) => renderEventCard(evt, false))}</div>
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden divide-y divide-slate-100">
+                  {g.events.map((evt) => {
+                    const open = expandedListId === evt.id;
+                    const accent = getAccentLabel(eventLabels, evt);
+                    const AccentIcon = getIconComponent(accent.icon);
+                    return (
+                      <div key={evt.id}>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedListId(open ? null : evt.id)}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-left cursor-pointer transition-colors ${open ? 'bg-slate-50' : 'hover:bg-slate-50'}`}
+                        >
+                          <span className="w-11 shrink-0 text-xs font-black text-slate-700 tabular-nums">{evt.time || '—'}</span>
+                          <span className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border ${getColorTone(accent.color).date}`} title={accent.name}>
+                            <AccentIcon className="w-3.5 h-3.5" />
+                          </span>
+                          <span className="flex-1 min-w-0">
+                            <span className="block text-sm font-bold text-slate-900 truncate">{evt.title}</span>
+                            {evt.location && <span className="block text-[11px] text-slate-500 truncate">{evt.location}</span>}
+                          </span>
+                          <ChevronRight className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${open ? 'rotate-90' : ''}`} />
+                        </button>
+                        {open && <div className="p-2 bg-slate-50/60">{renderEventCard(evt, false)}</div>}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
