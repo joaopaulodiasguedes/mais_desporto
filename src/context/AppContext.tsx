@@ -1184,16 +1184,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Authentication: Login
   const login = (email: string, password?: string) => {
     const cleanEmail = email.trim().toLowerCase();
+    const dbMode = getSupabaseConfig().isConfigured;
+
+    // Com a base de dados configurada, os utilizadores ainda podem estar a ser carregados (o preenchimento automático submete muito depressa)
+    if (dbMode && isDataLoading) {
+      return {
+        success: false,
+        message: 'A carregar os dados do clube… aguarde um instante e volte a carregar em "Entrar".'
+      };
+    }
+
     let found = availableUsers.find(u => u.email.toLowerCase() === cleanEmail);
 
-    if (!found) {
+    // Perfis de demonstração (palavra-passe de exemplo) só são usados em modo local, nunca com a base de dados ligada
+    if (!found && !dbMode) {
       found = INITIAL_PROFILES.find(u => u.email.toLowerCase() === cleanEmail);
       if (found) {
         setAvailableUsers(prev => [found!, ...prev.filter(u => u.email.toLowerCase() !== cleanEmail)]);
       }
     }
 
-    if (!found && (cleanEmail.includes('guedes') || cleanEmail.includes('joaopaulo'))) {
+    if (!found && !dbMode && (cleanEmail.includes('guedes') || cleanEmail.includes('joaopaulo'))) {
       found = INITIAL_PROFILES[0];
     }
 
