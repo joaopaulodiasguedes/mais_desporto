@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useApp, isCalendarEventVisibleForUser } from '../context/AppContext';
 import {
   CalendarDays,
+  List,
   Plus,
   MapPin,
   Clock,
@@ -74,6 +75,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
 
   // Pre-select today's day number
   const [selectedDay, setSelectedDay] = useState<number | null>(() => today.getDate());
+  const [viewTab, setViewTab] = useState<'calendario' | 'lista'>('calendario');
   const [filterType, setFilterType] = useState<'todos' | 'treino' | 'competicao' | 'tarefas'>('todos');
 
   // Day Manager Modal (Full Day CRUD)
@@ -143,6 +145,25 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
       return d === selectedDay;
     }).sort((a, b) => new Date(`${a.date}T${a.time}`).getTime() - new Date(`${b.date}T${b.time}`).getTime());
   }, [monthEvents, filterType, selectedDay]);
+
+  // Vista em lista: todos os eventos do mês (com o filtro de tipo), agrupados por dia
+  const listGroups = useMemo(() => {
+    const sorted = monthEvents
+      .filter((evt) => {
+        if (filterType === 'competicao') return isCompetition(evt);
+        if (filterType === 'treino') return isTraining(evt);
+        if (filterType === 'tarefas') return evt.type === 'tarefa';
+        return true;
+      })
+      .sort((a, b) => new Date(`${a.date}T${a.time || '00:00'}`).getTime() - new Date(`${b.date}T${b.time || '00:00'}`).getTime());
+    const groups: { date: string; events: CalendarEvent[] }[] = [];
+    sorted.forEach((evt) => {
+      const last = groups[groups.length - 1];
+      if (last && last.date === evt.date) last.events.push(evt);
+      else groups.push({ date: evt.date, events: [evt] });
+    });
+    return groups;
+  }, [monthEvents, filterType]);
 
   // Days in month calculation for the grid
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -680,6 +701,23 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
         </div>
       )}
 
+      {/* Separadores: Calendário (com próximas provas) / Lista */}
+      <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl w-full sm:w-fit">
+        {([
+          { id: 'calendario', label: 'Calendário', Icon: CalendarDays },
+          { id: 'lista', label: 'Lista', Icon: List }
+        ] as const).map(({ id, label, Icon }) => (
+          <button
+            key={id}
+            onClick={() => setViewTab(id)}
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap ${viewTab === id ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'}`}
+          >
+            <Icon className="w-4 h-4 text-orange-600" />
+            <span>{label}</span>
+          </button>
+        ))}
+      </div>
+
       {/* 1. BARRA SUPERIOR COMPLETA (OCUPA UMA LINHA INTEIRA COMO NOS PLANOS DE TREINO) */}
       <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         {/* Month & Year Navigator */}
@@ -798,6 +836,33 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
       </div>
 
       {/* 2. LAYOUT LADO A LADO (50/50): CALENDÁRIO À ESQUERDA, PRÓXIMOS EVENTOS À DIREITA */}
+      {viewTab === 'lista' && (
+        <div className="space-y-5">
+          {listGroups.map((g) => {
+            const d = new Date(g.date + 'T00:00:00');
+            const title = !isNaN(d.getTime())
+              ? d.toLocaleDateString('pt-PT', { weekday: 'long', day: '2-digit', month: 'long' })
+              : g.date;
+            return (
+              <div key={g.date} className="space-y-3">
+                <h3 className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5 px-1">
+                  <CalendarDays className="w-3.5 h-3.5 text-orange-600" />
+                  <span>{title} ({g.events.length})</span>
+                </h3>
+                <div className="space-y-3">{g.events.map((evt) => renderEventCard(evt, false))}</div>
+              </div>
+            );
+          })}
+          {listGroups.length === 0 && (
+            <div className="text-center py-10 bg-white rounded-3xl border border-slate-200 p-6">
+              <CalendarDays className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+              <h4 className="font-bold text-slate-700 text-sm">Sem eventos neste mês</h4>
+            </div>
+          )}
+        </div>
+      )}
+
+      {viewTab === 'calendario' && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* =========================================================
             COLUNA 1 (ESQUERDA - 50%): O CALENDÁRIO INTERATIVO
@@ -1157,6 +1222,7 @@ export const CalendarTab: React.FC<CalendarTabProps> = ({ onOpenPdf }) => {
           </div>
         </div>
       </div>
+      )}
 
       {/* Day Manager Modal (Full Day CRUD when clicking on any day) */}
       <DayManagerModal
